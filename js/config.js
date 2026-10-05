@@ -65,6 +65,7 @@ export const EMOTE = {
 export const HUD = {
   weaponIconSeconds: 1.5,     // weapon icon shown in the center after switching
   hitMarkerMs: 350,
+  fullscreenSwitchMs: 600,    // the browser drops the mouse lock during a fullscreen change; unlocks in this window are not a pause
 };
 
 // ---- Enemy AI --------------------------------------------------------------
@@ -111,5 +112,5 @@ export const WEAPON_STATS = {
   pistol: { id: 'pistol', name: 'Pistola', damage: 24, headMult: 2, interval: 0.3, auto: false, mag: 12, reload: 1.1, spread: 0.004, bloom: 0.006, bloomMax: 0.03, recoil: 0.016 },
   ak47: { id: 'ak47', name: 'AK-47', damage: 14, headMult: 2.2, interval: 0.1, auto: true, mag: 30, reload: 1.9, spread: 0.0008, bloom: 0.0015, bloomMax: 0.01, recoil: 0.014 },
   shotgun: { id: 'shotgun', name: 'Escopeta', damage: 9, headMult: 1.5, interval: 0.9, auto: false, mag: 6, reload: 2.4, spread: 0.004, bloom: 0, bloomMax: 0, recoil: 0.06, pellets: 8, pelletSpread: 0.055, falloff: { start: 5, end: 20, min: 0.08 } },
-  awp: { id: 'awp', name: 'AWP', damage: 90, headMult: 2, interval: 1.3, auto: false, mag: 5, reload: 2.4, spread: 0.06, bloom: 0, bloomMax: 0, recoil: 0.07, scoped: { fov: 18, spread: 0 } },
+  awp: { id: 'awp', name: 'AWP', damage: 90, headMult: 2, interval: 0.8, auto: false, mag: 5, reload: 2.4, spread: 0.06, bloom: 0, bloomMax: 0, recoil: 0.07, scoped: { fov: 18, spread: 0 } },
 };

@@ -12,6 +12,7 @@ import { WEAPONS } from './weapons.js';
 import { net } from '../net.js';
 import { animateRig } from '../characters/rig.js';
 import { sfx } from '../audio.js';
+import { isSwitchingFullscreen } from '../fullscreen.js';
 import { rand } from '../utils.js';
 import { t } from '../i18n.js';
 
@@ -41,6 +42,7 @@ export class Game {
     document.addEventListener('pointerlockchange', () => {
       if (!this.active) return;
       const locked = document.pointerLockElement === this.canvas;
+      if (!locked && !this.paused && isSwitchingFullscreen()) return this.lock();
       this.paused = !locked;
       if (this.paused) sfx.stopAll(EMOTE.fadeOut);
       this.hud.showPause(!locked);
@@ -59,7 +61,14 @@ export class Game {
   }
 
   lock() {
-    try { this.canvas.requestPointerLock()?.catch?.(() => {}); } catch { /* user can click again */ }
+    try { this.canvas.requestPointerLock()?.catch?.(() => this.showResume()); } catch { this.showResume(); }
+  }
+
+  // The lock needs a user gesture (the online guest starts from a network message), so ask for a click
+  showResume() {
+    if (!this.active) return;
+    this.paused = true;
+    this.hud.showPause(true);
   }
 
   // mode: 'duel' (vs bot) | 'training' (showcase) | 'multi' (vs a friend over the network, opts.role = host | guest)
