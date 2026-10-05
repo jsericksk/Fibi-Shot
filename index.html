@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fibi Shot</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- Screen 1: character select -->
+<section id="screen-select" class="screen">
+  <h1 class="logo">Fibi Shot</h1>
+  <button id="btn-fs" class="fs" data-i18n="fullscreen"></button>
+  <div class="langs" id="lang-pick"></div>
+  <p class="sub" data-i18n="subtitle"></p>
+  <div class="versus">
+    <div class="side">
+      <h2 data-i18n="you"></h2>
+      <img id="big-player" class="big" alt="">
+      <div id="name-player" class="fname"></div>
+      <div id="pick-player" class="picker"></div>
+    </div>
+    <div class="vs">VS</div>
+    <div class="side">
+      <h2 data-i18n="enemy"></h2>
+      <img id="big-enemy" class="big" alt="">
+      <div id="name-enemy" class="fname"></div>
+      <div id="pick-enemy" class="picker"></div>
+    </div>
+  </div>
+  <div class="maps" id="pick-map"></div>
+  <div class="modes">
+    <button id="btn-start" class="primary" data-i18n="mode.duel"></button>
+    <button id="btn-train" class="primary alt" data-i18n="mode.training"></button>
+    <button id="btn-multi" class="primary alt" data-i18n="mode.multi"></button>
+  </div>
+  <p class="help" data-i18n="help"></p>
+</section>
+
+<!-- Screen 1b: multiplayer lobby -->
+<section id="screen-lobby" class="screen hidden">
+  <h1 class="logo" data-i18n="mode.multi"></h1>
+
+  <div id="lobby-connect">
+    <button id="btn-create" class="primary" data-i18n="lobby.create"></button>
+    <div class="join">
+      <input id="join-code" maxlength="5" autocomplete="off" spellcheck="false" data-i18n-placeholder="lobby.codePlaceholder">
+      <button id="btn-join" class="primary alt" data-i18n="lobby.join"></button>
+    </div>
+  </div>
+
+  <div id="lobby-room" class="hidden">
+    <div id="room-share">
+      <span data-i18n="lobby.code"></span> <b id="room-code"></b>
+      <button id="btn-copy" data-i18n="lobby.copy"></button>
+    </div>
+    <div class="versus">
+      <div class="side">
+        <h2 data-i18n="you"></h2>
+        <img id="lobby-big-me" class="big" alt="">
+        <div id="lobby-name-me" class="fname"></div>
+        <div id="lobby-pick" class="picker"></div>
+      </div>
+      <div class="vs">VS</div>
+      <div class="side">
+        <h2 data-i18n="lobby.friend"></h2>
+        <img id="lobby-big-friend" class="big" alt="">
+        <div id="lobby-name-friend" class="fname"></div>
+      </div>
+    </div>
+    <div class="maps" id="lobby-maps"></div>
+    <button id="btn-lobby-start" class="primary" data-i18n="lobby.start"></button>
+  </div>
+
+  <p id="lobby-status"></p>
+  <button id="btn-lobby-back" data-i18n="lobby.back"></button>
+</section>
+
+<!-- Screen 2: match -->
+<section id="screen-game" class="screen hidden">
+  <canvas id="game"></canvas>
+  <div id="vignette"></div>
+  <div id="scope"></div>
+  <div id="crosshair"><i></i><i></i><i></i><i></i></div>
+  <div id="hitmarker"><b></b><span id="hit-text"></span></div>
+  <div id="banner"></div>
+  <div id="weapon-flash"></div>
+
+  <div id="score"><b id="sc-p">0</b><span>×</span><b id="sc-e">0</b></div>
+  <div id="toast"></div>
+  <div id="reload-icon"><svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></div>
+
+  <div class="plate left"><img id="p-portrait" alt=""><div><div id="p-name" class="pname"></div><div class="bar"><div id="p-hp"></div></div></div></div>
+  <div class="plate right"><div><div id="e-name" class="pname"></div><div class="bar"><div id="e-hp" class="enemy"></div></div></div><img id="e-portrait" alt=""></div>
+
+  <div id="weapon-panel">
+    <div id="slots"></div>
+    <div id="ammo">0 / 0</div>
+    <div id="reload-note"></div>
+  </div>
+
+  <div id="pause" class="overlay">
+    <h2 data-i18n="pause.title"></h2>
+    <p data-i18n="pause.hint"></p>
+    <button id="btn-resume" class="primary" data-i18n="pause.resume"></button>
+    <label id="sens-box">
+      <span data-i18n="pause.sensitivity"></span>
+      <input id="sens" type="range">
+      <b id="sens-val"></b>
+    </label>
+    <button id="btn-fs-pause" data-i18n="fullscreen"></button>
+    <div id="change-panel">
+      <button id="btn-change" data-i18n="pause.change"></button>
+      <div id="change-pickers"></div>
+    </div>
+    <button id="btn-quit" data-i18n="pause.quit"></button>
+  </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
+</script>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
