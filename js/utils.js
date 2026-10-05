@@ -21,6 +21,9 @@ export function add(parent, geo, mat, pos = [0, 0, 0], scale = [1, 1, 1], rot = 
   return mesh;
 }
 
+// Phones and tablets: the main pointer is a finger
+export const isTouch = matchMedia('(pointer: coarse)').matches;
+
 export const clamp = THREE.MathUtils.clamp;
 export const rand = (a, b) => a + Math.random() * (b - a);
 export const randInt = (a, b) => Math.floor(rand(a, b + 1));

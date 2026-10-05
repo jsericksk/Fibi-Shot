@@ -34,6 +34,8 @@ const ICONS = {
   awp: '<rect x="8" y="17" width="108" height="6" rx="2"/><rect x="38" y="5" width="34" height="8" rx="3"/><rect x="46" y="12" width="3" height="6"/><rect x="62" y="12" width="3" height="6"/><polygon points="0,14 22,16 22,32 0,28"/><polygon points="26,23 36,23 33,38 24,38"/><rect x="30" y="12" width="8" height="3"/>',
 };
 
+export const weaponIcon = id => `<svg viewBox="0 0 120 44">${ICONS[id]}</svg>`;
+
 // DOM-based HUD for the match screen
 export const hud = {
   setup(playerDef, enemyDef) {
@@ -130,7 +132,7 @@ export const hud = {
 
   // Weapon icon in the center of the screen after switching weapons
   showWeapon(id) {
-    el.weaponFlash.innerHTML = `<svg viewBox="0 0 120 44">${ICONS[id]}</svg><span>${t('weapon.' + id)}</span>`;
+    el.weaponFlash.innerHTML = `${weaponIcon(id)}<span>${t('weapon.' + id)}</span>`;
     el.weaponFlash.style.display = 'flex';
     clearTimeout(flashTimer);
     flashTimer = setTimeout(() => { el.weaponFlash.style.display = 'none'; }, HUD.weaponIconSeconds * 1000);

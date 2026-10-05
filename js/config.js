@@ -68,6 +68,23 @@ export const HUD = {
   fullscreenSwitchMs: 600,    // the browser drops the mouse lock during a fullscreen change; unlocks in this window are not a pause
 };
 
+// ---- Touch controls --------------------------------------------------------
+export const TOUCH = {
+  lookSensitivity: 1.6,       // finger drags turn faster than the mouse
+  joystickDeadZone: 0.15,     // fraction of the stick radius that is ignored
+  // Center of each control in % of the screen, and its size in px
+  layout: {
+    joystick: { x: 13, y: 80, size: 110 },
+    fire: { x: 88, y: 64, size: 100 },
+    jump: { x: 74, y: 80, size: 68 },
+    scope: { x: 76, y: 52, size: 60 },
+    weapon: { x: 36, y: 86, size: 56 },
+    reload: { x: 95, y: 36, size: 56 },
+    emote: { x: 64, y: 30, size: 52 },
+    pause: { x: 6, y: 32, size: 44 },
+  },
+};
+
 // ---- Enemy AI --------------------------------------------------------------
 export const ENEMY = {
   speed: 4.2,

@@ -12,8 +12,8 @@ import { WEAPONS } from './weapons.js';
 import { net } from '../net.js';
 import { animateRig } from '../characters/rig.js';
 import { sfx } from '../audio.js';
-import { isSwitchingFullscreen } from '../fullscreen.js';
-import { rand } from '../utils.js';
+import { isSwitchingFullscreen, enterFullscreen } from '../fullscreen.js';
+import { rand, isTouch } from '../utils.js';
 import { t } from '../i18n.js';
 
 const ARENA_HALF = WORLD.arenaHalf;
@@ -43,9 +43,7 @@ export class Game {
       if (!this.active) return;
       const locked = document.pointerLockElement === this.canvas;
       if (!locked && !this.paused && isSwitchingFullscreen()) return this.lock();
-      this.paused = !locked;
-      if (this.paused) sfx.stopAll(EMOTE.fadeOut);
-      this.hud.showPause(!locked);
+      this.setPaused(!locked);
     });
     this.hud.onResume(() => this.lock());
     this.hud.onQuit(() => this.quit());
@@ -60,7 +58,18 @@ export class Game {
     this.camera.updateProjectionMatrix();
   }
 
+  setPaused(on) {
+    this.paused = on;
+    if (on) sfx.stopAll(EMOTE.fadeOut);
+    this.hud.showPause(on);
+  }
+
+  // Touch screens have no mouse to lock: playing is simply "not paused", in fullscreen to hide the browser bars
   lock() {
+    if (isTouch) {
+      enterFullscreen();
+      return this.setPaused(false);
+    }
     try { this.canvas.requestPointerLock()?.catch?.(() => this.showResume()); } catch { this.showResume(); }
   }
 
@@ -130,7 +139,7 @@ export class Game {
     sfx.preload(Object.values(EMOTES).flat().map(e => e.sound));
     this.hud.setTraining(this.training);
     this.hud.setupChange(playerDef, this.training ? null : enemyDef, (side, id) => this.changeCharacter(side, id));
-    this.hud.toast(t(this.training ? 'toast.training' : 'toast.pickWeapon'), 0);
+    this.hud.toast(t(this.training ? 'toast.training' : isTouch ? 'toast.pickWeaponTouch' : 'toast.pickWeapon'), 0);
 
     if (this.multi) {
       this.netT = 0;
