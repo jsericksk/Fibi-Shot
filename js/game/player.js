@@ -9,13 +9,12 @@ import { CAMERA, PLAYER, EMOTES } from '../config.js';
 const BASE_FOV = CAMERA.fov;
 const JUMP_SPEED = PLAYER.jumpSpeed;
 const WALK_SPEED = PLAYER.walkSpeed;
-const SCOPED_SPEED = PLAYER.scopedSpeed;
 const ZOOM_RATE = CAMERA.scopeZoomRate;
 const CAM_DISTANCE = CAMERA.distance;
 const SHOULDER = CAMERA.shoulder;
 const CAM_HEIGHT = CAMERA.height;
 
-// Reads keyboard/mouse input, moves the player, drives the over-the-shoulder camera and fires
+// Reads keyboard/mouse/touch input, moves the player, drives the over-the-shoulder camera and fires
 export class PlayerControls {
   constructor(game, fighter) {
     this.game = game;
@@ -23,6 +22,7 @@ export class PlayerControls {
     this.camera = game.camera;
     this.keys = new Set();
     this.mouseDown = false;
+    this.move = { right: 0, forward: 0 };   // analog move input (touch joystick), added to the keys
     this.fireQueued = false;
     this.scoped = false;
     this.fov = BASE_FOV;
@@ -42,11 +42,10 @@ export class PlayerControls {
       if (e.code === 'Space') e.preventDefault();
       if (this.f.emote && ['KeyW', 'KeyA', 'KeyS', 'KeyD'].includes(e.code)) this.f.emote = null;   // a fresh move key ends the dance
       if (e.code === 'KeyF') toggleFullscreen();
-      if (e.code === 'KeyH' && this.game.canAct && !this.f.dead && !this.f.emote) this.startEmote();
-      // Weapons can be changed freely during the countdown too
-      if (idx >= 0 && this.game.canSwitch && !this.f.dead) this.switchWeapon(WEAPON_ORDER[idx]);
-      if (e.code === 'Space' && this.game.canAct) { this.f.emote = null; if (this.f.jump(JUMP_SPEED)) sfx.jump(); }
-      if (e.code === 'KeyR' && this.game.canAct && !this.f.dead && this.f.startReload()) { sfx.reload(); this.setScope(false); }
+      if (e.code === 'KeyH') this.emote();
+      if (idx >= 0) this.pickWeapon(WEAPON_ORDER[idx]);
+      if (e.code === 'Space') this.jump();
+      if (e.code === 'KeyR') this.reload();
     };
     this.onKeyUp = e => {
       this.keys.delete(e.code);
@@ -54,24 +53,14 @@ export class PlayerControls {
     };
     this.onBlur = () => { this.orbit = false; this.keys.clear(); };
     this.onMouseMove = e => {
-      if (document.pointerLockElement !== this.game.canvas) return;
-      const sens = PLAYER.sensitivity * settings.sensitivity;
-      if (this.orbit) {
-        this.orbitYaw -= e.movementX * sens * 1.4;
-        this.orbitPitch = clamp(this.orbitPitch + e.movementY * sens, -0.5, 1.2);
-        return;
-      }
-      if (this.f.dead) return;   // a dead fighter cannot turn
-      const k = sens * (this.scoped ? this.fov / BASE_FOV : 1);
-      this.f.yaw -= e.movementX * k;
-      this.f.pitch = clamp(this.f.pitch - e.movementY * k, -1.2, 1.2);
+      if (document.pointerLockElement === this.game.canvas) this.look(e.movementX, e.movementY);
     };
     this.onMouseDown = e => {
       if (document.pointerLockElement !== this.game.canvas) return;
-      if (e.button === 0) { this.mouseDown = true; this.fireQueued = true; }
-      if (e.button === 2 && this.game.canAct && !this.f.dead) this.setScope(!this.scoped);
+      if (e.button === 0) this.setFire(true);
+      if (e.button === 2) this.toggleScope();
     };
-    this.onMouseUp = e => { if (e.button === 0) this.mouseDown = false; };
+    this.onMouseUp = e => { if (e.button === 0) this.setFire(false); };
     this.onContextMenu = e => e.preventDefault();
 
     addEventListener('keydown', this.onKeyDown);
@@ -93,11 +82,61 @@ export class PlayerControls {
     removeEventListener('contextmenu', this.onContextMenu);
   }
 
+  // ---- Actions: shared by the keyboard, the mouse and the touch controls ----
+
+  // dx/dy: pointer movement in pixels
+  look(dx, dy) {
+    const sens = PLAYER.sensitivity * settings.sensitivity;
+    if (this.orbit) {
+      this.orbitYaw -= dx * sens * 1.4;
+      this.orbitPitch = clamp(this.orbitPitch + dy * sens, -0.5, 1.2);
+      return;
+    }
+    if (this.f.dead) return;   // a dead fighter cannot turn
+    const k = sens * (this.scoped ? this.fov / BASE_FOV : 1);
+    this.f.yaw -= dx * k;
+    this.f.pitch = clamp(this.f.pitch - dy * k, -1.2, 1.2);
+  }
+
+  setMove(right, forward) {
+    this.move.right = right;
+    this.move.forward = forward;
+    if (this.f.emote && (right || forward)) this.f.emote = null;
+  }
+
+  setFire(down) {
+    this.mouseDown = down;
+    if (down) this.fireQueued = true;
+  }
+
+  toggleScope() {
+    if (this.game.canAct && !this.f.dead) this.setScope(!this.scoped);
+  }
+
+  jump() {
+    if (!this.game.canAct) return;
+    this.f.emote = null;
+    if (this.f.jump(JUMP_SPEED)) sfx.jump();
+  }
+
+  reload() {
+    if (this.game.canAct && !this.f.dead && this.f.startReload()) { sfx.reload(); this.setScope(false); }
+  }
+
+  emote() {
+    if (this.game.canAct && !this.f.dead && !this.f.emote) this.startEmote();
+  }
+
+  // Weapons can be changed freely during the countdown too
+  pickWeapon(id) {
+    if (this.game.canSwitch && !this.f.dead) this.switchWeapon(id);
+  }
+
   setScope(on) {
-    if (on && (!this.f.weapon.scoped || this.f.reloading || this.f.dead)) return;
+    if (on && (this.f.reloading || this.f.dead || this.f.emote)) return;
     if (on !== this.scoped) sfx.switch();
     this.scoped = on;
-    this.game.hud.setScope(on);
+    this.game.hud.setScope(on, on && this.f.weapon.scoped.sniper);
   }
 
   // Random dance from the character's list (the camera stays where it is)
@@ -125,14 +164,14 @@ export class PlayerControls {
     const f = this.f;
     if (!f.dead && canAct && !f.emote) {
       // Movement relative to the facing direction
-      const fa = (this.keys.has('KeyW') ? 1 : 0) - (this.keys.has('KeyS') ? 1 : 0);
-      const ra = (this.keys.has('KeyD') ? 1 : 0) - (this.keys.has('KeyA') ? 1 : 0);
+      const fa = clamp((this.keys.has('KeyW') ? 1 : 0) - (this.keys.has('KeyS') ? 1 : 0) + this.move.forward, -1, 1);
+      const ra = clamp((this.keys.has('KeyD') ? 1 : 0) - (this.keys.has('KeyA') ? 1 : 0) + this.move.right, -1, 1);
       const fx = Math.sin(f.yaw), fz = Math.cos(f.yaw);
       let vx = fx * fa - fz * ra, vz = fz * fa + fx * ra;
       const len = Math.hypot(vx, vz);
       f.moving = len > 0;
       if (len > 0) {
-        const speed = this.scoped ? SCOPED_SPEED : WALK_SPEED;
+        const speed = (this.scoped ? f.weapon.scoped.speed : WALK_SPEED) * Math.min(1, len);   // a half-pushed stick walks slower
         f.move((vx / len) * speed * dt, (vz / len) * speed * dt, this.game.arena.colliders);
       }
     } else {
@@ -148,21 +187,15 @@ export class PlayerControls {
     // While dancing, held keys/buttons are ignored; a fresh click ends the dance
     if (f.emote) { if (this.fireQueued) f.emote = null; wantFire = false; }
     this.fireQueued = false;
-    if (wantFire && canAct && !f.dead) {
-      if (f.ammoNow <= 0) {
-        if (f.startReload()) { sfx.reload(); this.setScope(false); } else sfx.empty();
-      } else if (f.canFire()) {
-        this.shoot();
-      }
-    }
+    if (wantFire && canAct && f.canFire()) this.shoot();
     if (canAct && f.ammoNow <= 0 && !f.reloading && !f.dead) { f.startReload(); sfx.reload(); this.setScope(false); }
   }
 
   shoot() {
     const f = this.f, w = f.weapon;
-    let spread = w.scoped ? (this.scoped ? w.scoped.spread : w.spread) : w.spread + f.bloom;
-    // Scoped AWP is pinpoint (quick scope); everything else loses only a hair of accuracy while moving
-    if (f.moving && !(w.scoped && this.scoped)) spread += w.scoped ? PLAYER.moveSpreadAwp : PLAYER.moveSpread;
+    let spread = this.scoped ? w.scoped.spread : w.spread + f.bloom;
+    // Aiming is pinpoint (the AWP quick scope too); otherwise moving costs a hair of accuracy, the AWP more
+    if (f.moving && !this.scoped) spread += w.scoped.sniper ? PLAYER.moveSpreadAwp : PLAYER.moveSpread;
     if (!f.onGround) spread += PLAYER.airSpread;   // jump shots are inaccurate
 
     const dir = this.aimDir();
@@ -205,7 +238,7 @@ export class PlayerControls {
       cam.lookAt(c);
       return;
     }
-    if (this.scoped) {
+    if (this.scoped && f.weapon.scoped.sniper) {
       cam.position.copy(pivot).addScaledVector(dir, 0.35);
     } else {
       // Boom behind the shoulder, shortened if it would clip into cover

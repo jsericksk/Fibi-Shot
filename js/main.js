@@ -2,6 +2,8 @@ import { Game } from './game/game.js';
 import { hud } from './ui/hud.js';
 import { initSelect } from './ui/select.js';
 import { initLobby } from './ui/lobby.js';
+import { initTouch } from './ui/touch.js';
+import { initHudEditor } from './ui/hud-editor.js';
 
 const screens = {
   select: document.getElementById('screen-select'),
@@ -15,6 +17,8 @@ function show(name) {
 }
 
 game.onMenu = () => show('select');
+initTouch(game);   // before the menus so the touch help text is the one translated
+initHudEditor(game);
 
 const lobby = initLobby({
   onStart(playerDef, enemyDef, mapId, role) {

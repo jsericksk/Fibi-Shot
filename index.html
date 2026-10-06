@@ -2,8 +2,14 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Fibi Shot</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="theme-color" content="#0a0507">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -100,15 +106,25 @@
     <div id="reload-note"></div>
   </div>
 
+  <div id="touch"></div>
+
   <div id="pause" class="overlay">
     <h2 data-i18n="pause.title"></h2>
     <p data-i18n="pause.hint"></p>
     <button id="btn-resume" class="primary" data-i18n="pause.resume"></button>
-    <label id="sens-box">
-      <span data-i18n="pause.sensitivity"></span>
-      <input id="sens" type="range">
-      <b id="sens-val"></b>
-    </label>
+    <div class="sens-group">
+      <label class="sens-box">
+        <span data-i18n="pause.sensitivity"></span>
+        <input id="sens" type="range">
+        <b id="sens-val"></b>
+      </label>
+      <label class="sens-box touch-only">
+        <span data-i18n="pause.aimSensitivity"></span>
+        <input id="aim-sens" type="range">
+        <b id="aim-sens-val"></b>
+      </label>
+    </div>
+    <button id="btn-edit-hud" class="touch-only" data-i18n="pause.editHud"></button>
     <button id="btn-fs-pause" data-i18n="fullscreen"></button>
     <div id="change-panel">
       <button id="btn-change" data-i18n="pause.change"></button>
