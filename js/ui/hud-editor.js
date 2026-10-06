@@ -1,0 +1,96 @@
+import { TOUCH } from '../config.js';
+import { settings, setSetting, resetTouchSettings, OPACITY_RANGE } from '../settings.js';
+import { isTouch, clamp } from '../utils.js';
+import { CONTROL_IDS, controlEl, layoutOf, placeAll, sizeRangeOf } from './touch.js';
+
+const $ = id => document.getElementById(id);
+
+// Lets the player drag, resize and fade the on-screen controls. Opened from the pause menu.
+export function initHudEditor(game) {
+  if (!isTouch) return;
+
+  const root = document.createElement('div');
+  root.id = 'hud-editor';
+  root.innerHTML = `
+    <div id="hud-bar">
+      <label><span data-i18n="hud.size"></span><input id="hud-size" type="range"></label>
+      <label><span data-i18n="hud.opacity"></span><input id="hud-opacity" type="range"></label>
+      <button id="hud-reset" data-i18n="hud.reset"></button>
+      <button id="hud-done" data-i18n="hud.done"></button>
+    </div>
+    <p id="hud-hint" data-i18n="hud.hint"></p>`;
+  $('touch').append(root);
+
+  const size = $('hud-size'), opacity = $('hud-opacity');
+  Object.assign(size, TOUCH.sizeRange);
+  Object.assign(opacity, OPACITY_RANGE);
+
+  let selected = null;
+  let grab = null;   // finger offset from the center of the dragged control
+
+  function select(id) {
+    selected = id;
+    for (const c of CONTROL_IDS) controlEl(c).classList.toggle('selected', c === id);
+    size.disabled = !id;
+    if (!id) return;
+    Object.assign(size, sizeRangeOf(id));   // the range first, then the value
+    size.value = layoutOf(id).size;
+  }
+
+  function setSpot(id, spot) {
+    setSetting('touchLayout', { ...settings.touchLayout, [id]: spot });
+    placeAll();
+  }
+
+  // The control under the finger (the nearest center when they overlap)
+  function controlAt(x, y) {
+    let best = null, bestDist = Infinity;
+    for (const id of CONTROL_IDS) {
+      const r = controlEl(id).getBoundingClientRect();
+      const inside = x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+      const dist = Math.hypot(x - (r.left + r.width / 2), y - (r.top + r.height / 2));
+      if (inside && dist < bestDist) { best = id; bestDist = dist; }
+    }
+    return best;
+  }
+
+  root.addEventListener('pointerdown', e => {
+    if (e.target.closest('#hud-bar')) return;
+    select(controlAt(e.clientX, e.clientY));
+    if (!selected) return;
+    const r = controlEl(selected).getBoundingClientRect();
+    grab = { id: e.pointerId, dx: e.clientX - (r.left + r.width / 2), dy: e.clientY - (r.top + r.height / 2) };
+    root.setPointerCapture(e.pointerId);
+  });
+  root.addEventListener('pointermove', e => {
+    if (!grab || e.pointerId !== grab.id) return;
+    const r = controlEl(selected).getBoundingClientRect();
+    const cx = clamp(e.clientX - grab.dx, r.width / 2, innerWidth - r.width / 2);   // keep the whole control on screen
+    const cy = clamp(e.clientY - grab.dy, r.height / 2, innerHeight - r.height / 2);
+    setSpot(selected, { ...layoutOf(selected), x: (cx / innerWidth) * 100, y: (cy / innerHeight) * 100 });
+  });
+  const release = e => { if (grab && e.pointerId === grab.id) grab = null; };
+  root.addEventListener('pointerup', release);
+  root.addEventListener('pointercancel', release);
+
+  size.oninput = () => setSpot(selected, { ...layoutOf(selected), size: +size.value });
+  opacity.oninput = () => { setSetting('touchOpacity', +opacity.value); placeAll(); };
+  $('hud-reset').onclick = () => {
+    resetTouchSettings();
+    opacity.value = settings.touchOpacity;
+    placeAll();
+    select(null);
+  };
+
+  $('btn-edit-hud').onclick = () => {
+    opacity.value = settings.touchOpacity;
+    select(null);
+    game.hud.showPause(false);   // the game stays paused behind the editor
+    document.body.classList.add('hud-editing');
+  };
+  $('hud-done').onclick = () => {
+    select(null);
+    document.body.classList.remove('hud-editing');
+    game.hud.showPause(true);
+  };
+}

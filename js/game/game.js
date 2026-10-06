@@ -139,7 +139,7 @@ export class Game {
     sfx.preload(Object.values(EMOTES).flat().map(e => e.sound));
     this.hud.setTraining(this.training);
     this.hud.setupChange(playerDef, this.training ? null : enemyDef, (side, id) => this.changeCharacter(side, id));
-    this.hud.toast(t(this.training ? 'toast.training' : isTouch ? 'toast.pickWeaponTouch' : 'toast.pickWeapon'), 0);
+    if (!this.training) this.hud.toast(t(isTouch ? 'toast.pickWeaponTouch' : 'toast.pickWeapon'), 0);
 
     if (this.multi) {
       this.netT = 0;

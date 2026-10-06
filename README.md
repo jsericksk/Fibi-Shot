@@ -35,7 +35,7 @@ An internet connection is needed (three.js and PeerJS are loaded from a CDN).
 | `W` `A` `S` `D` | Move |
 | Mouse | Aim |
 | Left click | Shoot |
-| Right click | AWP scope |
+| Right click | Aim (small zoom, exact shots; full scope on the AWP) |
 | `1` `2` `3` `4` | Switch weapon |
 | `R` | Reload |
 | `Space` | Jump |
@@ -54,7 +54,8 @@ An internet connection is needed (three.js and PeerJS are loaded from a CDN).
 ## Weapons
 
 Pistol, AK-47, AWP (sniper) and Shotgun. Each one has its own feel: the shotgun is strong up close,
-the AWP is precise when scoped, and the AK-47 is a reliable automatic.
+the AWP is a sniper with a full scope, and the AK-47 is a reliable automatic.
+Every weapon can aim for a small zoom, and shots fired while aiming are exact.
 All the numbers can be tweaked in `js/config.js`.
 
 ## Maps

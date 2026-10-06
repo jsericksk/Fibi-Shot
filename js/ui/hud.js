@@ -2,7 +2,7 @@ import { WEAPONS, WEAPON_ORDER } from '../game/weapons.js';
 import { MATCH, HUD } from '../config.js';
 import { t } from '../i18n.js';
 import { toggleFullscreen } from '../fullscreen.js';
-import { settings, setSensitivity, SENSITIVITY_RANGE } from '../settings.js';
+import { settings, setSetting, SENSITIVITY_RANGE } from '../settings.js';
 import { CHARACTERS } from '../characters/index.js';
 import { thumbnail } from './thumbnails.js';
 
@@ -16,13 +16,17 @@ const el = {
   banner: $('banner'), changePanel: $('change-panel'), changePickers: $('change-pickers'), weaponFlash: $('weapon-flash'), score: $('score'), pause: $('pause'), vignette: $('vignette'),
 };
 
-// Mouse sensitivity slider in the pause menu
-const sens = $('sens'), sensVal = $('sens-val');
-Object.assign(sens, SENSITIVITY_RANGE, { value: settings.sensitivity });
-const showSens = () => { sensVal.textContent = '×' + settings.sensitivity.toFixed(2); };
-sens.oninput = () => { setSensitivity(+sens.value); showSens(); };
-sens.onchange = () => sens.blur();
-showSens();
+// Sensitivity sliders in the pause menu
+function bindSensitivity(id, key) {
+  const input = $(id), value = $(id + '-val');
+  Object.assign(input, SENSITIVITY_RANGE, { value: settings[key] });
+  const show = () => { value.textContent = '×' + settings[key].toFixed(2); };
+  input.oninput = () => { setSetting(key, +input.value); show(); };
+  input.onchange = () => input.blur();
+  show();
+}
+bindSensitivity('sens', 'sensitivity');
+bindSensitivity('aim-sens', 'aimSensitivity');
 
 let bannerTimer, hitTimer, toastTimer, flashTimer, lastKey = '';
 
@@ -75,9 +79,11 @@ export const hud = {
     el.scoreE.textContent = enemy;
   },
 
-  setScope(on) {
-    el.scope.classList.toggle('on', on);
-    el.crosshair.style.display = on ? 'none' : '';
+  // on: aiming. sniper: the full scope view (black mask) instead of a tighter crosshair
+  setScope(on, sniper = false) {
+    el.scope.classList.toggle('on', on && sniper);
+    el.crosshair.style.display = on && sniper ? 'none' : '';
+    el.crosshair.classList.toggle('aim', on && !sniper);
   },
 
   hitMarker(headshot, kill) {

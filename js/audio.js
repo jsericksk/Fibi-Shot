@@ -115,7 +115,6 @@ export const sfx = {
     if (id === 'awp') { noise(0.5, { type: 'lowpass', freq: 1800, vol: 0.6 * vol }); tone(120, 28, 0.45, { type: 'sine', vol: 0.5 * vol }); noise(0.08, { type: 'highpass', freq: 2500, vol: 0.4 * vol }); }
   }),
   reload: safe(() => { tone(900, 500, 0.05, { type: 'square', vol: 0.08 }); tone(500, 800, 0.05, { type: 'square', vol: 0.08, delay: 0.5 }); }),
-  empty: safe(() => tone(300, 250, 0.05, { type: 'square', vol: 0.08 })),
   jump: safe(() => tone(260, 520, 0.12, { type: 'sine', vol: 0.12 })),
   switch: safe(() => { noise(0.05, { type: 'bandpass', freq: 1500, vol: 0.2 }); }),
   hit: safe(head => { tone(head ? 1500 : 900, head ? 1200 : 700, 0.09, { type: 'triangle', vol: 0.25 }); }),

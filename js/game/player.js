@@ -9,7 +9,6 @@ import { CAMERA, PLAYER, EMOTES } from '../config.js';
 const BASE_FOV = CAMERA.fov;
 const JUMP_SPEED = PLAYER.jumpSpeed;
 const WALK_SPEED = PLAYER.walkSpeed;
-const SCOPED_SPEED = PLAYER.scopedSpeed;
 const ZOOM_RATE = CAMERA.scopeZoomRate;
 const CAM_DISTANCE = CAMERA.distance;
 const SHOULDER = CAMERA.shoulder;
@@ -134,10 +133,10 @@ export class PlayerControls {
   }
 
   setScope(on) {
-    if (on && (!this.f.weapon.scoped || this.f.reloading || this.f.dead)) return;
+    if (on && (this.f.reloading || this.f.dead || this.f.emote)) return;
     if (on !== this.scoped) sfx.switch();
     this.scoped = on;
-    this.game.hud.setScope(on);
+    this.game.hud.setScope(on, on && this.f.weapon.scoped.sniper);
   }
 
   // Random dance from the character's list (the camera stays where it is)
@@ -172,7 +171,7 @@ export class PlayerControls {
       const len = Math.hypot(vx, vz);
       f.moving = len > 0;
       if (len > 0) {
-        const speed = (this.scoped ? SCOPED_SPEED : WALK_SPEED) * Math.min(1, len);   // a half-pushed stick walks slower
+        const speed = (this.scoped ? f.weapon.scoped.speed : WALK_SPEED) * Math.min(1, len);   // a half-pushed stick walks slower
         f.move((vx / len) * speed * dt, (vz / len) * speed * dt, this.game.arena.colliders);
       }
     } else {
@@ -188,21 +187,15 @@ export class PlayerControls {
     // While dancing, held keys/buttons are ignored; a fresh click ends the dance
     if (f.emote) { if (this.fireQueued) f.emote = null; wantFire = false; }
     this.fireQueued = false;
-    if (wantFire && canAct && !f.dead) {
-      if (f.ammoNow <= 0) {
-        if (f.startReload()) { sfx.reload(); this.setScope(false); } else sfx.empty();
-      } else if (f.canFire()) {
-        this.shoot();
-      }
-    }
+    if (wantFire && canAct && f.canFire()) this.shoot();
     if (canAct && f.ammoNow <= 0 && !f.reloading && !f.dead) { f.startReload(); sfx.reload(); this.setScope(false); }
   }
 
   shoot() {
     const f = this.f, w = f.weapon;
-    let spread = w.scoped ? (this.scoped ? w.scoped.spread : w.spread) : w.spread + f.bloom;
-    // Scoped AWP is pinpoint (quick scope); everything else loses only a hair of accuracy while moving
-    if (f.moving && !(w.scoped && this.scoped)) spread += w.scoped ? PLAYER.moveSpreadAwp : PLAYER.moveSpread;
+    let spread = this.scoped ? w.scoped.spread : w.spread + f.bloom;
+    // Aiming is pinpoint (the AWP quick scope too); otherwise moving costs a hair of accuracy, the AWP more
+    if (f.moving && !this.scoped) spread += w.scoped.sniper ? PLAYER.moveSpreadAwp : PLAYER.moveSpread;
     if (!f.onGround) spread += PLAYER.airSpread;   // jump shots are inaccurate
 
     const dir = this.aimDir();
@@ -245,7 +238,7 @@ export class PlayerControls {
       cam.lookAt(c);
       return;
     }
-    if (this.scoped) {
+    if (this.scoped && f.weapon.scoped.sniper) {
       cam.position.copy(pivot).addScaledVector(dir, 0.35);
     } else {
       // Boom behind the shoulder, shortened if it would clip into cover
