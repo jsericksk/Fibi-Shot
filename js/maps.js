@@ -1,5 +1,8 @@
 // Map definitions. Add a new entry to MAPS and it shows up in the menu.
 // Cover entries: [x, z, width, depth, height, kind]. `quarter` is mirrored on both axes.
+// Optional: wall.height (default 3.5), wall.stripe (null = none), kinds[].split (color of the top half of a stacked pair),
+// kinds[].crown (leaves on top of a tree), forest { count, spread } (trees beyond the walls),
+// ceiling { height, color } (indoor map: needs lights; light panels are drawn over `lights.at`), lights.y (default 3)
 // Gravity is the same on every map (WORLD.gravity): fighters can jump onto cover up to ~3 m high.
 
 export const MAPS = {
@@ -76,6 +79,86 @@ export const MAPS = {
       [0, 3.8, 1, 3.4, 1.1, 'wall'], [0, -3.8, 1, 3.4, 1.1, 'wall'],
       [6, 6, 2, 2, 2.4, 'crate'], [-6, 6, 2, 2, 2.4, 'crate'],
       [6, -6, 2, 2, 2.4, 'crate'], [-6, -6, 2, 2, 2.4, 'crate'],
+    ],
+  },
+
+  forest: {
+    id: 'forest',
+    name: 'Floresta',
+    preview: 'linear-gradient(#8fd1ff 0 42%, #2f8f3a 42%)',
+    sky: 0x8fd1ff,
+    fog: [80, 200],
+    hemi: [0xdff1ff, 0x4a7a3a, 1.0],
+    sun: { color: 0xfff1cc, intensity: 2.4, pos: [30, 45, -15] },
+    floor: 'grass',
+    wall: { color: 0x4a9a45, stripe: null, height: 2.4 },   // a hedge around the clearing
+    forest: { count: 40, spread: 55 },
+    kinds: {
+      rock: { color: 0x8a8f8a, trim: null },
+      log: { color: 0x7a5230, trim: null },
+      tree: { color: 0x6b4a2b, trim: null, crown: 0x2f8f3a },
+      bush: { color: 0x3a8a3a, trim: null },
+      crate: { color: 0xb88a4a, trim: null },
+    },
+    lights: null,
+    quarter: [
+      [9, 8, 4, 4, 2.4, 'rock'],
+      [20, 6, 7, 2, 2.2, 'log'],
+      [6, 20, 2, 7, 2.2, 'log'],
+      [16, 16, 1.4, 1.4, 5, 'tree'],
+      [26, 12, 1.4, 1.4, 5, 'tree'],
+      [12, 27, 1.4, 1.4, 5, 'tree'],
+      [24, 24, 3.6, 3.6, 2.4, 'bush'],
+      [27, 19, 3, 3, 2.2, 'bush'],
+      [19, 27, 3, 3, 2.2, 'bush'],
+      [14, 3, 2.6, 2.6, 2.3, 'crate'],
+      [4, 13, 4, 3, 2.3, 'rock'],
+    ],
+    center: [
+      [0, 0, 4.4, 4.4, 2.4, 'rock'],
+    ],
+  },
+
+  assault: {
+    id: 'assault',
+    name: 'Assault',
+    preview: 'linear-gradient(135deg, #b5432f 0 38%, #2f5fa3 38% 62%, #8b8d8e 62%)',
+    sky: 0x15171a,
+    fog: [45, 120],
+    hemi: [0xdfe3ea, 0x5a5c60, 1.1],
+    sun: { color: 0xfff2dd, intensity: 0.8, pos: [20, 40, -10] },
+    floor: 'concrete',
+    wall: { color: 0x6d6f70, stripe: 0xb89a20, height: 9 },
+    ceiling: { height: 9, color: 0x3a3d40 },
+    kinds: {
+      container_red: { color: 0xb5432f, trim: null },
+      container_blue: { color: 0x2f5fa3, trim: null },
+      stack_rb: { color: 0xb5432f, trim: null, split: 0x2f5fa3 },   // red below, blue on top
+      stack_br: { color: 0x2f5fa3, trim: null, split: 0xb5432f },
+      crate: { color: 0xc99a3a, trim: null },
+      crate_green: { color: 0x56603a, trim: null },
+      platform: { color: 0x8e9091, trim: null },
+      wall: { color: 0x74767a, trim: null },
+      pillar: { color: 0x77797a, trim: null },
+    },
+    lights: { color: 0xfff2dd, intensity: 45, distance: 42, y: 7, at: [[-15, -15], [15, -15], [-15, 15], [15, 15], [0, 0]] },
+    quarter: [
+      [8, 7, 6, 2.4, 5.2, 'stack_rb'],
+      [19, 8, 6, 2.4, 2.6, 'container_red'],
+      [8, 20, 2.4, 6, 5.2, 'stack_br'],
+      [24, 23, 6, 2.4, 2.6, 'container_blue'],
+      [14, 14, 1.6, 1.6, 1.6, 'crate'],
+      [16, 15.4, 1.2, 1.2, 1.2, 'crate_green'],
+      [13, 26, 1.6, 1.6, 1.6, 'crate_green'],
+      [27, 13, 1.6, 1.6, 1.6, 'crate'],
+      [24, 3, 8, 6, 0.9, 'platform'],
+      [25, 3, 1.4, 1.4, 2.0, 'crate'],
+      [4, 14, 1, 5, 1.1, 'wall'],
+      [13, 1.5, 1.2, 1.2, 9, 'pillar'],
+    ],
+    center: [
+      [0, 0, 5, 5, 0.9, 'platform'],
+      [0, 0, 1.6, 1.6, 2.2, 'crate'],
     ],
   },
 };

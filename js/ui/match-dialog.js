@@ -5,12 +5,12 @@ import { formatTime } from '../utils.js';
 
 const $ = id => document.getElementById(id);
 
-// Asks for the match length in a dialog with two squares: timed or unlimited.
+// Asks for the match length in a dialog with two squares: unlimited or timed.
 // Calls onPick(seconds) with 0 for unlimited. A click outside the box cancels.
 export function askMatchDuration(onPick) {
   const options = [
-    { seconds: MATCH.timedSeconds, big: formatTime(MATCH.timedSeconds), label: t('matchDialog.timed', { min: MATCH.timedSeconds / 60 }) },
     { seconds: 0, big: '∞', label: t('matchDialog.unlimited') },
+    { seconds: MATCH.timedSeconds, big: formatTime(MATCH.timedSeconds), label: t('matchDialog.timed', { min: MATCH.timedSeconds / 60 }) },
   ];
   const dialog = $('match-dialog');
   $('match-options').innerHTML = options.map((o, i) => `
