@@ -71,6 +71,8 @@ export const hud = {
     const key = `${player.weaponId}|${player.ammoNow}|${player.reloading}`;
     if (key === lastKey) return;
     lastKey = key;
+    const weaponBtn = $('t-weapon');   // touch only: the button shows the weapon in hand
+    if (weaponBtn) weaponBtn.innerHTML = weaponIcon(player.weaponId);
     el.ammo.textContent = player.training ? `∞ / ${w.mag}` : `${player.ammoNow} / ${w.mag}`;
     el.reloadNote.textContent = player.reloading ? t('reloading') : player.ammoNow === 0 ? t('noAmmo') : '';
     el.slots.querySelectorAll('.slot').forEach(s => s.classList.toggle('active', s.dataset.id === player.weaponId));
@@ -134,7 +136,7 @@ export const hud = {
 
   // Training hides the score and the crosshair is a plain dot for the AWP
   setTraining(on) {
-    el.score.style.display = on ? 'none' : '';
+    el.score.classList.toggle('off', on);
     document.querySelector('.plate.right').style.display = on ? 'none' : '';
     el.changePanel.style.display = on ? 'flex' : 'none';
     el.changePickers.classList.remove('open');

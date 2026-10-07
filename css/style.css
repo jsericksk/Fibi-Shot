@@ -90,8 +90,10 @@ button { font: inherit; cursor: pointer; }
 .overlay button:not(.primary) { border: 2px solid #fff; border-radius: 12px; background: transparent; color: #fff; font-weight: 800; padding: 8px 22px; }
 
 /* score and toast */
-#score { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); display: flex; gap: 12px; align-items: center; font-weight: 900; font-size: 34px; text-shadow: 0 2px 0 #000; background: rgba(0, 0, 0, .6); border: 1px solid #5a1119; border-radius: 14px; padding: 2px 18px; }
-#score span { font-size: 20px; opacity: .6; }
+#score { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); display: flex; gap: .35em; align-items: center; font-weight: 900; font-size: 34px; text-shadow: 0 2px 0 #000; background: rgba(0, 0, 0, .6); border: 1px solid #5a1119; border-radius: .4em; padding: .06em .5em; }
+#score span { font-size: .6em; opacity: .6; }
+#score.off { display: none; }
+.hud-editing #score.off { display: flex; opacity: .5; }
 #score.below-timer { top: 52px; }
 #timer { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); font-size: 30px; font-weight: 900; text-shadow: 0 2px 0 #000; font-variant-numeric: tabular-nums; pointer-events: none; }
 #timer.off { display: none; }
@@ -198,7 +200,7 @@ button { font: inherit; cursor: pointer; }
 .touch #touch { display: block; }
 .touch #screen-game { touch-action: none; -webkit-touch-callout: none; }
 .touch .plate, .touch #score, .touch #toast { pointer-events: none; }
-.touch #timer { transform: translate(-50%, -50%); }   /* position and font-size come from the layout */
+.touch #timer, .touch #score { transform: translate(-50%, -50%); }   /* position and font-size come from the layout */
 .touch #weapon-panel { right: auto; bottom: auto; transform: translate(-50%, -50%); text-align: center; }   /* font-size comes from the layout */
 .touch #ammo { font-size: 1em; line-height: 1.1; }
 .touch #reload-note { height: auto; min-height: 1.2em; font-size: .5em; }
@@ -208,9 +210,11 @@ button { font: inherit; cursor: pointer; }
 #joy-zone { position: absolute; left: 0; top: 0; height: 100%; pointer-events: auto; touch-action: none; }
 #joystick { pointer-events: none; background: rgba(255, 255, 255, .12); border: 2px solid rgba(255, 255, 255, .35); }
 #joystick i { position: absolute; left: 50%; top: 50%; width: 42%; height: 42%; margin: -21% 0 0 -21%; border-radius: 50%; background: rgba(224, 24, 45, .75); border: 2px solid #fff; }
-.tbtn { padding: 0; border: 2px solid rgba(255, 255, 255, .5); background: rgba(0, 0, 0, .45); color: #fff; font-weight: 900; font-size: 12px; text-shadow: 0 2px 0 #000; }
+.tbtn { display: flex; align-items: center; justify-content: center; padding: 0; border: 2px solid rgba(255, 255, 255, .5); background: rgba(0, 0, 0, .45); color: #fff; }
+.tbtn#t-weapon svg { width: 86%; height: auto; }
+.tbtn svg { width: 52%; height: 52%; fill: currentColor; filter: drop-shadow(0 2px 0 rgba(0, 0, 0, .6)); pointer-events: none; }
 .tbtn.down { background: var(--accent); }
-#t-fire { background: rgba(224, 24, 45, .55); font-size: 18px; }
+#t-fire { background: rgba(224, 24, 45, .55); }
 #weapon-menu { position: absolute; display: none; gap: 8px; pointer-events: auto; }
 #weapon-menu.open { display: flex; }
 .wslot { width: 76px; height: 64px; padding: 4px; border: 2px solid rgba(255, 255, 255, .5); border-radius: 12px; background: rgba(0, 0, 0, .65); color: #fff; font-size: 11px; font-weight: 800; }
@@ -289,7 +293,8 @@ body:not(.touch) .touch-only { display: none; }
 .hud-editing #touch { background: rgba(0, 0, 0, .55); }
 .hud-editing #weapon-menu { display: none; }
 #touch .selected { outline: 3px dashed #fff; outline-offset: 4px; }
-#hud-bar { position: absolute; top: 6px; left: 50%; transform: translateX(-50%); display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px 12px; max-width: calc(100vw - 12px); padding: 6px 12px; border-radius: 12px; background: rgba(10, 0, 3, .9); border: 1px solid var(--accent); font-size: 12px; font-weight: 800; }
+#hud-bar { position: absolute; top: 6px; touch-action: none; left: 50%; transform: translateX(-50%); display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px 12px; max-width: calc(100vw - 12px); padding: 6px 12px; border-radius: 12px; background: rgba(10, 0, 3, .9); border: 1px solid var(--accent); font-size: 12px; font-weight: 800; }
+#hud-grip { font-style: normal; font-size: 18px; opacity: .6; cursor: grab; }
 #hud-bar label { display: flex; align-items: center; gap: 6px; }
 #hud-bar input { width: 100px; accent-color: var(--accent); }
 #hud-bar button { border: 2px solid #fff; border-radius: 10px; background: transparent; color: #fff; font-weight: 800; font-size: 12px; padding: 4px 12px; }

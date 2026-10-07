@@ -77,7 +77,7 @@ export const TOUCH = {
   joystickDeadZone: 0.15,     // fraction of the stick radius that is ignored
   joystickZone: 42,           // % of the screen width (from the left) where a touch starts the stick
   sizeRange: { min: 40, max: 180, step: 2 },   // px, for the layout editor
-  sizeRanges: { ammo: { min: 14, max: 48, step: 1 }, timer: { min: 14, max: 48, step: 1 } },   // controls that need their own range
+  sizeRanges: { ammo: { min: 14, max: 48, step: 1 }, timer: { min: 14, max: 48, step: 1 }, score: { min: 10, max: 40, step: 1 } },   // controls that need their own range
   // Center of each control in % of the screen, and its size in px
   layout: {
     joystick: { x: 13, y: 80, size: 110 },
@@ -90,6 +90,7 @@ export const TOUCH = {
     pause: { x: 6, y: 32, size: 44 },
     ammo: { x: 50, y: 92, size: 22 },   // size is the font size in px
     timer: { x: 50, y: 5, size: 22 },   // font size in px too
+    score: { x: 50, y: 14, size: 16 },  // kills, font size in px too
   },
 };
 

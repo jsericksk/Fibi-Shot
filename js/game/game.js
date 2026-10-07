@@ -143,7 +143,7 @@ export class Game {
     sfx.preload(Object.values(EMOTES).flat().map(e => e.sound));
     this.hud.setTraining(this.training);
     this.hud.setupChange(playerDef, this.training ? null : enemyDef, (side, id) => this.changeCharacter(side, id));
-    if (!this.training) this.hud.toast(t(isTouch ? 'toast.pickWeaponTouch' : 'toast.pickWeapon'), 0);
+    if (!this.training && !isTouch) this.hud.toast(t('toast.pickWeapon'), 0);   // touch players know the buttons
 
     if (this.multi) {
       this.netT = 0;
@@ -180,12 +180,14 @@ export class Game {
     this.updateTimer(dt);
 
     const canAct = this.state === 'playing' && !this.paused;
+    const fighters = [this.player, ...this.bots.map(b => b.f)];
+    // Gravity first: the camera is placed in controls.update, so it must already see this frame's height
+    for (const f of fighters) if (!f.remote) f.updateVertical(dt, this.arena.colliders, WORLD.gravity);
     this.controls.update(dt, canAct);
     this.bots.forEach(b => b.update(dt, canAct));
-    for (const f of [this.player, ...this.bots.map(b => b.f)]) {
+    for (const f of fighters) {
       f.update(dt);
       if (!f.remote) {   // the friend's position comes from the network
-        f.updateVertical(dt, this.arena.colliders, WORLD.gravity);
         if (f.dead && canAct) {
           f.respawnT -= dt;
           if (f.respawnT <= 0) this.respawn(f);
