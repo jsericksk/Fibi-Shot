@@ -3,10 +3,11 @@ import { thumbnail } from './thumbnails.js';
 import { MAP_LIST } from '../maps.js';
 import { sfx } from '../audio.js';
 import { net } from '../net.js';
+import { askMatchDuration } from './match-dialog.js';
 import { t, applyI18n, onLangChange } from '../i18n.js';
 
 // Multiplayer lobby: create or join a room, pick characters (and the map, host only), then start.
-// Lobby messages: hello {char, map?} | char {id} | map {id} | start {map}
+// Lobby messages: hello {char, map?} | char {id} | map {id} | start {map, duration}
 export function initLobby({ onStart, onBack }) {
   const $ = id => document.getElementById(id);
   const state = { me: 'fibi', friend: null, map: MAP_LIST[0].id, code: '', statusKey: '' };
@@ -66,8 +67,8 @@ export function initLobby({ onStart, onBack }) {
     start.disabled = !state.friend;
   }
 
-  function begin(mapId) {
-    onStart(getCharacter(state.me), getCharacter(state.friend), mapId, net.role);
+  function begin(mapId, duration) {
+    onStart(getCharacter(state.me), getCharacter(state.friend), mapId, net.role, duration);
   }
 
   function onMessage(m) {
@@ -80,7 +81,7 @@ export function initLobby({ onStart, onBack }) {
         break;
       case 'char': state.friend = m.id; render(); break;
       case 'map': state.map = m.id; render(); break;
-      case 'start': if (state.friend) begin(m.map); break;
+      case 'start': if (state.friend) begin(m.map, m.duration); break;
     }
   }
 
@@ -146,8 +147,10 @@ export function initLobby({ onStart, onBack }) {
   $('btn-lobby-start').onclick = () => {
     if (!state.friend) return;
     sfx.click();
-    net.send({ t: 'start', map: state.map });
-    begin(state.map);
+    askMatchDuration(duration => {
+      net.send({ t: 'start', map: state.map, duration });
+      begin(state.map, duration);
+    });
   };
   $('btn-lobby-back').onclick = () => { sfx.click(); net.close(); onBack(); };
 

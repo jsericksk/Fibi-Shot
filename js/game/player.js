@@ -13,6 +13,7 @@ const ZOOM_RATE = CAMERA.scopeZoomRate;
 const CAM_DISTANCE = CAMERA.distance;
 const SHOULDER = CAMERA.shoulder;
 const CAM_HEIGHT = CAMERA.height;
+const SCOPE_FORWARD = CAMERA.scopeForward;
 
 // Reads keyboard/mouse/touch input, moves the player, drives the over-the-shoulder camera and fires
 export class PlayerControls {
@@ -132,7 +133,14 @@ export class PlayerControls {
     if (this.game.canSwitch && !this.f.dead) this.switchWeapon(id);
   }
 
+  // Moves to the weapon on the right (step 1) or on the left (-1) in the weapon order; nothing at the ends
+  stepWeapon(step) {
+    const id = WEAPON_ORDER[WEAPON_ORDER.indexOf(this.f.weaponId) + step];
+    if (id) this.pickWeapon(id);
+  }
+
   setScope(on) {
+    if (on) this.f.cancelReload();   // aiming interrupts a reload too
     if (on && (this.f.reloading || this.f.dead || this.f.emote)) return;
     if (on !== this.scoped) sfx.switch();
     this.scoped = on;
@@ -187,6 +195,7 @@ export class PlayerControls {
     // While dancing, held keys/buttons are ignored; a fresh click ends the dance
     if (f.emote) { if (this.fireQueued) f.emote = null; wantFire = false; }
     this.fireQueued = false;
+    if (wantFire && canAct) f.cancelReload();
     if (wantFire && canAct && f.canFire()) this.shoot();
     if (canAct && f.ammoNow <= 0 && !f.reloading && !f.dead) { f.startReload(); sfx.reload(); this.setScope(false); }
   }
@@ -238,18 +247,16 @@ export class PlayerControls {
       cam.lookAt(c);
       return;
     }
-    if (this.scoped && f.weapon.scoped.sniper) {
-      cam.position.copy(pivot).addScaledVector(dir, 0.35);
-    } else {
-      // Boom behind the shoulder, shortened if it would clip into cover
-      const origin = pivot.clone().addScaledVector(right, SHOULDER);
-      const back = dir.clone().multiplyScalar(-1).add(new THREE.Vector3(0, 0.08, 0)).normalize();
-      this.game.raycaster.set(origin, back);
-      this.game.raycaster.far = CAM_DISTANCE;
-      const hit = this.game.raycaster.intersectObjects(this.game.arena.blockers, false)[0];
-      const d = hit ? Math.max(0.4, hit.distance - 0.25) : CAM_DISTANCE;
-      cam.position.copy(origin).addScaledVector(back, d);
-    }
+    // Boom behind the shoulder, shortened if it would clip into cover
+    const origin = pivot.clone().addScaledVector(right, SHOULDER);
+    const back = dir.clone().multiplyScalar(-1).add(new THREE.Vector3(0, 0.08, 0)).normalize();
+    this.game.raycaster.set(origin, back);
+    this.game.raycaster.far = CAM_DISTANCE;
+    const hit = this.game.raycaster.intersectObjects(this.game.arena.blockers, false)[0];
+    const d = hit ? Math.max(0.4, hit.distance - 0.25) : CAM_DISTANCE;
+    cam.position.copy(origin).addScaledVector(back, d);
+    // The sniper scope slides forward along the same line of sight, so a quick scope shoots exactly where the crosshair was
+    if (this.scoped && f.weapon.scoped.sniper) cam.position.addScaledVector(dir, d + SCOPE_FORWARD);
     cam.lookAt(this.tmp.copy(cam.position).add(dir));
   }
 }

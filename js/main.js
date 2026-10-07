@@ -21,19 +21,19 @@ initTouch(game);   // before the menus so the touch help text is the one transla
 initHudEditor(game);
 
 const lobby = initLobby({
-  onStart(playerDef, enemyDef, mapId, role) {
+  onStart(playerDef, enemyDef, mapId, role, duration) {
     show('game');            // canvas must be visible before requesting pointer lock
     game.resize();
-    game.start(playerDef, enemyDef, 'multi', mapId, { role });
+    game.start(playerDef, enemyDef, 'multi', mapId, { role, duration });
   },
   onBack: () => show('select'),
 });
 
 initSelect({
-  onStart(playerDef, enemyDef, mode, mapId) {
+  onStart(playerDef, enemyDef, mode, mapId, duration) {
     show('game');
     game.resize();
-    game.start(playerDef, enemyDef, mode, mapId);
+    game.start(playerDef, enemyDef, mode, mapId, { duration });
   },
   onMultiplayer() {
     show('lobby');

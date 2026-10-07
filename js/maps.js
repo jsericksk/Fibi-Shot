@@ -1,6 +1,6 @@
 // Map definitions. Add a new entry to MAPS and it shows up in the menu.
 // Cover entries: [x, z, width, depth, height, kind]. `quarter` is mirrored on both axes.
-// Fighters can jump onto cover up to ~1.3 m high on Earth gravity.
+// Gravity is the same on every map (WORLD.gravity): fighters can jump onto cover up to ~3 m high.
 
 export const MAPS = {
   moon: {
@@ -11,7 +11,6 @@ export const MAPS = {
     fog: [70, 170],
     hemi: [0x8899bb, 0x222233, 0.55],
     sun: { color: 0xffffff, intensity: 2.8, pos: [35, 38, -12] },
-    gravity: 10,               // low gravity: floaty jumps
     floor: 'moon',
     space: true,               // stars and a distant Earth
     wall: { color: 0x5c5c66, stripe: 0xdfe6f2 },
@@ -47,7 +46,6 @@ export const MAPS = {
     fog: [35, 105],
     hemi: [0xc9a0a8, 0x1a0b0e, 1.1],
     sun: { color: 0xffb0a0, intensity: 1.0, pos: [-20, 40, -15] },
-    gravity: 26,
     floor: 'tiles',
     wall: { color: 0x1b1519, stripe: 0xff1e2e },
     kinds: {

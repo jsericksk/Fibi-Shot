@@ -3,7 +3,7 @@ import { WEAPON_ORDER } from './weapons.js';
 import { rand, randInt, lerpAngle, clamp } from '../utils.js';
 import { ENEMY, PLAYER, SHOWCASE, EMOTES, WORLD } from '../config.js';
 
-const SPEED = ENEMY.speed;
+const SPEED = PLAYER.walkSpeed;   // bots move as fast as the player
 const MIN_RANGE = ENEMY.minRange, MAX_RANGE = ENEMY.maxRange;
 const AWP_CHARGE = ENEMY.awpCharge;
 const ERROR = ENEMY.aimError;
@@ -42,13 +42,7 @@ export class EnemyAI {
     this.f = fighter;
     this.target = target;
 
-    // Red laser telegraphing AWP shots
-    const geo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]);
-    this.laser = new THREE.Line(geo, new THREE.LineBasicMaterial({ color: 0xff2a4a, transparent: true, opacity: 0.8 }));
-    this.laser.frustumCulled = false;
-    this.laser.visible = false;
-    game.scene.add(this.laser);
-
+    // Glint on the AWP scope lens while charging a shot
     this.scopeIcon = makeGlint();
     game.scene.add(this.scopeIcon);
 
@@ -77,7 +71,6 @@ export class EnemyAI {
 
   update(dt, canAct) {
     const f = this.f, t = this.target;
-    this.laser.visible = false;
     this.scopeIcon.visible = false;
     if (f.dead) return;
     if (this.wander) return this.updateWander(dt, canAct);
@@ -90,14 +83,40 @@ export class EnemyAI {
     const to = t.chestPos(new THREE.Vector3()).sub(f.chestPos(new THREE.Vector3()));
     f.pitch = clamp(Math.atan2(to.y, dist), -0.5, 0.5);
 
-    if (!canAct || t.dead) { f.moving = false; return; }
+    if (!canAct) { f.moving = false; return; }
+    if (f.emote) {   // taunting: stands still until the dance ends, it is hit or it sees the player aiming at it
+      if (this.noticesDanger()) f.emote = null;
+      else { f.moving = false; return; }
+    }
 
     this.los = this.game.hasLineOfSight(f.chestPos(new THREE.Vector3()), t.chestPos(new THREE.Vector3()));
     this.noLosT = this.los ? 0 : this.noLosT + dt;
 
     this.move(dt, dist);
+    if (t.dead) return;   // keeps moving after a kill so it does not look frozen
     this.handleWeapons(dt);
     if (!this.game.training) this.fire(dt, dist);   // in training the enemy only roams, it never shoots
+  }
+
+  startEmote() {
+    const list = EMOTES[this.f.def.id] ?? EMOTES.default;
+    this.f.emote = { ...list[randInt(0, list.length - 1)], t: 0 };
+    this.emoteHp = this.f.hp;
+  }
+
+  // True when the bot got hurt or the player is aiming (scoped) at it in plain sight
+  noticesDanger() {
+    const f = this.f, t = this.target, controls = this.game.controls;
+    if (f.hp < this.emoteHp) return true;
+    if (t.dead || !controls.scoped) return false;
+    const toBot = f.chestPos().sub(t.chestPos());
+    if (controls.aimDir().dot(toBot.clone().normalize()) < ENEMY.noticeAimDot) return false;
+    return this.game.hasLineOfSight(t.chestPos(), f.chestPos());
+  }
+
+  // Now and then the bot dances over the player it just eliminated
+  taunt() {
+    if (Math.random() < ENEMY.tauntChance) this.startEmote();
   }
 
   // Showcase behaviour: walk to random spots, hop around and now and then dance
@@ -109,8 +128,7 @@ export class EnemyAI {
 
     this.emoteT -= dt;
     if (this.emoteT <= 0) {
-      const list = EMOTES[f.def.id] ?? EMOTES.default;
-      f.emote = { ...list[randInt(0, list.length - 1)], t: 0 };
+      this.startEmote();
       this.emoteT = rand(...SHOWCASE.emoteEvery);
       f.moving = false;
       return;
@@ -220,7 +238,7 @@ export class EnemyAI {
 
     if (w.id === 'awp') {
       this.charge += dt;
-      this.showLaser(aim);
+      this.showScopeGlint();
       if (this.charge >= AWP_CHARGE && f.canFire()) { this.shoot(origin, aim); this.charge = 0; this.reaction = rand(0.4, 1); }
     } else if (w.id === 'pistol' || w.id === 'shotgun') {
       this.burstWait -= dt;
@@ -235,14 +253,7 @@ export class EnemyAI {
     }
   }
 
-  showLaser(aim) {
-    const pos = this.laser.geometry.attributes.position;
-    const m = this.f.muzzleWorld(new THREE.Vector3());
-    pos.setXYZ(0, m.x, m.y, m.z);
-    pos.setXYZ(1, aim.x, aim.y, aim.z);
-    pos.needsUpdate = true;
-    this.laser.visible = true;
-    // Pulsing glint on the scope lens
+  showScopeGlint() {
     this.scopeIcon.position.copy(this.f.guns.awp.group.localToWorld(new THREE.Vector3(0, 0.16, 0.5)));
     this.scopeIcon.scale.setScalar(0.55 + Math.sin(this.game.t * 14) * 0.12);
     this.scopeIcon.material.opacity = 0.75 + Math.sin(this.game.t * 14) * 0.25;
@@ -263,9 +274,6 @@ export class EnemyAI {
   }
 
   dispose() {
-    this.game.scene.remove(this.laser);
-    this.laser.geometry.dispose();
-    this.laser.material.dispose();
     this.game.scene.remove(this.scopeIcon);
     this.scopeIcon.material.map.dispose();
     this.scopeIcon.material.dispose();

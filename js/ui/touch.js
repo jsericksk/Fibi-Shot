@@ -17,7 +17,7 @@ const BUTTONS = {
 };
 
 export const CONTROL_IDS = Object.keys(TOUCH.layout);
-const ELEMENT_IDS = { joystick: 'joystick', ammo: 'weapon-panel' };   // every other control is #t-<id>
+const ELEMENT_IDS = { joystick: 'joystick', ammo: 'weapon-panel', timer: 'timer' };   // every other control is #t-<id>
 export const controlEl = id => $(ELEMENT_IDS[id] ?? 't-' + id);
 export const sizeRangeOf = id => TOUCH.sizeRanges[id] ?? TOUCH.sizeRange;
 
@@ -26,9 +26,11 @@ const isSpot = s => s && [s.x, s.y, s.size].every(Number.isFinite);
 // Where a control is: the player's own layout, or the default one
 export const layoutOf = id => (isSpot(settings.touchLayout[id]) ? settings.touchLayout[id] : TOUCH.layout[id]);
 
+const TEXT_CONTROLS = ['weapon-panel', 'timer'];
+
 function place(el, { x, y, size }) {
   Object.assign(el.style, { left: x + '%', top: y + '%' });
-  if (el.id === 'weapon-panel') el.style.fontSize = size + 'px';   // the ammo text scales by font size
+  if (TEXT_CONTROLS.includes(el.id)) el.style.fontSize = size + 'px';   // text controls scale by font size
   else Object.assign(el.style, { width: size + 'px', height: size + 'px' });
 }
 
@@ -132,13 +134,26 @@ function bindWeaponMenu(game) {
       top: (above >= margin ? above : Math.min(cy + gap, innerHeight - h - margin)) + 'px',
     });
   };
-  menu.onclick = e => {
+  // pointerdown instead of click: with another finger on the stick or the jump button, browsers skip the click
+  menu.onpointerdown = e => {
     const slot = e.target.closest('.wslot');
     if (!slot) return;
+    e.preventDefault();
     game.controls?.pickWeapon(slot.dataset.id);
     close();
   };
-  bindButton($('t-weapon'), { down: toggle });
+  // A tap opens the menu; sliding left or right steps through the weapons instead
+  let swipeX = 0, swiped = false;
+  bindButton($('t-weapon'), { down: () => { swiped = false; }, up: () => { if (!swiped) toggle(); } }, {
+    start: e => { swipeX = e.clientX; },
+    move: e => {
+      if (Math.abs(e.clientX - swipeX) < TOUCH.weaponSwipe) return;
+      game.controls?.stepWeapon(Math.sign(e.clientX - swipeX));
+      swipeX = e.clientX;
+      swiped = true;
+      close();
+    },
+  });
   $('touch').addEventListener('pointerdown', e => { if (!e.target.closest('#weapon-menu, #t-weapon')) close(); });
 }
 
@@ -159,7 +174,7 @@ export function initTouch(game) {
     ${labels.map(id => `<button id="t-${id}" class="tctl tbtn" data-i18n="touch.${id}"></button>`).join('')}
     <button id="t-pause" class="tctl tbtn" data-i18n="touch.pause"></button>
     <div id="weapon-menu"></div>`;
-  $('touch').append($('weapon-panel'));   // the ammo text is a movable control too
+  $('touch').append($('weapon-panel'), $('timer'));   // the ammo and timer texts are movable controls too
 
   track($('touch-look'), lookDrag(game));
   $('joy-zone').style.width = TOUCH.joystickZone + '%';

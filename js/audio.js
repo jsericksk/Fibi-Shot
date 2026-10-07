@@ -118,6 +118,13 @@ export const sfx = {
   jump: safe(() => tone(260, 520, 0.12, { type: 'sine', vol: 0.12 })),
   switch: safe(() => { noise(0.05, { type: 'bandpass', freq: 1500, vol: 0.2 }); }),
   hit: safe(head => { tone(head ? 1500 : 900, head ? 1200 : 700, 0.09, { type: 'triangle', vol: 0.25 }); }),
+  // Deep thud with a dry crack on top, like a helmet breaking
+  headshotKill: safe(() => {
+    tone(110, 35, 0.5, { type: 'sine', vol: 0.7 });
+    noise(0.07, { type: 'highpass', freq: 1800, vol: 0.5 });
+    noise(0.3, { type: 'lowpass', freq: 500, vol: 0.6 });
+    tone(320, 90, 0.12, { type: 'square', vol: 0.15, delay: 0.02 });
+  }),
   hurt: safe(() => { tone(180, 70, 0.2, { type: 'sawtooth', vol: 0.3 }); noise(0.1, { type: 'lowpass', freq: 600, vol: 0.3 }); }),
   beep: safe(high => tone(high ? 880 : 520, high ? 880 : 520, 0.14, { type: 'square', vol: 0.12 })),
   click: safe(() => tone(700, 900, 0.05, { type: 'triangle', vol: 0.12 })),

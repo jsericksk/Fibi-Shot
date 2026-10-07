@@ -21,7 +21,7 @@ const ARENA_HALF = WORLD.arenaHalf;
 const COUNTDOWN = MATCH.countdown;
 const FAR = MATCH.bulletRange;
 
-// One endless deathmatch: scene, fighters, hit detection, scoring and respawns
+// One deathmatch, endless or timed: scene, fighters, hit detection, scoring and respawns
 export class Game {
   constructor(canvas, hud) {
     this.canvas = canvas;
@@ -33,7 +33,7 @@ export class Game {
     this.camera = new THREE.PerspectiveCamera(CAMERA.fov, 1, 0.1, CAMERA.far);
     this.raycaster = new THREE.Raycaster();
     this.active = false;
-    this.state = 'idle';           // idle | countdown | playing
+    this.state = 'idle';           // idle | countdown | playing | over
     this.onMenu = () => {};
 
     addEventListener('resize', () => this.resize());
@@ -42,6 +42,7 @@ export class Game {
     document.addEventListener('pointerlockchange', () => {
       if (!this.active) return;
       const locked = document.pointerLockElement === this.canvas;
+      if (this.state === 'over') return;   // the result screen frees the mouse on purpose
       if (!locked && !this.paused && isSwitchingFullscreen()) return this.lock();
       this.setPaused(!locked);
     });
@@ -50,7 +51,7 @@ export class Game {
   }
 
   get canAct() { return this.state === 'playing' && !this.paused; }
-  get canSwitch() { return this.active && this.state !== 'idle' && !this.paused; }
+  get canSwitch() { return this.active && this.state !== 'idle' && this.state !== 'over' && !this.paused; }
 
   resize() {
     this.renderer.setSize(innerWidth, innerHeight);
@@ -129,9 +130,12 @@ export class Game {
 
     this.controls = new PlayerControls(this, this.player);
     this.scores = { player: 0, enemy: 0 };
+    this.duration = this.training ? 0 : opts.duration ?? 0;   // seconds, 0 = unlimited
+    this.timeLeft = this.duration;
 
     this.hud.setup(playerDef, enemyDef);
     this.hud.setScore(0, 0);
+    this.hud.setTimer(this.training ? null : this.duration, this.timeLeft);
     this.hud.setScope(false);
     this.hud.showPause(false);
     this.lastEmote = null;
@@ -173,6 +177,7 @@ export class Game {
   update(dt) {
     this.t += dt;
     this.updateCountdown(dt);
+    this.updateTimer(dt);
 
     const canAct = this.state === 'playing' && !this.paused;
     this.controls.update(dt, canAct);
@@ -180,7 +185,7 @@ export class Game {
     for (const f of [this.player, ...this.bots.map(b => b.f)]) {
       f.update(dt);
       if (!f.remote) {   // the friend's position comes from the network
-        f.updateVertical(dt, this.arena.colliders, this.map.gravity);
+        f.updateVertical(dt, this.arena.colliders, WORLD.gravity);
         if (f.dead && canAct) {
           f.respawnT -= dt;
           if (f.respawnT <= 0) this.respawn(f);
@@ -242,6 +247,7 @@ export class Game {
       }
       case 'died':   // our shot killed the friend
         this.hud.hitMarker(this.lastHitHead, true);
+        if (this.lastHitHead) sfx.headshotKill();
         this.onKill(this.player, this.enemy);
         break;
     }
@@ -269,20 +275,45 @@ export class Game {
     }
   }
 
-  // Random free spot far from `other`, preferring places out of its line of sight
+  // Timed matches count down once the countdown is over and end at zero
+  updateTimer(dt) {
+    if (!this.duration || this.state !== 'playing') return;
+    this.timeLeft = Math.max(0, this.timeLeft - dt);
+    this.hud.setTimer(this.duration, this.timeLeft);
+    if (this.timeLeft === 0) this.finish();
+  }
+
+  // Time is up: freeze the match and show who won
+  finish() {
+    this.state = 'over';
+    this.controls.setScope(false);
+    this.controls.mouseDown = false;
+    this.hud.toast('', 0);
+    const { player, enemy } = this.scores;
+    const result = player > enemy ? 'win' : player < enemy ? 'lose' : 'draw';
+    this.hud.showResult(result, player, enemy);
+    if (result === 'win') sfx.win(); else if (result === 'lose') sfx.lose(); else sfx.beep(true);
+    document.exitPointerLock?.();
+  }
+
+  // Random free spot far from `other`, preferring places out of its line of sight.
+  // If every free spot tried is closer than `minDistance`, the farthest one wins.
   pickSpawn(other, minDistance = MATCH.minSpawnDistance, filter = null) {
     const lim = ARENA_HALF - 2;
     const valid = [], hidden = [];
+    let farthest = null, farthestDist = -1;
     for (let i = 0; i < 80; i++) {
       const x = rand(-lim, lim), z = rand(-lim, lim);
       if (!this.arena.isFree(x, z, 1) || (filter && !filter(x, z))) continue;
-      if (other && other.pos.distanceTo(new THREE.Vector3(x, 0, z)) < minDistance) continue;
       const spot = { x, z };
+      const dist = other ? other.pos.distanceTo(new THREE.Vector3(x, 0, z)) : Infinity;
+      if (dist > farthestDist) { farthest = spot; farthestDist = dist; }
+      if (dist < minDistance) continue;
       valid.push(spot);
       if (other && !this.hasLineOfSight(new THREE.Vector3(x, 1.2, z), other.chestPos())) hidden.push(spot);
     }
     const pool = hidden.length ? hidden : valid;
-    return pool.length ? pool[Math.floor(Math.random() * pool.length)] : { x: 0, z: -lim };
+    return pool.length ? pool[Math.floor(Math.random() * pool.length)] : farthest ?? { x: 0, z: -lim };
   }
 
   // Puts a fighter at a random spawn, facing the other one
@@ -319,7 +350,6 @@ export class Game {
 
     const muzzle = shooter.muzzleWorld();
     const pellets = w.pellets ?? 1;
-    const scale = shooter.isPlayer ? 1 : MATCH.enemyDamageScale;
     const side = new THREE.Vector3(-dir.z, 0, dir.x).normalize();
     const up = new THREE.Vector3().crossVectors(dir, side).normalize();
 
@@ -346,7 +376,7 @@ export class Game {
       this.effects.impact(hit.point, head ? 0xff6a8a : 0xffffff);
       const rec = hits.get(target) ?? { damage: 0, headshot: false };
       rec.headshot ||= head;
-      rec.damage += w.damage * (head ? w.headMult : 1) * scale * this.falloff(w, hit.distance);
+      rec.damage += w.damage * (head ? w.headMult : 1) * this.falloff(w, hit.distance);
       hits.set(target, rec);
     }
 
@@ -365,7 +395,7 @@ export class Game {
         continue;
       }
       const died = target.takeDamage(damage);
-      if (shooter.isPlayer) { this.hud.hitMarker(headshot, died); sfx.hit(headshot); }
+      if (shooter.isPlayer) { this.hud.hitMarker(headshot, died); sfx.hit(headshot); if (died && headshot) sfx.headshotKill(); }
       else { this.hud.damageFlash(); sfx.hurt(); }
       if (died) this.onKill(shooter, target);
     }
@@ -398,6 +428,7 @@ export class Game {
       this.controls.setScope(false);
       this.controls.mouseDown = false;
       this.hud.toast(t('toast.killedYou', { name: killer.def.name }), 0);
+      if (!this.multi) this.bots.find(b => b.f === killer)?.taunt();
       sfx.lose();
     } else {
       this.hud.toast(t('toast.youKilled', { name: victim.def.name }), 1800);
