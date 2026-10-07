@@ -46,7 +46,7 @@ export const PLAYER = {
 
 // ---- Emotes (H key) ----------------------------------------------------------
 // Each character has its own emotes; one is picked at random when pressing H.
-// dance: animation name from js/characters/dances.js (ballet, idol, penguin, flail) | duration: seconds | sound: mp3 in audio/emotes
+// dance: animation name from js/characters/dances.js (ballet, idol, penguin, flail, backflip, gallop) | duration: seconds | sound: mp3 in audio/emotes
 export const EMOTES = {
   fibi: [
     { dance: 'ballet', duration: 7, sound: 'audio/emotes/fibi-emote-1.mp3' },
@@ -54,6 +54,10 @@ export const EMOTES = {
   ],
   guga: [{ dance: 'penguin', duration: 5, sound: 'audio/emotes/guga-emote-1.mp3' }],
   nono: [{ dance: 'flail', duration: 5, sound: 'audio/emotes/nono-emote-1.mp3' }],
+  mambo: [
+    { dance: 'backflip', duration: 7.3, sound: 'audio/emotes/mambo-1.mp3' },
+    { dance: 'gallop', duration: 8.5, sound: 'audio/emotes/mambo-2.mp3' },
+  ],
   default: [{ dance: 'idol', duration: 5, sound: null }],   // characters without their own emotes
 };
 export const EMOTE = {

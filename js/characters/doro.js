@@ -16,7 +16,7 @@ const C = {
   line: 0x5a3a52,
 };
 
-// Chubby, grumpy mochi girl: puffy cheeks, angry purple eyes, pink hair with a rose bun and a lavender bow
+// Chubby, sweet mochi girl: puffy cheeks, big purple eyes, pink hair with a rose bun and a lavender bow
 export function buildDoro() {
   const rig = createRig();
   const { legs, body, arms, head } = rig;
@@ -45,7 +45,7 @@ export function buildDoro() {
     add(head, sphere, M(0xffb9b9, { transparent: true, opacity: 0.7 }), [s * 0.42, -0.14, 0.47], [0.15, 0.09, 0.03], [0, s * 0.5, 0]);
   }
 
-  // Angry purple eyes with slanted lids and brows
+  // Big purple eyes
   for (const s of [-1, 1]) {
     const eye = new THREE.Group();
     eye.position.set(s * 0.25, -0.03, 0.53);
@@ -56,10 +56,9 @@ export function buildDoro() {
     add(eye, sphere, M(0x241a38), [0, -0.01, 0.045], [0.065, 0.07, 0.03]);
     add(eye, sphere, M(0xffffff, { emissive: 0xffffff, emissiveIntensity: 0.6 }), [-0.04, 0.04, 0.07], [0.04, 0.04, 0.02]);
     add(eye, sphere, M(0xffffff), [0.045, -0.06, 0.07], [0.022, 0.022, 0.012]);
-    // Slanted upper lid: inner end lower = angry
-    add(eye, sphere, M(C.line), [0, 0.1, 0.035], [0.2, 0.05, 0.05], [0, 0, s * 0.5]);
-    // Thick brow above it
-    add(head, box, M(C.hairDark), [s * 0.25, 0.17, 0.55], [0.2, 0.045, 0.03], [0, s * 0.3, s * 0.5]);
+    // Soft upper lid and a relaxed brow: outer ends slightly lower = friendly
+    add(eye, sphere, M(C.line), [0, 0.13, 0.035], [0.2, 0.04, 0.05], [0, 0, s * -0.15]);
+    add(head, box, M(C.hairDark), [s * 0.25, 0.2, 0.55], [0.2, 0.04, 0.03], [0, s * 0.3, s * -0.2]);
   }
 
   // Pouty "v" mouth
@@ -74,6 +73,7 @@ export function buildDoro() {
   }
   add(head, sphere, M(C.hair), [0, -0.02, -0.2], [0.72, 0.62, 0.62]);
   for (const s of [-1, 1]) {
+    add(head, sphere, M(C.hair), [s * 0.58, 0.1, 0.1], [0.17, 0.34, 0.34]);   // temples, so the sides are not bald
     add(head, new THREE.CapsuleGeometry(0.1, 0.5, 8, 16), M(C.hair), [s * 0.64, -0.22, 0.18], [1, 1, 1], [0.08, 0, s * -0.12]);
     add(head, sphere, M(C.hairDark), [s * 0.62, -0.5, 0.2], [0.09, 0.1, 0.08]);
   }

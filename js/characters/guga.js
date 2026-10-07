@@ -11,7 +11,7 @@ export function buildGuga() {
 
   // Short dark legs and orange webbed feet
   for (const leg of legs) {
-    add(leg, cyl, M(C.suit), [0, -0.14, 0], [0.1, 0.13, 0.1]);
+    add(leg, cyl, M(C.suit), [0, -0.23, 0], [0.1, 0.38, 0.1]);   // reaches down to the foot
     add(leg, sphere, M(C.feet), [0, -0.44, 0.1], [0.15, 0.05, 0.22]);
   }
 
