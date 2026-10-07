@@ -9,6 +9,7 @@ const DEFAULTS = {
   aimSensitivity: 1,              // extra multiplier while aiming by dragging the fire button (touch)
   touchOpacity: OPACITY_RANGE.max,
   touchLayout: {},                // id -> { x, y, size } of the controls the player moved or resized
+  hudBarPos: null,                // { x, y } center (% of the screen) of the layout editor's toolbar, null = default
 };
 
 export const settings = { ...DEFAULTS };
@@ -21,6 +22,7 @@ try {
   settings.aimSensitivity = clampTo(saved.aimSensitivity, SENSITIVITY_RANGE, DEFAULTS.aimSensitivity);
   settings.touchOpacity = clampTo(saved.touchOpacity, OPACITY_RANGE, DEFAULTS.touchOpacity);
   if (saved.touchLayout && typeof saved.touchLayout === 'object') settings.touchLayout = saved.touchLayout;
+  if ([saved.hudBarPos?.x, saved.hudBarPos?.y].every(Number.isFinite)) settings.hudBarPos = saved.hudBarPos;
 } catch { /* use defaults */ }
 
 export function setSetting(key, value) {
@@ -31,4 +33,5 @@ export function setSetting(key, value) {
 export function resetTouchSettings() {
   setSetting('touchLayout', DEFAULTS.touchLayout);
   setSetting('touchOpacity', DEFAULTS.touchOpacity);
+  setSetting('hudBarPos', DEFAULTS.hudBarPos);
 }

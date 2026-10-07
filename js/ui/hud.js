@@ -1,6 +1,7 @@
 import { WEAPONS, WEAPON_ORDER } from '../game/weapons.js';
 import { MATCH, HUD } from '../config.js';
 import { t } from '../i18n.js';
+import { formatTime } from '../utils.js';
 import { toggleFullscreen } from '../fullscreen.js';
 import { settings, setSetting, SENSITIVITY_RANGE } from '../settings.js';
 import { CHARACTERS } from '../characters/index.js';
@@ -13,7 +14,7 @@ const el = {
   scoreP: $('sc-p'), scoreE: $('sc-e'), toast: $('toast'),
   slots: $('slots'), ammo: $('ammo'), reloadNote: $('reload-note'), reloadIcon: $('reload-icon'),
   crosshair: $('crosshair'), scope: $('scope'), hit: $('hitmarker'), hitText: $('hit-text'),
-  banner: $('banner'), changePanel: $('change-panel'), changePickers: $('change-pickers'), weaponFlash: $('weapon-flash'), score: $('score'), pause: $('pause'), vignette: $('vignette'),
+  banner: $('banner'), changePanel: $('change-panel'), changePickers: $('change-pickers'), weaponFlash: $('weapon-flash'), score: $('score'), timer: $('timer'), result: $('result'), resultTitle: $('result-title'), resultScore: $('result-score'), pause: $('pause'), vignette: $('vignette'),
 };
 
 // Sensitivity sliders in the pause menu
@@ -49,6 +50,7 @@ export const hud = {
     el.ePortrait.src = thumbnail(enemyDef);
     el.slots.innerHTML = WEAPON_ORDER.map((id, i) => `<div class="slot" data-id="${id}"><b>${i + 1}</b> ${t('weapon.' + id)}</div>`).join('');
     lastKey = '';
+    el.result.style.display = 'none';
     this.banner('', 0);
     this.toast('', 0);
     clearTimeout(flashTimer);
@@ -69,6 +71,8 @@ export const hud = {
     const key = `${player.weaponId}|${player.ammoNow}|${player.reloading}`;
     if (key === lastKey) return;
     lastKey = key;
+    const weaponBtn = $('t-weapon');   // touch only: the button shows the weapon in hand
+    if (weaponBtn) weaponBtn.innerHTML = weaponIcon(player.weaponId);
     el.ammo.textContent = player.training ? `∞ / ${w.mag}` : `${player.ammoNow} / ${w.mag}`;
     el.reloadNote.textContent = player.reloading ? t('reloading') : player.ammoNow === 0 ? t('noAmmo') : '';
     el.slots.querySelectorAll('.slot').forEach(s => s.classList.toggle('active', s.dataset.id === player.weaponId));
@@ -77,6 +81,21 @@ export const hud = {
   setScore(player, enemy) {
     el.scoreP.textContent = player;
     el.scoreE.textContent = enemy;
+  },
+
+  // duration: match length in seconds (0 = unlimited, null = no timer at all). Shows the time left.
+  setTimer(duration, left) {
+    const shown = duration === null ? '' : duration ? formatTime(Math.ceil(left)) : '∞';
+    el.timer.classList.toggle('off', !duration);   // unlimited matches hide it (the HUD editor still shows it)
+    el.score.classList.toggle('below-timer', duration !== null);
+    if (el.timer.textContent !== shown) el.timer.textContent = shown;
+    el.timer.classList.toggle('low', !!duration && left <= HUD.timerWarnSeconds);
+  },
+
+  showResult(result, player, enemy) {
+    el.resultTitle.textContent = t('result.' + result);
+    el.resultScore.textContent = `${player} × ${enemy}`;
+    el.result.style.display = 'flex';
   },
 
   // on: aiming. sniper: the full scope view (black mask) instead of a tighter crosshair
@@ -117,7 +136,7 @@ export const hud = {
 
   // Training hides the score and the crosshair is a plain dot for the AWP
   setTraining(on) {
-    el.score.style.display = on ? 'none' : '';
+    el.score.classList.toggle('off', on);
     document.querySelector('.plate.right').style.display = on ? 'none' : '';
     el.changePanel.style.display = on ? 'flex' : 'none';
     el.changePickers.classList.remove('open');
@@ -150,5 +169,5 @@ export const hud = {
     $('btn-resume').onclick = fn;
     $('btn-fs-pause').onclick = toggleFullscreen;
   },
-  onQuit(fn) { $('btn-quit').onclick = fn; },
+  onQuit(fn) { $('btn-quit').onclick = $('btn-result-quit').onclick = fn; },
 };

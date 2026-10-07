@@ -35,11 +35,12 @@
       <div id="pick-enemy" class="picker"></div>
     </div>
   </div>
+  <h3 class="section" data-i18n="section.map"></h3>
   <div class="maps" id="pick-map"></div>
   <div class="modes">
-    <button id="btn-start" class="primary" data-i18n="mode.duel"></button>
-    <button id="btn-train" class="primary alt" data-i18n="mode.training"></button>
-    <button id="btn-multi" class="primary alt" data-i18n="mode.multi"></button>
+    <button id="btn-start" class="mode main"><i>⚔️</i><b data-i18n="mode.duel"></b><span data-i18n="mode.duel.desc"></span></button>
+    <button id="btn-train" class="mode"><i>🎯</i><b data-i18n="mode.training"></b><span data-i18n="mode.training.desc"></span></button>
+    <button id="btn-multi" class="mode"><i>🌐</i><b data-i18n="mode.multi"></b><span data-i18n="mode.multi.desc"></span></button>
   </div>
   <p class="help" data-i18n="help"></p>
 </section>
@@ -93,6 +94,7 @@
   <div id="banner"></div>
   <div id="weapon-flash"></div>
 
+  <div id="timer"></div>
   <div id="score"><b id="sc-p">0</b><span>×</span><b id="sc-e">0</b></div>
   <div id="toast"></div>
   <div id="reload-icon"><svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></div>
@@ -107,6 +109,12 @@
   </div>
 
   <div id="touch"></div>
+
+  <div id="result" class="overlay">
+    <h2 id="result-title"></h2>
+    <div id="result-score"></div>
+    <button id="btn-result-quit" class="primary" data-i18n="pause.quit"></button>
+  </div>
 
   <div id="pause" class="overlay">
     <h2 data-i18n="pause.title"></h2>
@@ -133,6 +141,14 @@
     <button id="btn-quit" data-i18n="pause.quit"></button>
   </div>
 </section>
+
+<!-- Match type dialog: asked before a 1v1 or an online match -->
+<div id="match-dialog" class="hidden">
+  <div class="dialog-box">
+    <h2 data-i18n="matchDialog.title"></h2>
+    <div id="match-options"></div>
+  </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script type="importmap">

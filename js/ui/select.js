@@ -3,6 +3,7 @@ import { thumbnail } from './thumbnails.js';
 import { sfx } from '../audio.js';
 import { MAP_LIST } from '../maps.js';
 import { toggleFullscreen } from '../fullscreen.js';
+import { askMatchDuration } from './match-dialog.js';
 import { t, applyI18n, setLang, getLang, LANGS, onLangChange } from '../i18n.js';
 
 // Character select screen: pick your fighter and your enemy, then start
@@ -42,13 +43,11 @@ export function initSelect({ onStart, onMultiplayer }) {
     renderMaps();
   }
 
-  const begin = mode => () => {
-    sfx.unlock();
-    sfx.click();
-    onStart(getCharacter(state.player), getCharacter(state.enemy), mode, state.map);
+  const begin = (mode, duration = 0) => {
+    onStart(getCharacter(state.player), getCharacter(state.enemy), mode, state.map, duration);
   };
-  $('btn-start').onclick = begin('duel');
-  $('btn-train').onclick = begin('training');
+  $('btn-start').onclick = () => { sfx.unlock(); sfx.click(); askMatchDuration(seconds => begin('duel', seconds)); };
+  $('btn-train').onclick = () => { sfx.unlock(); sfx.click(); begin('training'); };
   $('btn-multi').onclick = () => { sfx.unlock(); sfx.click(); onMultiplayer(); };
   // Training shows every character, so the enemy choice does not matter: dim it while Training is hovered
   const screen = $('screen-select');

@@ -35,3 +35,7 @@ export function lerpAngle(a, b, k) {
   if (d < -Math.PI) d += Math.PI * 2;
   return a + d * k;
 }
+
+
+// Whole seconds as m:ss
+export const formatTime = s => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;

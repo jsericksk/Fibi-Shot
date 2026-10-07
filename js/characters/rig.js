@@ -71,7 +71,7 @@ export function setIdlePose(rig) {
 
 // Big anime eyes, eyebrows, blush and mouth, attached to the head group
 export function addEyes(head, o = {}) {
-  const { outer = 0x5a3fb5, inner = 0x9a84f0, lidY = 0.13, lidSY = 0.06, brow = 0x4a3a30, mouth = 'smile', blush = 0.8 } = o;
+  const { outer = 0x5a3fb5, inner = 0x9a84f0, lidY = 0.17, lidSY = 0.032, brow = 0x4a3a30, mouth = 'smile', blush = 0.8 } = o;
   for (const s of [-1, 1]) {
     const eye = new THREE.Group();
     eye.position.set(s * 0.24, -0.04, 0.5);
@@ -84,7 +84,7 @@ export function addEyes(head, o = {}) {
     add(eye, sphere, M(0xffffff), [0.05, -0.07, 0.07], [0.03, 0.03, 0.015]);
     add(eye, sphere, M(0xffffff, { emissive: 0xffffff, emissiveIntensity: 0.4 }), [-0.07, -0.03, 0.065], [0.016, 0.016, 0.012]);
     add(eye, sphere, M(0x25222e), [0, lidY, 0.02], [0.2, lidSY, 0.05]); // upper eyelid
-    add(head, box, M(brow), [s * 0.26, 0.21, 0.5], [0.15, 0.035, 0.03], [0, s * 0.35, s * -0.15]);
+    add(head, box, M(brow), [s * 0.26, 0.24, 0.5], [0.15, 0.035, 0.03], [0, s * 0.35, s * -0.15]);
     if (blush > 0) add(head, sphere, M(0xffa9b4, { transparent: true, opacity: blush }), [s * 0.35, -0.2, 0.44], [0.12, 0.07, 0.03], [0, s * 0.6, 0]);
   }
   if (mouth === 'smile') add(head, sphere, M(0xb24a5a), [0, -0.24, 0.55], [0.045, 0.03, 0.02]);

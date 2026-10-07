@@ -8,6 +8,7 @@
 const { sin: s, cos: c, abs, PI, min, max } = Math;
 const ease = x => { const k = min(1, max(0, x)); return k * k * (3 - 2 * k); };   // smoothstep, clamped to 0..1
 const SIDE = [-1, 1];
+const FLIP_CENTER = 0.6;   // height of the body's middle: somersaults spin around it, not around the feet
 
 // Neutral starting pose; each dance then overrides what it needs
 function reset({ model, legs, arms, head }) {
@@ -24,8 +25,18 @@ function armsPose(rig, left, right) {
   rig.arms[1].rotation.set(right[0], 0, right[1]);
 }
 
+// One full backward somersault for f in 0..1, rotating around the middle of the body (not the feet)
+function backSomersault({ model, legs, head, arms }, f) {
+  const air = s(f * PI), turn = -ease(f) * PI * 2, mid = FLIP_CENTER;
+  model.rotation.x = turn;
+  model.position.set(0, mid - mid * c(turn) + air * 0.9, -mid * s(turn));
+  legs[0].rotation.x = legs[1].rotation.x = -1.3 * air;                  // knees tucked
+  arms.forEach((a, i) => a.rotation.set(-2.8 + 1.6 * air, 0, SIDE[i] * 0.3));   // arms up, hugging the knees mid-air
+  head.rotation.set(0.3 * air, 0, 0);
+}
+
 export const DANCES = {
-  // Fibi: ballet show (7 s) - curtsy, pirouettes, arabesque, grand jetes, final curtsy
+  // Fibi: ballet show (7 s) - curtsy, pirouettes, arabesque, backflip, final curtsy
   ballet(rig, t) {
     reset(rig);
     const { model, legs, arms, head } = rig;
@@ -54,14 +65,7 @@ export const DANCES = {
       armsPose(rig, [-1.6 * k - 0.3 * (1 - k), 0.2], [1.1 * k, 0.5]);
       head.rotation.set(-0.35 * k, 0, 0);
     } else if (t < 6.3) {
-      // Two grand jetes: big leaps in a split
-      const v = (t - 5) / 1.3, h = abs(s(v * PI * 2));
-      model.position.y = h * 0.6;
-      model.rotation.x = -0.15 * h;
-      legs[0].rotation.x = -1.25 * h;
-      legs[1].rotation.x = 1.25 * h;
-      armsPose(rig, [-2.5, 0.9], [-2.5, 0.9]);
-      head.rotation.set(-0.2 * h, 0, 0);
+      backSomersault(rig, min(1, (t - 5) / 1.2));      // backflip
     } else {
       // Final curtsy, holding the bow
       const w = ease((t - 6.3) / 0.3);
@@ -145,5 +149,73 @@ export const DANCES = {
     legs[0].rotation.x = s(t * 12) * 1.1;
     legs[1].rotation.x = -s(t * 12) * 1.1;
     head.rotation.set(0, 0, s(t * 6) * 0.35);
+  },
+
+  // Mambo 1: backflip show (7.3 s) - sway, crouch, backflip at about 4 s, celebration, final pose
+  backflip(rig, t) {
+    reset(rig);
+    const { model, legs, head } = rig;
+    const flip = f => backSomersault(rig, f);
+    // Squat to jump, or to absorb the landing
+    const crouch = w => {
+      model.rotation.x = 0.25 * w;
+      model.position.y = -0.14 * w;
+      legs[0].rotation.z = -0.15 * w; legs[1].rotation.z = 0.15 * w;
+      armsPose(rig, [0.5 * w, 0.3], [0.5 * w, 0.3]);
+    };
+    // The somersault happens at about 4 s (it peaks at 4.0)
+    const sway = t0 => {                                               // sway with the arms waving up and down
+      const p = s((t - t0) * 7);
+      model.rotation.z = p * 0.15;
+      model.position.y = abs(p) * 0.05;
+      armsPose(rig, p > 0 ? [-2.6, 0.5] : [-0.3, 0.7], p > 0 ? [-0.3, 0.7] : [-2.6, 0.5]);
+      head.rotation.set(0, 0, -p * 0.2);
+    };
+    if (t < 2.6) sway(0);
+    else if (t < 3.4) crouch(ease((t - 2.6) / 0.8));
+    else if (t < 4.6) flip((t - 3.4) / 1.2);
+    else if (t < 4.9) crouch(s(((t - 4.6) / 0.3) * PI));              // landing
+    else if (t < 6.4) sway(4.9);
+    else {
+      const w = ease((t - 6.4) / 0.3);                                 // final pose: one arm up, the other on the hip
+      model.rotation.z = 0.1 * w;
+      armsPose(rig, [-2.9 * w, 0.4 * w + 0.2], [0, 0.7 * w + 0.2]);
+      head.rotation.set(0, 0, -0.2 * w);
+    }
+  },
+
+  // Mambo 2: horse routine (8.5 s) - trot, hip shake, gallop hops, rears up (holds the pose)
+  gallop(rig, t) {
+    reset(rig);
+    const { model, legs, head } = rig;
+    if (t < 2.5) {
+      const ph = t * 9, p = s(ph);
+      legs[0].rotation.x = -max(0, p) * 1.1;             // high knees, one leg at a time
+      legs[1].rotation.x = max(0, -p) * -1.1;
+      model.position.y = abs(p) * 0.08;
+      armsPose(rig, [-1.2 + p * 0.5, 0.2], [-1.2 - p * 0.5, 0.2]);   // arms bent like reins
+      head.rotation.set(0.12 * c(ph * 2), 0, 0);
+    } else if (t < 5) {
+      const ph = (t - 2.5) * 8, p = s(ph);
+      model.rotation.z = p * 0.22;                       // hip shake
+      model.position.y = abs(s(ph * 2)) * 0.05;
+      legs[0].rotation.z = -0.2 * abs(p); legs[1].rotation.z = 0.2 * abs(p);
+      armsPose(rig, [-2.7, 0.3 + 0.3 * p], [-2.7, 0.3 - 0.3 * p]);   // hands up, swaying
+      head.rotation.set(0, 0, -p * 0.25);
+    } else if (t < 7) {
+      const u = (t - 5) / 2, ph = u * PI * 6, p = s(ph);
+      model.rotation.x = 0.25;
+      model.position.y = abs(p) * 0.4;                   // gallop hops
+      legs[0].rotation.x = -0.9 * max(0, p); legs[1].rotation.x = -0.9 * max(0, -p);
+      armsPose(rig, [0.5, 0.2], [0.5, 0.2]);             // arms swept back
+      head.rotation.set(-0.2, 0, 0);
+    } else {
+      const w = ease((t - 7) / 0.4);                     // rears up, one hand to the sky
+      model.rotation.x = -0.3 * w;
+      model.position.y = 0.05 * w;
+      legs[0].rotation.x = legs[1].rotation.x = 0.15 * w;
+      armsPose(rig, [-1.3 * w, 0.4 * w], [-3.0 * w, 0.3 * w]);
+      head.rotation.set(-0.3 * w, 0, 0);
+    }
   },
 };

@@ -9,13 +9,14 @@ export const MATCH = {
   spawnProtection: 1.5,       // invulnerability after spawning
   minSpawnDistance: 20,       // respawn spots are at least this far from the other fighter
   maxHp: 100,
-  enemyDamageScale: 0.5,      // enemy hits softer so the match is fair (1 = same as player)
   bulletRange: 140,           // hitscan max distance
+  timedSeconds: 300,          // length of the timed match (the other option is unlimited)
 };
 
 // ---- World -----------------------------------------------------------------
 export const WORLD = {
   arenaHalf: 30,              // map is a square of (2 * arenaHalf) meters
+  gravity: 10,                // same floaty, moon-like jump on every map
   fighterRadius: 0.45,        // collision radius
   stepUp: 0.35,               // max height difference walked onto without jumping
 };
@@ -27,6 +28,7 @@ export const CAMERA = {
   distance: 4.2,              // over-the-shoulder boom length
   shoulder: 1.05,             // sideways offset
   height: 1.95,
+  scopeForward: 0.35,         // sniper scope view sits this far ahead of the shoulder point
   scopeZoomRate: 45,          // higher = snappier scope (quick scope)
   orbitDistance: 3.4,         // Alt-look camera distance
 };
@@ -34,7 +36,7 @@ export const CAMERA = {
 // ---- Player ----------------------------------------------------------------
 export const PLAYER = {
   sensitivity: 0.0022,
-  walkSpeed: 6,
+  walkSpeed: 7.5,
   jumpSpeed: 8.2,
   // Extra spread (radians) when moving
   moveSpread: 0.002,          // normal weapons
@@ -44,7 +46,7 @@ export const PLAYER = {
 
 // ---- Emotes (H key) ----------------------------------------------------------
 // Each character has its own emotes; one is picked at random when pressing H.
-// dance: animation name from js/characters/dances.js (ballet, idol, penguin, flail) | duration: seconds | sound: mp3 in audio/emotes
+// dance: animation name from js/characters/dances.js (ballet, idol, penguin, flail, backflip, gallop) | duration: seconds | sound: mp3 in audio/emotes
 export const EMOTES = {
   fibi: [
     { dance: 'ballet', duration: 7, sound: 'audio/emotes/fibi-emote-1.mp3' },
@@ -52,6 +54,10 @@ export const EMOTES = {
   ],
   guga: [{ dance: 'penguin', duration: 5, sound: 'audio/emotes/guga-emote-1.mp3' }],
   nono: [{ dance: 'flail', duration: 5, sound: 'audio/emotes/nono-emote-1.mp3' }],
+  mambo: [
+    { dance: 'backflip', duration: 7.3, sound: 'audio/emotes/mambo-1.mp3' },
+    { dance: 'gallop', duration: 8.5, sound: 'audio/emotes/mambo-2.mp3' },
+  ],
   default: [{ dance: 'idol', duration: 5, sound: null }],   // characters without their own emotes
 };
 export const EMOTE = {
@@ -62,18 +68,20 @@ export const EMOTE = {
 
 // ---- HUD -------------------------------------------------------------------
 export const HUD = {
-  weaponIconSeconds: 1.5,     // weapon icon shown in the center after switching
+  weaponIconSeconds: 0.3,     // weapon icon shown in the center after switching
   hitMarkerMs: 350,
+  timerWarnSeconds: 30,       // the timer turns red in the last seconds
   fullscreenSwitchMs: 600,    // the browser drops the mouse lock during a fullscreen change; unlocks in this window are not a pause
 };
 
 // ---- Touch controls --------------------------------------------------------
 export const TOUCH = {
   lookSensitivity: 1.6,       // finger drags turn faster than the mouse
+  weaponSwipe: 24,            // px of sliding on the weapon button to step to the next weapon
   joystickDeadZone: 0.15,     // fraction of the stick radius that is ignored
   joystickZone: 42,           // % of the screen width (from the left) where a touch starts the stick
   sizeRange: { min: 40, max: 180, step: 2 },   // px, for the layout editor
-  sizeRanges: { ammo: { min: 14, max: 48, step: 1 } },   // controls that need their own range
+  sizeRanges: { ammo: { min: 14, max: 48, step: 1 }, timer: { min: 14, max: 48, step: 1 }, score: { min: 10, max: 40, step: 1 } },   // controls that need their own range
   // Center of each control in % of the screen, and its size in px
   layout: {
     joystick: { x: 13, y: 80, size: 110 },
@@ -85,19 +93,22 @@ export const TOUCH = {
     emote: { x: 64, y: 30, size: 52 },
     pause: { x: 6, y: 32, size: 44 },
     ammo: { x: 50, y: 92, size: 22 },   // size is the font size in px
+    timer: { x: 50, y: 5, size: 22 },   // font size in px too
+    score: { x: 50, y: 14, size: 16 },  // kills, font size in px too
   },
 };
 
 // ---- Enemy AI --------------------------------------------------------------
 export const ENEMY = {
-  speed: 4.2,
   minRange: 8,                // backs off when closer than this
   maxRange: 22,               // chases when farther than this
-  awpCharge: 0.85,            // seconds the AWP laser shows before the shot
-  firstShotDelay: 1.5,
+  awpCharge: 0.7,            // seconds the AWP glints before the shot
+  firstShotDelay: 1.0,
+  noticeAimDot: 0.99,         // a dancing bot stops when the player scopes within this (cosine) of it
+  tauntChance: 0.35,          // odds of dancing to taunt after killing the player
   jumpEvery: [2.5, 6],        // seconds between random hops while moving
-  awpCounterChance: 0.7,      // when the player uses the AWP, odds the bot picks it too
-  aimError: { pistol: 0.05, ak47: 0.07, awp: 0.03, shotgun: 0.04 },     // radians, lower is more accurate
+  awpCounterChance: 0.8,      // when the player uses the AWP, odds the bot picks it too
+  aimError: { pistol: 0.035, ak47: 0.05, awp: 0.02, shotgun: 0.03 },     // radians, lower is more accurate
   fireRange: { pistol: 26, ak47: 34, awp: 70, shotgun: 14 },          // meters
 };
 
@@ -129,11 +140,11 @@ export const SHOWCASE = {
 // speed = walking speed while aiming, sniper = full scope view (black mask) instead of the normal crosshair
 // pellets/pelletSpread: shotgun fires this many rays inside a cone (radians); `damage` is per pellet
 // falloff: damage multiplier goes from 1 at `start` meters down to `min` at `end` meters (and stays there)
-const LIGHT_AIM = { fov: 50, spread: 0, speed: 4 };   // a small zoom, shots land exactly on the crosshair
+const LIGHT_AIM = { fov: 50, spread: 0, speed: 5 };   // a small zoom, shots land exactly on the crosshair
 
 export const WEAPON_STATS = {
   pistol: { id: 'pistol', name: 'Pistola', damage: 24, headMult: 2, interval: 0.3, auto: false, mag: 12, reload: 1.1, spread: 0.004, bloom: 0.006, bloomMax: 0.03, recoil: 0.016, scoped: LIGHT_AIM },
   ak47: { id: 'ak47', name: 'AK-47', damage: 14, headMult: 2.2, interval: 0.1, auto: true, mag: 30, reload: 1.9, spread: 0.0008, bloom: 0.0015, bloomMax: 0.01, recoil: 0.014, scoped: LIGHT_AIM },
   shotgun: { id: 'shotgun', name: 'Escopeta', damage: 9, headMult: 1.5, interval: 0.9, auto: false, mag: 6, reload: 2.4, spread: 0.004, bloom: 0, bloomMax: 0, recoil: 0.06, pellets: 8, pelletSpread: 0.055, falloff: { start: 5, end: 20, min: 0.08 }, scoped: LIGHT_AIM },
-  awp: { id: 'awp', name: 'AWP', damage: 90, headMult: 2, interval: 0.8, auto: false, mag: 5, reload: 2.4, spread: 0.06, bloom: 0, bloomMax: 0, recoil: 0.07, scoped: { fov: 18, spread: 0, speed: 2.6, sniper: true } },
+  awp: { id: 'awp', name: 'AWP', damage: 90, headMult: 2, interval: 0.8, auto: false, mag: 5, reload: 2.4, spread: 0.06, bloom: 0, bloomMax: 0, recoil: 0.07, scoped: { fov: 18, spread: 0, speed: 3.2, sniper: true } },
 };

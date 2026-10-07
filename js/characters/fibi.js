@@ -11,7 +11,7 @@ export function buildFibi() {
 
   // Striped socks and shoes
   for (const leg of legs) {
-    [-0.07, -0.19, -0.31].forEach((y, i) => add(leg, cyl, M(i % 2 ? C.white : C.black), [0, y, 0], [0.1, 0.06, 0.1]));
+    [-0.07, -0.19, -0.31].forEach((y, i) => add(leg, cyl, M(i % 2 ? C.white : C.black), [0, y, 0], [0.1, 0.12, 0.1]));   // stripes touch, so the sock is one solid tube
     add(leg, sphere, M(C.black), [0, -0.44, 0.07], [0.13, 0.08, 0.2]);
   }
 
@@ -44,7 +44,8 @@ export function buildFibi() {
   // Volume under the hat. Kept narrower than the hat dome so no blonde shows through.
   add(head, sphere, M(C.hair), [0, 0.28, -0.1], [0.52, 0.48, 0.52]);
   for (const s of [-1, 1]) {
-    add(head, new THREE.CapsuleGeometry(0.14, 0.4, 8, 16), M(C.hair), [s * 0.58, -0.32, 0.1], [1, 1, 1], [0, 0, s * -0.08]);
+    add(head, sphere, M(C.hair), [s * 0.5, 0.12, 0.08], [0.17, 0.34, 0.34]);   // temples, so the sides are not bald
+    add(head, new THREE.CapsuleGeometry(0.15, 0.5, 8, 16), M(C.hair), [s * 0.58, -0.22, 0.1], [1, 1, 1], [0, 0, s * -0.08]);
   }
 
   // Blue X hairclip and black ribbon

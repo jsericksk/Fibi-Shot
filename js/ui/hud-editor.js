@@ -13,6 +13,7 @@ export function initHudEditor(game) {
   root.id = 'hud-editor';
   root.innerHTML = `
     <div id="hud-bar">
+      <i id="hud-grip">⠿</i>
       <label><span data-i18n="hud.size"></span><input id="hud-size" type="range"></label>
       <label><span data-i18n="hud.opacity"></span><input id="hud-opacity" type="range"></label>
       <button id="hud-reset" data-i18n="hud.reset"></button>
@@ -25,8 +26,10 @@ export function initHudEditor(game) {
   Object.assign(size, TOUCH.sizeRange);
   Object.assign(opacity, OPACITY_RANGE);
 
+  const bar = $('hud-bar');
   let selected = null;
   let grab = null;   // finger offset from the center of the dragged control
+  let barGrab = null;   // the same for the toolbar
 
   function select(id) {
     selected = id;
@@ -54,8 +57,28 @@ export function initHudEditor(game) {
     return best;
   }
 
+  // The toolbar moves too, to free the top of the screen. Its spot is saved like the controls'.
+  function placeBar() {
+    const pos = settings.hudBarPos;
+    Object.assign(bar.style, pos ? { left: pos.x + '%', top: pos.y + '%', transform: 'translate(-50%, -50%)' } : { left: '', top: '', transform: '' });
+  }
+
+  function moveBar(e) {
+    const { width, height } = bar.getBoundingClientRect();
+    const cx = clamp(e.clientX - barGrab.dx, width / 2, innerWidth - width / 2);
+    const cy = clamp(e.clientY - barGrab.dy, height / 2, innerHeight - height / 2);
+    setSetting('hudBarPos', { x: (cx / innerWidth) * 100, y: (cy / innerHeight) * 100 });
+    placeBar();
+  }
+
   root.addEventListener('pointerdown', e => {
-    if (e.target.closest('#hud-bar')) return;
+    if (e.target.closest('#hud-bar')) {
+      if (e.target.closest('input, button, label')) return;
+      const r = bar.getBoundingClientRect();
+      barGrab = { id: e.pointerId, dx: e.clientX - (r.left + r.width / 2), dy: e.clientY - (r.top + r.height / 2) };
+      root.setPointerCapture(e.pointerId);
+      return;
+    }
     select(controlAt(e.clientX, e.clientY));
     if (!selected) return;
     const r = controlEl(selected).getBoundingClientRect();
@@ -63,13 +86,17 @@ export function initHudEditor(game) {
     root.setPointerCapture(e.pointerId);
   });
   root.addEventListener('pointermove', e => {
+    if (barGrab && e.pointerId === barGrab.id) return moveBar(e);
     if (!grab || e.pointerId !== grab.id) return;
     const r = controlEl(selected).getBoundingClientRect();
     const cx = clamp(e.clientX - grab.dx, r.width / 2, innerWidth - r.width / 2);   // keep the whole control on screen
     const cy = clamp(e.clientY - grab.dy, r.height / 2, innerHeight - r.height / 2);
     setSpot(selected, { ...layoutOf(selected), x: (cx / innerWidth) * 100, y: (cy / innerHeight) * 100 });
   });
-  const release = e => { if (grab && e.pointerId === grab.id) grab = null; };
+  const release = e => {
+    if (grab && e.pointerId === grab.id) grab = null;
+    if (barGrab && e.pointerId === barGrab.id) barGrab = null;
+  };
   root.addEventListener('pointerup', release);
   root.addEventListener('pointercancel', release);
 
@@ -79,6 +106,7 @@ export function initHudEditor(game) {
     resetTouchSettings();
     opacity.value = settings.touchOpacity;
     placeAll();
+    placeBar();
     select(null);
   };
 
@@ -87,6 +115,7 @@ export function initHudEditor(game) {
     select(null);
     game.hud.showPause(false);   // the game stays paused behind the editor
     document.body.classList.add('hud-editing');
+    placeBar();
   };
   $('hud-done').onclick = () => {
     select(null);

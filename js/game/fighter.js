@@ -94,6 +94,11 @@ export class Fighter {
     return true;
   }
 
+  // Shooting interrupts a reload as long as there are bullets left
+  cancelReload() {
+    if (this.reloading && this.ammoNow > 0) this.reloading = false;
+  }
+
   update(dt) {
     this.cooldown -= dt;
     this.invuln = Math.max(0, this.invuln - dt);
