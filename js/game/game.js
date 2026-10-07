@@ -329,8 +329,7 @@ export class Game {
     const other = f.isPlayer ? this.enemy : this.player;
     this.place(f, other);
     f.invuln = MATCH.spawnProtection;
-    if (f.isPlayer) this.hud.toast('', 0);
-    else this.bots.find(b => b.f === f)?.onRespawn();
+    if (!f.isPlayer) this.bots.find(b => b.f === f)?.onRespawn();
   }
 
   // True when no cover is between two points
@@ -429,11 +428,9 @@ export class Game {
     if (victim.isPlayer) {
       this.controls.setScope(false);
       this.controls.mouseDown = false;
-      this.hud.toast(t('toast.killedYou', { name: killer.def.name }), 0);
       if (!this.multi) this.bots.find(b => b.f === killer)?.taunt();
       sfx.lose();
     } else {
-      this.hud.toast(t('toast.youKilled', { name: victim.def.name }), 1800);
       sfx.win();
     }
   }
