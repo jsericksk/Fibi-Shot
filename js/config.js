@@ -84,15 +84,15 @@ export const TOUCH = {
   sizeRanges: { ammo: { min: 14, max: 48, step: 1 }, timer: { min: 14, max: 48, step: 1 }, score: { min: 10, max: 40, step: 1 } },   // controls that need their own range
   // Center of each control in % of the screen, and its size in px
   layout: {
-    joystick: { x: 13, y: 80, size: 110 },
-    fire: { x: 88, y: 64, size: 100 },
-    jump: { x: 74, y: 80, size: 68 },
-    scope: { x: 76, y: 52, size: 60 },
-    weapon: { x: 36, y: 86, size: 56 },
-    reload: { x: 95, y: 36, size: 56 },
-    emote: { x: 64, y: 30, size: 52 },
+    joystick: { x: 15.5, y: 79, size: 110 },
+    fire: { x: 86.5, y: 62, size: 100 },
+    jump: { x: 87, y: 90, size: 68 },
+    scope: { x: 96, y: 47.5, size: 60 },
+    weapon: { x: 70.5, y: 90.5, size: 56 },
+    reload: { x: 96.3, y: 75, size: 56 },
+    emote: { x: 89.5, y: 30, size: 52 },
     pause: { x: 6, y: 32, size: 44 },
-    ammo: { x: 50, y: 92, size: 22 },   // size is the font size in px
+    ammo: { x: 70.5, y: 78.5, size: 20 },   // size is the font size in px
     timer: { x: 50, y: 5, size: 22 },   // font size in px too
     score: { x: 50, y: 14, size: 16 },  // kills, font size in px too
   },

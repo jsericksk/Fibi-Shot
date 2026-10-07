@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { clamp } from '../utils.js';
+import { clamp, isTouch } from '../utils.js';
 import { sfx } from '../audio.js';
 import { toggleFullscreen } from '../fullscreen.js';
 import { settings } from '../settings.js';
@@ -100,9 +100,11 @@ export class PlayerControls {
   }
 
   setMove(right, forward) {
+    // Only a fresh push ends the dance: the stick keeps reporting while it is held
+    const starting = !(this.move.right || this.move.forward) && (right || forward);
     this.move.right = right;
     this.move.forward = forward;
-    if (this.f.emote && (right || forward)) this.f.emote = null;
+    if (this.f.emote && starting) this.f.emote = null;
   }
 
   setFire(down) {
@@ -203,9 +205,10 @@ export class PlayerControls {
   shoot() {
     const f = this.f, w = f.weapon;
     let spread = this.scoped ? w.scoped.spread : w.spread + f.bloom;
-    // Aiming is pinpoint (the AWP quick scope too); otherwise moving costs a hair of accuracy, the AWP more
-    if (f.moving && !this.scoped) spread += w.scoped.sniper ? PLAYER.moveSpreadAwp : PLAYER.moveSpread;
-    if (!f.onGround) spread += PLAYER.airSpread;   // jump shots are inaccurate
+    // Aiming is pinpoint (the AWP quick scope too); otherwise moving costs a hair of accuracy, the AWP more.
+    // Neither move nor jump spread on touch: walking, jumping and shooting already take all the fingers there
+    if (f.moving && !this.scoped && !isTouch) spread += w.scoped.sniper ? PLAYER.moveSpreadAwp : PLAYER.moveSpread;
+    if (!f.onGround && !isTouch) spread += PLAYER.airSpread;   // jump shots are inaccurate
 
     const dir = this.aimDir();
     const right = this.tmp.set(-dir.z, 0, dir.x).normalize();

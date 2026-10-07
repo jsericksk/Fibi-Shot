@@ -85,8 +85,8 @@ export const hud = {
 
   // duration: match length in seconds (0 = unlimited, null = no timer at all). Shows the time left.
   setTimer(duration, left) {
-    const shown = duration === null ? '' : duration ? formatTime(Math.ceil(left)) : '∞';
-    el.timer.classList.toggle('off', !duration);   // unlimited matches hide it (the HUD editor still shows it)
+    const shown = duration ? formatTime(Math.ceil(left)) : '∞';
+    el.timer.classList.toggle('off', !duration);   // unlimited matches and training hide it (the HUD editor still shows it)
     el.score.classList.toggle('below-timer', duration !== null);
     if (el.timer.textContent !== shown) el.timer.textContent = shown;
     el.timer.classList.toggle('low', !!duration && left <= HUD.timerWarnSeconds);
