@@ -115,7 +115,7 @@ export const ENEMY = {
   tauntChance: 0.35,          // odds of dancing to taunt after killing the player
   jumpEvery: [2.5, 6],        // seconds between random hops while moving
   awpCounterChance: 0.8,      // when the player uses the AWP, odds the bot picks it too
-  aimError: { pistol: 0.075, ak47: 0.105, awp: 0.045, shotgun: 0.06 },     // radians, lower is more accurate
+  aimError: { pistol: 0.04, ak47: 0.055, awp: 0.04, shotgun: 0.032 },     // radians, lower is more accurate
   fireRange: { pistol: 26, ak47: 34, awp: 70, shotgun: 14 },          // meters
 };
 
