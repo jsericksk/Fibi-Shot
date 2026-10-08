@@ -64,6 +64,7 @@ export const hud = {
     // Reload icon in the middle of the screen with a progress ring
     const w = player.weapon;
     el.crosshair.classList.toggle('dot', w.id === 'awp');
+    document.body.classList.toggle('sniper', !!w.scoped.sniper);   // !!: toggle() with undefined would flip every frame
     el.crosshair.classList.toggle('hide', !!player.emote);
     el.reloadIcon.style.display = player.reloading ? 'flex' : 'none';
     if (player.reloading) el.reloadIcon.style.setProperty('--p', `${(1 - player.reloadT / w.reload) * 360}deg`);
@@ -101,6 +102,7 @@ export const hud = {
   // on: aiming. sniper: the full scope view (black mask) instead of a tighter crosshair
   setScope(on, sniper = false) {
     el.scope.classList.toggle('on', on && sniper);
+    document.body.classList.toggle('scoped', on);
     el.crosshair.style.display = on && sniper ? 'none' : '';
     el.crosshair.classList.toggle('aim', on && !sniper);
   },

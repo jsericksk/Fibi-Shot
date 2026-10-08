@@ -26,6 +26,7 @@ export class PlayerControls {
     this.move = { right: 0, forward: 0 };   // analog move input (touch joystick), added to the keys
     this.fireQueued = false;
     this.scoped = false;
+    this.unscopeAfterShot = false;
     this.fov = BASE_FOV;
     this.tmp = new THREE.Vector3();
     this.orbit = false;      // Alt held: free camera around the character
@@ -110,6 +111,23 @@ export class PlayerControls {
   setFire(down) {
     this.mouseDown = down;
     if (down) this.fireQueued = true;
+  }
+
+  // Touch fire button: the sniper aims while held and shoots on release, `touchAim` weapons aim and shoot
+  // right away, the others just shoot.
+  aimFire(down) {
+    const w = this.f.weapon, sniper = w.scoped.sniper;
+    if (down) {
+      if (sniper || w.touchAim) this.setScope(true);
+      if (!sniper) this.setFire(true);
+    } else if (sniper && this.scoped) {
+      this.setFire(true);
+      this.setFire(false);
+      this.unscopeAfterShot = true;   // the shot must still happen scoped (pinpoint)
+    } else {
+      this.setFire(false);
+      this.setScope(false);
+    }
   }
 
   toggleScope() {
@@ -199,6 +217,7 @@ export class PlayerControls {
     this.fireQueued = false;
     if (wantFire && canAct) f.cancelReload();
     if (wantFire && canAct && f.canFire()) this.shoot();
+    if (this.unscopeAfterShot) { this.unscopeAfterShot = false; this.setScope(false); }
     if (canAct && f.ammoNow <= 0 && !f.reloading && !f.dead) { f.startReload(); sfx.reload(); this.setScope(false); }
   }
 

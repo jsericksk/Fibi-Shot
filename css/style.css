@@ -293,6 +293,13 @@ button { -webkit-tap-highlight-color: transparent; }
 .tbtn svg { width: 52%; height: 52%; fill: currentColor; filter: drop-shadow(0 2px 0 rgba(0, 0, 0, .6)); pointer-events: none; }
 .tbtn.down { background: var(--accent); }
 #t-fire { background: rgba(224, 24, 45, .55); }
+#t-scope { display: none; }
+.sniper #t-scope, .hud-editing #t-scope { display: flex; }
+.scoped #t-scope svg { display: none; }
+/* The cancel cross is two bars, so it is centered exactly (a text glyph is not) */
+.scoped #t-scope::before, .scoped #t-scope::after { content: ""; position: absolute; left: 50%; top: 50%; width: 46%; height: 4px; border-radius: 2px; background: currentColor; filter: drop-shadow(0 2px 0 rgba(0, 0, 0, .6)); }
+.scoped #t-scope::before { transform: translate(-50%, -50%) rotate(45deg); }
+.scoped #t-scope::after { transform: translate(-50%, -50%) rotate(-45deg); }
 #weapon-menu { position: absolute; display: none; gap: 8px; pointer-events: auto; }
 #weapon-menu.open { display: flex; }
 .wslot { width: 76px; height: 64px; padding: 4px; border: 2px solid rgba(255, 255, 255, .5); border-radius: 12px; background: rgba(0, 0, 0, .65); color: #fff; font-size: 11px; font-weight: 800; }
