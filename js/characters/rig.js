@@ -96,9 +96,10 @@ export function addEyes(head, o = {}) {
 }
 
 // Poses the rig every frame: aim pitch, run cycle, death fall
-export function animateRig(rig, { moving, t, pitch, dead, deadT, air, emote, unarmed }, dt) {
+export function animateRig(rig, { moving, t, pitch, dead, deadT, deathPose, air, emote, unarmed }, dt) {
   const k = Math.min(1, dt * 15);
-  rig.gunMount.visible = !emote && !unarmed;
+  rig.gunMount.visible = !emote && !unarmed && !dead;   // a dead fighter has dropped the weapon
+  if (rig.hat) rig.hat.visible = !dead;                 // and lost the hat, if any
   if (emote && !dead) return danceRig(rig, emote);
   rig.model.rotation.y = rig.model.rotation.z = 0;
   rig.head.rotation.y = rig.head.rotation.z = 0;
@@ -110,10 +111,15 @@ export function animateRig(rig, { moving, t, pitch, dead, deadT, air, emote, una
   rig.head.rotation.x = -clamp(pitch, -1, 1) * 0.35;
 
   if (dead) {
-    // Fall backwards around the feet
-    rig.model.rotation.x += (-1.5 - rig.model.rotation.x) * Math.min(1, dt * 6);
-    rig.model.position.y = 0.12;
-    rig.arms.forEach(a => { a.rotation.x += (-2.4 - a.rotation.x) * k; });
+    // Fall around the feet, onto the back or the belly, then lift the model so it lies on the floor instead of in it
+    rig.aimPivot.rotation.x = 0;
+    rig.model.rotation.x += ((deathPose.faceUp ? -1.5 : 1.5) - rig.model.rotation.x) * Math.min(1, dt * 6);
+    rig.model.position.y = 0;
+    rig.arms.forEach(a => {
+      a.rotation.x += ((deathPose.armsUp ? -2.9 : 0.15) - a.rotation.x) * k;
+      a.rotation.z += (a.userData.side * (deathPose.armsUp ? -0.25 : -0.2) - a.rotation.z) * k;
+    });
+    keepAboveFloor(rig);
   } else {
     rig.model.rotation.x = 0;
     rig.model.position.set(0, moving && !air ? Math.abs(Math.sin(t * 11)) * 0.05 : 0, 0);
@@ -141,11 +147,12 @@ const floorBox = new THREE.Box3();
 
 // Lowest world Y of the visible model (the hidden gun is ignored)
 export function modelMinY(rig) {
-  rig.model.updateWorldMatrix(true, false);
+  rig.model.updateMatrixWorld(true);
   floorBox.makeEmpty();
+  const expandVisible = obj => obj.traverseVisible(o => { if (o.isMesh) floorBox.expandByObject(o); });   // a thrown-off hat does not count
   for (const part of rig.model.children) {
-    if (part === rig.aimPivot) rig.arms.forEach(a => floorBox.expandByObject(a));
-    else floorBox.expandByObject(part);
+    if (part === rig.aimPivot) rig.arms.forEach(expandVisible);
+    else expandVisible(part);
   }
   return floorBox.min.y;
 }

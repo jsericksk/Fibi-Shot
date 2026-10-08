@@ -1,6 +1,7 @@
 import { TOUCH } from '../config.js';
 import { settings, setSetting, resetTouchSettings, OPACITY_RANGE } from '../settings.js';
 import { isTouch, clamp } from '../utils.js';
+import { confirmDialog } from './confirm-dialog.js';
 import { CONTROL_IDS, controlEl, layoutOf, placeAll, sizeRangeOf } from './touch.js';
 
 const $ = id => document.getElementById(id);
@@ -14,10 +15,14 @@ export function initHudEditor(game) {
   root.innerHTML = `
     <div id="hud-bar">
       <i id="hud-grip">⠿</i>
-      <label><span data-i18n="hud.size"></span><input id="hud-size" type="range"></label>
-      <label><span data-i18n="hud.opacity"></span><input id="hud-opacity" type="range"></label>
-      <button id="hud-reset" data-i18n="hud.reset"></button>
-      <button id="hud-done" data-i18n="hud.done"></button>
+      <div id="hud-sliders">
+        <label><span data-i18n="hud.size"></span><input id="hud-size" type="range"></label>
+        <label><span data-i18n="hud.opacity"></span><input id="hud-opacity" type="range"></label>
+      </div>
+      <div id="hud-buttons">
+        <button id="hud-reset" data-i18n="hud.reset"></button>
+        <button id="hud-done" data-i18n="hud.done"></button>
+      </div>
     </div>
     <p id="hud-hint" data-i18n="hud.hint"></p>`;
   $('touch').append(root);
@@ -102,13 +107,14 @@ export function initHudEditor(game) {
 
   size.oninput = () => setSpot(selected, { ...layoutOf(selected), size: +size.value });
   opacity.oninput = () => { setSetting('touchOpacity', +opacity.value); placeAll(); };
-  $('hud-reset').onclick = () => {
+  const reset = () => {
     resetTouchSettings();
     opacity.value = settings.touchOpacity;
     placeAll();
     placeBar();
     select(null);
   };
+  $('hud-reset').onclick = () => confirmDialog('hud.resetConfirm', reset);
 
   $('btn-edit-hud').onclick = () => {
     opacity.value = settings.touchOpacity;

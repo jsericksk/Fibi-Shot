@@ -1,15 +1,21 @@
 import * as THREE from 'three';
+import { WORLD, THROWN } from '../config.js';
+import { rand } from '../utils.js';
 
 const UP = new THREE.Vector3(0, 1, 0);
 const tracerGeo = new THREE.CylinderGeometry(1, 1, 1, 6);
 const flashGeo = new THREE.SphereGeometry(1, 8, 6);
 const sparkGeo = new THREE.BoxGeometry(1, 1, 1);
 
+const box = new THREE.Box3();
+const lowestY = obj => box.setFromObject(obj).min.y;
+
 // Short-lived visuals: bullet tracers, muzzle flashes and impact sparks
 export class Effects {
   constructor(scene) {
     this.scene = scene;
     this.items = [];
+    this.thrown = [];   // weapons and hats thrown off fallen fighters
   }
 
   tracer(from, to, color = 0xfff1a8, width = 0.015, life = 0.09) {
@@ -46,7 +52,52 @@ export class Effects {
     }
   }
 
+  // Copies a part of a fighter (weapon, hat) into the scene and throws it: it tumbles, lands flat on whatever floorAt(x, z, y) says, then disappears
+  throwOff(source, yaw, floorAt) {
+    const mesh = source.clone(true);
+    source.updateWorldMatrix(true, false);
+    source.matrixWorld.decompose(mesh.position, mesh.quaternion, mesh.scale);
+    this.scene.add(mesh);
+    const vel = new THREE.Vector3(Math.sin(yaw) * THROWN.throwSpeed + rand(-0.8, 0.8), THROWN.upSpeed, Math.cos(yaw) * THROWN.throwSpeed + rand(-0.8, 0.8));
+    const spin = new THREE.Vector3(rand(-1, 1), rand(-1, 1), rand(-1, 1)).multiplyScalar(THROWN.spin);
+    this.thrown.push({ mesh, vel, spin, floorAt, life: THROWN.life, bounced: false });
+  }
+
+  updateThrown(dt) {
+    for (let i = this.thrown.length - 1; i >= 0; i--) {
+      const g = this.thrown[i], mesh = g.mesh;
+      g.life -= dt;
+      if (g.life <= 0) {
+        this.scene.remove(mesh);   // geometry and materials are shared with the part it was copied from
+        this.thrown.splice(i, 1);
+        continue;
+      }
+      if (g.vel) {
+        g.vel.y -= WORLD.gravity * dt;
+        mesh.position.addScaledVector(g.vel, dt);
+        mesh.rotation.x += g.spin.x * dt;
+        mesh.rotation.y += g.spin.y * dt;
+        mesh.rotation.z += g.spin.z * dt;
+        // The floor under it right now: the ground, or the top of cover it is above
+        const floor = g.floorAt(mesh.position.x, mesh.position.z, mesh.position.y + THROWN.coverReach);
+        if (lowestY(mesh) <= floor) {
+          if (g.bounced) g.vel = null;   // second landing: it stays on the floor
+          else {
+            g.bounced = true;
+            mesh.rotation.x = mesh.rotation.z = 0;   // lands flat
+            g.vel.y = -g.vel.y * THROWN.bounce;
+            g.vel.x *= 0.4;
+            g.vel.z *= 0.4;
+            g.spin.set(0, g.spin.y * 0.4, 0);
+          }
+          mesh.position.y += floor - lowestY(mesh);
+        }
+      }
+    }
+  }
+
   update(dt) {
+    this.updateThrown(dt);
     for (let i = this.items.length - 1; i >= 0; i--) {
       const it = this.items[i];
       it.life -= dt;

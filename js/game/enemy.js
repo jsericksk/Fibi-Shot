@@ -53,6 +53,9 @@ export class EnemyAI {
   onRespawn() {
     this.strafeDir = 1;
     this.strafeT = 0;
+    this.lastTarget = null;   // where the player was last frame, to read which way it slides
+    this.playerSide = 0;      // -1 / 1: the side the player has been sliding to
+    this.mirrorT = 0;         // countdown to answering a side change (0 = none pending)
     this.detourT = 0;
     this.noLosT = 0;
     this.los = false;
@@ -92,6 +95,7 @@ export class EnemyAI {
     this.los = this.game.hasLineOfSight(f.chestPos(new THREE.Vector3()), t.chestPos(new THREE.Vector3()));
     this.noLosT = this.los ? 0 : this.noLosT + dt;
 
+    this.followPlayerSide(dt, dx, dz, dist);
     this.move(dt, dist);
     if (t.dead) return;   // keeps moving after a kill so it does not look frozen
     this.handleWeapons(dt);
@@ -159,6 +163,24 @@ export class EnemyAI {
     if (f.pos.distanceTo(before) < SHOWCASE.walkSpeed * dt * 0.3) {
       if (f.onGround) f.jump(PLAYER.jumpSpeed);
       this.wayT = 0;
+    }
+  }
+
+  // When the player starts sliding to the other side, the bot turns around too (after a short reaction)
+  followPlayerSide(dt, dx, dz, dist) {
+    const t = this.target, last = this.lastTarget;
+    this.lastTarget = { x: t.pos.x, z: t.pos.z };
+    if (last && dt > 0 && dist > 0) {
+      const across = ((t.pos.x - last.x) * -dz + (t.pos.z - last.z) * dx) / (dist * dt);   // speed across the line between them
+      const side = Math.abs(across) > ENEMY.mirrorMinSpeed ? Math.sign(across) : 0;
+      if (side && side !== this.playerSide) {
+        if (this.playerSide && Math.random() < ENEMY.mirrorChance) this.mirrorT = rand(...ENEMY.mirrorDelay);
+        this.playerSide = side;
+      }
+    }
+    if (this.mirrorT > 0 && (this.mirrorT -= dt) <= 0) {
+      this.strafeDir = this.strafeDir ? -this.strafeDir : (Math.random() < 0.5 ? -1 : 1);
+      this.strafeT = rand(0.7, 2);
     }
   }
 

@@ -39,12 +39,12 @@ export function buildFibi() {
     const a = i * 0.2;
     add(head, sphere, M(C.hair), [Math.sin(a) * 0.6, 0.2, Math.cos(a) * 0.54], [0.1, 0.16, 0.07], [0, a, 0]);
   }
-  add(head, new THREE.CylinderGeometry(0.6, 0.5, 0.62, 32), M(C.hair), [0, -0.01, -0.2]);
+  add(head, new THREE.CylinderGeometry(0.6, 0.5, 0.81, 32), M(C.hair), [0, 0.035, -0.15], [1, 1, 1], [-0.12, 0, 0]);   // tilted like the brim, so its top reaches the underside of the brim without poking through
   add(head, sphere, M(C.hair), [0, -0.32, -0.2], [0.5, 0.15, 0.48]);
   // Volume under the hat. Kept narrower than the hat dome so no blonde shows through.
   add(head, sphere, M(C.hair), [0, 0.28, -0.1], [0.52, 0.48, 0.52]);
   for (const s of [-1, 1]) {
-    add(head, sphere, M(C.hair), [s * 0.5, 0.12, 0.08], [0.17, 0.34, 0.34]);   // temples, so the sides are not bald
+    add(head, sphere, M(C.hair), [s * 0.5, 0.14, 0.08], [0.17, 0.37, 0.34]);   // temples, so the sides are not bald, up to the brim
     add(head, new THREE.CapsuleGeometry(0.15, 0.5, 8, 16), M(C.hair), [s * 0.58, -0.22, 0.1], [1, 1, 1], [0, 0, s * -0.08]);
   }
 
@@ -63,6 +63,7 @@ export function buildFibi() {
   hat.rotation.x = -0.12;
   hat.scale.setScalar(1.05);
   head.add(hat);
+  rig.hat = hat;   // pops off when she dies
   add(hat, cyl, M(C.white), [0, 0, 0], [1.2, 0.04, 1.2]);
   add(hat, new THREE.TorusGeometry(1.2, 0.04, 10, 48), M(C.black), [0, 0, 0], [1, 1, 1], [Math.PI / 2, 0, 0]);
   add(hat, new THREE.TorusGeometry(0.95, 0.035, 10, 48), M(C.purple), [0, 0.04, 0], [1, 1, 1], [Math.PI / 2, 0, 0]);

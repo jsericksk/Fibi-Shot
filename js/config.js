@@ -10,12 +10,13 @@ export const MATCH = {
   minSpawnDistance: 20,       // respawn spots are at least this far from the other fighter
   maxHp: 100,
   bulletRange: 140,           // hitscan max distance
-  timedSeconds: 300,          // length of the timed match (the other option is unlimited)
+  timedSeconds: [180, 300],   // lengths of the timed matches (the other option is unlimited)
 };
 
 // ---- World -----------------------------------------------------------------
 export const WORLD = {
-  arenaHalf: 30,              // map is a square of (2 * arenaHalf) meters
+  arenaHalf: 36,              // map is a square of (2 * arenaHalf) meters
+  designHalf: 30,             // maps.js positions are drawn for this half size and spread out to fit arenaHalf
   gravity: 10,                // same floaty, moon-like jump on every map
   fighterRadius: 0.45,        // collision radius
   stepUp: 0.35,               // max height difference walked onto without jumping
@@ -66,6 +67,12 @@ export const EMOTE = {
   hearRange: 35,              // other characters' emote sounds fade out with distance up to this many meters
 };
 
+// ---- Home screen character ---------------------------------------------------
+export const HOME_STAGE = {
+  startYaw: 0.35,             // radians, same slight turn as the menu thumbnails
+  turnSpeed: 0.03,              // radians per pixel dragged
+};
+
 // ---- HUD -------------------------------------------------------------------
 export const HUD = {
   weaponIconSeconds: 0.3,     // weapon icon shown in the center after switching
@@ -84,15 +91,15 @@ export const TOUCH = {
   sizeRanges: { ammo: { min: 14, max: 48, step: 1 }, timer: { min: 14, max: 48, step: 1 }, score: { min: 10, max: 40, step: 1 } },   // controls that need their own range
   // Center of each control in % of the screen, and its size in px
   layout: {
-    joystick: { x: 13, y: 80, size: 110 },
-    fire: { x: 88, y: 64, size: 100 },
-    jump: { x: 74, y: 80, size: 68 },
-    scope: { x: 76, y: 52, size: 60 },
-    weapon: { x: 36, y: 86, size: 56 },
-    reload: { x: 95, y: 36, size: 56 },
-    emote: { x: 64, y: 30, size: 52 },
+    joystick: { x: 15.5, y: 79, size: 110 },
+    fire: { x: 86.5, y: 62, size: 100 },
+    jump: { x: 87, y: 90, size: 68 },
+    scope: { x: 96, y: 47.5, size: 60 },
+    weapon: { x: 70.5, y: 90.5, size: 56 },
+    reload: { x: 96.3, y: 75, size: 56 },
+    emote: { x: 89.5, y: 30, size: 52 },
     pause: { x: 6, y: 32, size: 44 },
-    ammo: { x: 50, y: 92, size: 22 },   // size is the font size in px
+    ammo: { x: 70.5, y: 78.5, size: 20 },   // size is the font size in px
     timer: { x: 50, y: 5, size: 22 },   // font size in px too
     score: { x: 50, y: 14, size: 16 },  // kills, font size in px too
   },
@@ -108,8 +115,21 @@ export const ENEMY = {
   tauntChance: 0.35,          // odds of dancing to taunt after killing the player
   jumpEvery: [2.5, 6],        // seconds between random hops while moving
   awpCounterChance: 0.8,      // when the player uses the AWP, odds the bot picks it too
-  aimError: { pistol: 0.035, ak47: 0.05, awp: 0.02, shotgun: 0.03 },     // radians, lower is more accurate
+  mirrorChance: 0.7,          // odds of strafing the other way when the player changes its sliding side
+  mirrorDelay: [0.15, 0.45],  // seconds of reaction before it does
+  mirrorMinSpeed: 1.2,        // m/s the player must slide across the bot's line of sight to count as a side
+  aimError: { pistol: 0.04, ak47: 0.055, awp: 0.04, shotgun: 0.032 },     // radians, lower is more accurate
   fireRange: { pistol: 26, ak47: 34, awp: 70, shotgun: 14 },          // meters
+};
+
+// ---- Gun and hat thrown off on death ------------------------------------
+export const THROWN = {
+  upSpeed: 3.5,               // m/s thrown upward
+  throwSpeed: 1.8,            // m/s thrown forward (a little random sideways too)
+  spin: 7,                    // max rad/s of tumbling
+  coverReach: 0.3,            // m above the gun that cover tops still catch it
+  bounce: 0.3,                // share of the speed kept on the first landing
+  life: 3,                    // seconds before it is gone
 };
 
 // ---- Multiplayer (PeerJS) ---------------------------------------------------

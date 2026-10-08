@@ -2,11 +2,15 @@ import * as THREE from 'three';
 import { WEAPONS, WEAPON_ORDER, buildGun } from './weapons.js';
 import { WORLD, MATCH } from '../config.js';
 import { MODEL_SCALE } from '../characters/rig.js';
+import { floorHeight } from './arena.js';
 
 const RADIUS = WORLD.fighterRadius;
 const STEP_UP = WORLD.stepUp;
 const ARENA_HALF = WORLD.arenaHalf;
 export const MAX_HP = MATCH.maxHp;
+
+// Each fall is different: on the back or on the belly, arms raised or at the sides
+export const randomDeathPose = () => ({ faceUp: Math.random() < 0.5, armsUp: Math.random() < 0.5 });
 
 // Shared state for the player and the enemy: model, health, weapons and movement
 export class Fighter {
@@ -48,6 +52,7 @@ export class Fighter {
     this.invuln = 0;     // spawn protection (seconds)
     this.respawnT = 0;
     this.emote = null;       // { dance, duration, sound, t } while dancing
+    this.deathPose = { faceUp: true, armsUp: false };   // how the body lies once dead (see randomDeathPose)
     this.training = false;   // training: infinite ammo, cannot die
   }
 
@@ -142,11 +147,7 @@ export class Fighter {
   updateVertical(dt, colliders, gravity) {
     this.vy -= gravity * dt;
     this.pos.y += this.vy * dt;
-    let floor = 0;
-    for (const c of colliders) {
-      const inside = this.pos.x > c.minX - 0.1 && this.pos.x < c.maxX + 0.1 && this.pos.z > c.minZ - 0.1 && this.pos.z < c.maxZ + 0.1;
-      if (inside && c.h <= this.pos.y + STEP_UP && c.h > floor) floor = c.h;
-    }
+    const floor = floorHeight(colliders, this.pos.x, this.pos.z, this.pos.y + STEP_UP, 0.1);
     if (this.pos.y <= floor) {
       this.pos.y = floor;
       this.vy = 0;
