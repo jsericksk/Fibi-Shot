@@ -115,8 +115,21 @@ export const ENEMY = {
   tauntChance: 0.35,          // odds of dancing to taunt after killing the player
   jumpEvery: [2.5, 6],        // seconds between random hops while moving
   awpCounterChance: 0.8,      // when the player uses the AWP, odds the bot picks it too
+  mirrorChance: 0.7,          // odds of strafing the other way when the player changes its sliding side
+  mirrorDelay: [0.15, 0.45],  // seconds of reaction before it does
+  mirrorMinSpeed: 1.2,        // m/s the player must slide across the bot's line of sight to count as a side
   aimError: { pistol: 0.04, ak47: 0.055, awp: 0.04, shotgun: 0.032 },     // radians, lower is more accurate
   fireRange: { pistol: 26, ak47: 34, awp: 70, shotgun: 14 },          // meters
+};
+
+// ---- Gun and hat thrown off on death ------------------------------------
+export const THROWN = {
+  upSpeed: 3.5,               // m/s thrown upward
+  throwSpeed: 1.8,            // m/s thrown forward (a little random sideways too)
+  spin: 7,                    // max rad/s of tumbling
+  coverReach: 0.3,            // m above the gun that cover tops still catch it
+  bounce: 0.3,                // share of the speed kept on the first landing
+  life: 3,                    // seconds before it is gone
 };
 
 // ---- Multiplayer (PeerJS) ---------------------------------------------------

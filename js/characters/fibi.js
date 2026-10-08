@@ -63,6 +63,7 @@ export function buildFibi() {
   hat.rotation.x = -0.12;
   hat.scale.setScalar(1.05);
   head.add(hat);
+  rig.hat = hat;   // pops off when she dies
   add(hat, cyl, M(C.white), [0, 0, 0], [1.2, 0.04, 1.2]);
   add(hat, new THREE.TorusGeometry(1.2, 0.04, 10, 48), M(C.black), [0, 0, 0], [1, 1, 1], [Math.PI / 2, 0, 0]);
   add(hat, new THREE.TorusGeometry(0.95, 0.035, 10, 48), M(C.purple), [0, 0.04, 0], [1, 1, 1], [Math.PI / 2, 0, 0]);

@@ -161,6 +161,16 @@ function addSpace(scene) {
 }
 
 // Builds floor, walls and cover for a map definition.
+// Height of the highest cover top at (x, z) that is not above maxY (0 = the floor); margin widens the cover boxes
+export function floorHeight(colliders, x, z, maxY, margin = 0) {
+  let floor = 0;
+  for (const c of colliders) {
+    const inside = x > c.minX - margin && x < c.maxX + margin && z > c.minZ - margin && z < c.maxZ + margin;
+    if (inside && c.h <= maxY && c.h > floor) floor = c.h;
+  }
+  return floor;
+}
+
 // blockers: meshes that stop bullets; colliders: 2D boxes that block movement
 export function buildArena(scene, map) {
   const blockers = [];

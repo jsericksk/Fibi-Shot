@@ -1,10 +1,10 @@
 import * as THREE from 'three';
-import { buildArena } from './arena.js';
+import { buildArena, floorHeight } from './arena.js';
 import { MAPS, MAP_LIST } from '../maps.js';
 import { getCharacter, CHARACTERS } from '../characters/index.js';
 import { MATCH, WORLD, CAMERA, EMOTE, EMOTES, SHOWCASE, NET } from '../config.js';
 import { Effects } from './effects.js';
-import { Fighter } from './fighter.js';
+import { Fighter, randomDeathPose } from './fighter.js';
 import { PlayerControls } from './player.js';
 import { EnemyAI } from './enemy.js';
 import { RemotePlayer } from './remote.js';
@@ -193,7 +193,7 @@ export class Game {
           if (f.respawnT <= 0) this.respawn(f);
         }
       }
-      animateRig(f.rig, { moving: f.moving, t: this.t + (f.isPlayer ? 0 : 1.7), pitch: f.pitch + f.kick, dead: f.dead, deadT: f.deadT, air: !f.onGround, emote: f.emote, unarmed: f.unarmed }, dt);
+      animateRig(f.rig, { moving: f.moving, t: this.t + (f.isPlayer ? 0 : 1.7), pitch: f.pitch + f.kick, dead: f.dead, deadT: f.deadT, deathPose: f.deathPose, air: !f.onGround, emote: f.emote, unarmed: f.unarmed }, dt);
     }
     // Emote sound follows the dance: starts with it, fades out when it ends or is cancelled
     const emote = this.player.emote;
@@ -422,6 +422,10 @@ export class Game {
 
   onKill(killer, victim) {
     victim.respawnT = MATCH.respawnDelay;
+    victim.deathPose = randomDeathPose();
+    const floorAt = (x, z, y) => floorHeight(this.arena.colliders, x, z, y);
+    this.effects.throwOff(victim.guns[victim.weaponId].group, victim.yaw, floorAt);
+    if (victim.rig.hat) this.effects.throwOff(victim.rig.hat, victim.yaw, floorAt);
     if (killer.isPlayer) this.scores.player++; else this.scores.enemy++;
     this.hud.setScore(this.scores.player, this.scores.enemy);
 
