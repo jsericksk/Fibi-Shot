@@ -70,7 +70,7 @@ export const EMOTE = {
 // ---- Home screen character ---------------------------------------------------
 export const HOME_STAGE = {
   startYaw: 0.35,             // radians, same slight turn as the menu thumbnails
-  turnSpeed: 0.012,           // radians per pixel dragged
+  turnSpeed: 0.03,              // radians per pixel dragged
 };
 
 // ---- HUD -------------------------------------------------------------------

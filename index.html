@@ -14,36 +14,47 @@
 </head>
 <body>
 
-<!-- Screen 1: character select -->
+<!-- Screen 1: home (pick fighters and map, start) -->
 <section id="screen-select" class="screen">
-  <h1 class="logo">Fibi Shot</h1>
-  <button id="btn-fs" class="fs" data-i18n="fullscreen"></button>
-  <div class="langs" id="lang-pick"></div>
-  <p class="sub" data-i18n="subtitle"></p>
-  <div class="versus">
-    <div class="side">
-      <h2 data-i18n="you"></h2>
-      <div class="stage big">
-        <canvas id="stage-player" width="480" height="380"></canvas>
-        <button id="btn-stage-emote" class="tbtn stage-emote"></button>
+  <header class="home-top">
+    <h1 class="logo">Fibi Shot</h1>
+    <div class="home-tools">
+      <button id="btn-fs" class="tool" data-i18n="fullscreen"></button>
+      <div class="langs" id="lang-pick"></div>
+    </div>
+  </header>
+
+  <div class="home-body">
+    <div class="home-left">
+      <div class="duel">
+        <div class="fighter-row">
+          <button id="btn-stage-emote" class="tbtn stage-emote"></button>
+          <div class="fighter active" data-side="player">
+            <h2 data-i18n="you"></h2>
+            <div class="stage art"><canvas id="stage-player" width="480" height="380"></canvas></div>
+            <div id="name-player" class="fname"></div>
+          </div>
+        </div>
+        <div class="vs">VS</div>
+        <div class="fighter" data-side="enemy">
+          <h2 data-i18n="enemy"></h2>
+          <div class="stage art"><canvas id="stage-enemy" width="480" height="380"></canvas></div>
+          <div id="name-enemy" class="fname"></div>
+        </div>
       </div>
-      <div id="name-player" class="fname"></div>
-      <div id="pick-player" class="picker"></div>
+      <h3 class="section"><span data-i18n="section.pick"></span> <b id="pick-for"></b></h3>
+      <div id="roster" class="roster"></div>
     </div>
-    <div class="vs">VS</div>
-    <div class="side">
-      <h2 data-i18n="enemy"></h2>
-      <img id="big-enemy" class="big" alt="">
-      <div id="name-enemy" class="fname"></div>
-      <div id="pick-enemy" class="picker"></div>
+
+    <div class="home-right">
+      <h3 class="section" data-i18n="section.map"></h3>
+      <div class="maps" id="pick-map"></div>
+      <div class="actions">
+        <button id="btn-start" class="act play"><i>⚔️</i><span><b data-i18n="mode.duel"></b><em data-i18n="mode.duel.desc"></em></span></button>
+        <button id="btn-train" class="act"><i>🎯</i><b data-i18n="mode.training"></b></button>
+        <button id="btn-multi" class="act"><i>🌐</i><b data-i18n="mode.multi"></b></button>
+      </div>
     </div>
-  </div>
-  <h3 class="section" data-i18n="section.map"></h3>
-  <div class="maps" id="pick-map"></div>
-  <div class="modes">
-    <button id="btn-start" class="mode main"><i>⚔️</i><b data-i18n="mode.duel"></b><span data-i18n="mode.duel.desc"></span></button>
-    <button id="btn-train" class="mode"><i>🎯</i><b data-i18n="mode.training"></b><span data-i18n="mode.training.desc"></span></button>
-    <button id="btn-multi" class="mode"><i>🌐</i><b data-i18n="mode.multi"></b><span data-i18n="mode.multi.desc"></span></button>
   </div>
   <p class="help" data-i18n="help"></p>
 </section>

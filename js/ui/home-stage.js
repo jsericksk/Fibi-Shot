@@ -6,7 +6,7 @@ import { clamp } from '../utils.js';
 
 const VOICE = 'home';
 
-// Live 3D character of the home screen: it can dance (emote button) and be turned by dragging.
+// Live 3D character of the home screen: it is turned by dragging and, with an emote button, it can dance.
 // Returns show(def) to switch the character.
 export function initHomeStage(canvas, emoteButton) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
@@ -56,10 +56,12 @@ export function initHomeStage(canvas, emoteButton) {
     setIdlePose(rig);
   }
 
-  emoteButton.onclick = () => {
-    sfx.unlock();
-    if (emote) stopEmote(); else startEmote();
-  };
+  if (emoteButton) {
+    emoteButton.onclick = () => {
+      sfx.unlock();
+      if (emote) stopEmote(); else startEmote();
+    };
+  }
 
   // Dragging sideways turns the character around
   let dragId = null, lastX = 0;
