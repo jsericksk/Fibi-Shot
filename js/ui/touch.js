@@ -8,8 +8,9 @@ import { weaponIcon } from './hud.js';
 const $ = id => document.getElementById(id);
 
 // Tap buttons call an action of the player. The fire and scope buttons also aim while dragged.
+// Fire aims too, so the scope button is only needed to cancel a sniper shot (it is shown just for the AWP).
 const BUTTONS = {
-  fire: { down: c => c.setFire(true), up: c => c.setFire(false), aim: true },
+  fire: { down: c => c.aimFire(true), up: c => c.aimFire(false), aim: true },
   jump: { down: c => c.jump() },
   scope: { down: c => c.toggleScope(), aim: true },
   reload: { down: c => c.reload() },
