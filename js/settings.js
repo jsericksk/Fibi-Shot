@@ -2,7 +2,7 @@
 const KEY = 'fibishot-settings';
 
 export const SENSITIVITY_RANGE = { min: 0.2, max: 3, step: 0.05 };
-export const OPACITY_RANGE = { min: 0.3, max: 1, step: 0.05 };
+export const OPACITY_RANGE = { min: 0.1, max: 1, step: 0.05 };
 
 const DEFAULTS = {
   sensitivity: 1,                 // camera: multiplier on PLAYER.sensitivity (config.js)

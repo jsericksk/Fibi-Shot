@@ -17,7 +17,7 @@ const BUTTONS = {
 };
 
 // Button icons (viewBox 0 0 24 24, drawn with the button's text color)
-const ICONS = {
+export const ICONS = {
   fire: '<svg viewBox="0 0 24 24"><path d="M12 2c2.6 2 3.8 4.6 3.8 7.4V17H8.2V9.4C8.2 6.6 9.4 4 12 2z"/><rect x="7.5" y="18.5" width="9" height="3" rx="1"/></svg>',
   jump: '<svg viewBox="0 0 24 24"><path d="M12 3l8 9h-5v9H9v-9H4z"/></svg>',
   scope: '<svg viewBox="0 0 24 24"><rect x="10.8" y="1.5" width="2.4" height="7.8" rx="1.2"/><rect x="10.8" y="14.7" width="2.4" height="7.8" rx="1.2"/><rect x="1.5" y="10.8" width="7.8" height="2.4" rx="1.2"/><rect x="14.7" y="10.8" width="7.8" height="2.4" rx="1.2"/><path fill-rule="evenodd" d="M12 9.8a2.2 2.2 0 1 0 0 4.4 2.2 2.2 0 0 0 0-4.4zm0 1.2a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/></svg>',

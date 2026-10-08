@@ -1,5 +1,7 @@
 import { CHARACTERS, getCharacter } from '../characters/index.js';
 import { thumbnail } from './thumbnails.js';
+import { initHomeStage } from './home-stage.js';
+import { ICONS } from './touch.js';
 import { sfx } from '../audio.js';
 import { MAP_LIST } from '../maps.js';
 import { toggleFullscreen } from '../fullscreen.js';
@@ -10,6 +12,8 @@ import { t, applyI18n, setLang, getLang, LANGS, onLangChange } from '../i18n.js'
 export function initSelect({ onStart, onMultiplayer }) {
   const state = { player: 'fibi', enemy: 'guga', map: MAP_LIST[0].id };
   const $ = id => document.getElementById(id);
+  $('btn-stage-emote').innerHTML = ICONS.emote;
+  const showPlayer = initHomeStage($('stage-player'), $('btn-stage-emote'));
 
   function renderPicker(side) {
     const box = $(`pick-${side}`);
@@ -33,10 +37,12 @@ export function initSelect({ onStart, onMultiplayer }) {
     });
   }
 
+  let stagedId = null;   // the 3D player only changes when another character is picked
   function refresh() {
     for (const side of ['player', 'enemy']) {
       const def = getCharacter(state[side]);
-      $(`big-${side}`).src = thumbnail(def);
+      if (side === 'player') { if (stagedId !== def.id) showPlayer(def); stagedId = def.id; }
+      else $('big-enemy').src = thumbnail(def);
       $(`name-${side}`).textContent = def.name;
       renderPicker(side);
     }

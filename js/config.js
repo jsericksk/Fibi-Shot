@@ -10,12 +10,13 @@ export const MATCH = {
   minSpawnDistance: 20,       // respawn spots are at least this far from the other fighter
   maxHp: 100,
   bulletRange: 140,           // hitscan max distance
-  timedSeconds: 300,          // length of the timed match (the other option is unlimited)
+  timedSeconds: [180, 300],   // lengths of the timed matches (the other option is unlimited)
 };
 
 // ---- World -----------------------------------------------------------------
 export const WORLD = {
-  arenaHalf: 30,              // map is a square of (2 * arenaHalf) meters
+  arenaHalf: 36,              // map is a square of (2 * arenaHalf) meters
+  designHalf: 30,             // maps.js positions are drawn for this half size and spread out to fit arenaHalf
   gravity: 10,                // same floaty, moon-like jump on every map
   fighterRadius: 0.45,        // collision radius
   stepUp: 0.35,               // max height difference walked onto without jumping
@@ -66,6 +67,12 @@ export const EMOTE = {
   hearRange: 35,              // other characters' emote sounds fade out with distance up to this many meters
 };
 
+// ---- Home screen character ---------------------------------------------------
+export const HOME_STAGE = {
+  startYaw: 0.35,             // radians, same slight turn as the menu thumbnails
+  turnSpeed: 0.012,           // radians per pixel dragged
+};
+
 // ---- HUD -------------------------------------------------------------------
 export const HUD = {
   weaponIconSeconds: 0.3,     // weapon icon shown in the center after switching
@@ -108,7 +115,7 @@ export const ENEMY = {
   tauntChance: 0.35,          // odds of dancing to taunt after killing the player
   jumpEvery: [2.5, 6],        // seconds between random hops while moving
   awpCounterChance: 0.8,      // when the player uses the AWP, odds the bot picks it too
-  aimError: { pistol: 0.035, ak47: 0.05, awp: 0.02, shotgun: 0.03 },     // radians, lower is more accurate
+  aimError: { pistol: 0.075, ak47: 0.105, awp: 0.045, shotgun: 0.06 },     // radians, lower is more accurate
   fireRange: { pistol: 26, ak47: 34, awp: 70, shotgun: 14 },          // meters
 };
 

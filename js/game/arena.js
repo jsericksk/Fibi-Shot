@@ -3,6 +3,7 @@ import { M, add, sphere, rand } from '../utils.js';
 import { WORLD } from '../config.js';
 
 export const ARENA_HALF = WORLD.arenaHalf;
+const SPREAD = ARENA_HALF / WORLD.designHalf;   // stretches the positions written in maps.js
 
 const glow = color => M(color, { emissive: color, emissiveIntensity: 1.2 });
 
@@ -123,14 +124,14 @@ function addCeiling(scene, map, blockers) {
   roof.position.y = height;
   scene.add(roof);
   blockers.push(roof);
-  for (const z of [-20, 0, 20]) {
+  for (const z of [-20 * SPREAD, 0, 20 * SPREAD]) {
     const beam = new THREE.Mesh(new THREE.BoxGeometry(ARENA_HALF * 2, 0.4, 0.5), M(0x2a2018));
     beam.position.set(0, height - 0.25, z);
     scene.add(beam);
   }
   for (const [x, z] of map.lights.at) {
     const panel = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.1, 1.1), glow(0xfff6e0));
-    panel.position.set(x, height - 0.1, z);
+    panel.position.set(x * SPREAD, height - 0.1, z * SPREAD);
     scene.add(panel);
   }
 }
@@ -189,7 +190,10 @@ export function buildArena(scene, map) {
 
   const cover = [
     ...map.center,
-    ...map.quarter.flatMap(([x, z, w, d, ch, k]) => [[x, z, w, d, ch, k], [-x, z, w, d, ch, k], [x, -z, w, d, ch, k], [-x, -z, w, d, ch, k]]),
+    ...map.quarter.flatMap(([x, z, w, d, ch, k]) => {
+      const sx = x * SPREAD, sz = z * SPREAD;
+      return [[sx, sz, w, d, ch, k], [-sx, sz, w, d, ch, k], [sx, -sz, w, d, ch, k], [-sx, -sz, w, d, ch, k]];
+    }),
   ];
   for (const [x, z, w, d, ch, kind] of cover) {
     const { color, trim, split, crown } = map.kinds[kind];
@@ -228,7 +232,7 @@ export function buildArena(scene, map) {
     const L = map.lights;
     for (const [x, z] of L.at) {
       const l = new THREE.PointLight(L.color, L.intensity, L.distance, 1.6);
-      l.position.set(x, L.y ?? 3, z);
+      l.position.set(x * SPREAD, L.y ?? 3, z * SPREAD);
       scene.add(l);
     }
   }
