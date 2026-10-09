@@ -3,6 +3,7 @@
 // Optional: wall.height (default 3.5), wall.stripe (null = none), kinds[].split (color of the top half of a stacked pair),
 // kinds[].crown (leaves on top of a tree), forest { count, spread } (trees beyond the walls),
 // ceiling { height, color } (indoor map: needs lights; light panels are drawn over `lights.at`), lights.y (default 3)
+// doomsday: true (needs `space`) ends timed matches with the Earth being nuked
 // Gravity is the same on every map (WORLD.gravity): fighters can jump onto cover up to ~3 m high.
 
 export const MAPS = {
@@ -16,6 +17,7 @@ export const MAPS = {
     sun: { color: 0xffffff, intensity: 2.8, pos: [35, 38, -12] },
     floor: 'moon',
     space: true,               // stars and a distant Earth
+    doomsday: true,            // easter egg: timed matches end with a nuke on the Earth
     wall: { color: 0x5c5c66, stripe: 0xdfe6f2 },
     kinds: {
       rock: { color: 0x75757d, trim: null },

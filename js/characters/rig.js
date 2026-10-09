@@ -67,6 +67,7 @@ export function setAimPose(rig) {
 // Arms hanging down (used for portraits)
 export function setIdlePose(rig) {
   rig.arms.forEach(a => a.rotation.set(0, 0, a.userData.side * 0.2));
+  rig.emoteOnly?.forEach(o => { o.visible = false; });   // the stage never runs animateRig outside emotes
 }
 
 // Big anime eyes, eyebrows, blush and mouth, attached to the head group
@@ -100,6 +101,7 @@ export function animateRig(rig, { moving, t, pitch, dead, deadT, deathPose, air,
   const k = Math.min(1, dt * 15);
   rig.gunMount.visible = !emote && !unarmed && !dead;   // a dead fighter has dropped the weapon
   if (rig.hat) rig.hat.visible = !dead;                 // and lost the hat, if any
+  rig.emoteOnly?.forEach(o => { o.visible = !!emote && !dead; });   // e.g. the finger guns
   if (emote && !dead) return danceRig(rig, emote);
   rig.model.rotation.y = rig.model.rotation.z = 0;
   rig.head.rotation.y = rig.head.rotation.z = 0;
