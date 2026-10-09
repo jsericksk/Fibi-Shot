@@ -10,7 +10,7 @@ export const MATCH = {
   minSpawnDistance: 20,       // respawn spots are at least this far from the other fighter
   maxHp: 100,
   bulletRange: 140,           // hitscan max distance
-  timedSeconds: [20, 180, 300],   // lengths of the timed matches (the other option is unlimited). TEMP: 20 s is for testing the Moon easter egg
+  timedSeconds: [180, 300],   // lengths of the timed matches (the other option is unlimited)
 };
 
 // ---- Moon easter egg: a nuke hits the Earth at the end of timed matches ----------
@@ -62,7 +62,7 @@ export const PLAYER = {
 
 // ---- Emotes (H key) ----------------------------------------------------------
 // Each character has its own emotes; one is picked at random when pressing H.
-// dance: animation name from js/characters/dances.js (ballet, idol, penguin, flail, backflip, gallop) | duration: seconds | sound: mp3 in audio/emotes
+// dance: animation name from js/characters/dances.js (ballet, idol, penguin, flail, backflip, gallop, fingerGuns) | duration: seconds | sound: mp3 in audio/emotes
 export const EMOTES = {
   fibi: [
     { dance: 'ballet', duration: 7, sound: 'audio/emotes/fibi-emote-1.mp3' },
@@ -74,6 +74,8 @@ export const EMOTES = {
     { dance: 'backflip', duration: 7.3, sound: 'audio/emotes/mambo-1.mp3' },
     { dance: 'gallop', duration: 8.5, sound: 'audio/emotes/mambo-2.mp3' },
   ],
+  lula: [{ dance: 'idol', duration: 5, sound: 'audio/emotes/lula-emote-1.mp3' }],
+  bolso: [{ dance: 'fingerGuns', duration: 6.4, sound: 'audio/emotes/bolso-emote-1.mp3' }],
   default: [{ dance: 'idol', duration: 5, sound: null }],   // characters without their own emotes
 };
 export const EMOTE = {

@@ -40,7 +40,7 @@ export function buildGun(id) {
   } else {
     add(g, box, green, [0, 0.02, 0.2], [0.075, 0.1, 0.9]);
     add(g, cyl, dark, [0, 0.04, 1.0], [0.026, 0.9, 0.026], [Math.PI / 2, 0, 0]);
-    add(g, box, green, [0, -0.02, -0.4], [0.07, 0.15, 0.55]);
+    add(g, box, green, [0, -0.02, -0.36], [0.07, 0.15, 0.5]);   // stock ends inside the slim jackets, so it never pokes out of a back
     add(g, box, dark, [0, -0.1, 0.0], [0.06, 0.15, 0.07], [0.2, 0, 0]);
     add(g, cyl, dark, [0, 0.14, 0.25], [0.05, 0.42, 0.05], [Math.PI / 2, 0, 0]);   // scope tube
     add(g, cyl, M(0x4aa8ff, { emissive: 0x2266aa, emissiveIntensity: 0.6 }), [0, 0.14, 0.47], [0.052, 0.02, 0.052], [Math.PI / 2, 0, 0]); // lens
