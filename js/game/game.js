@@ -2,8 +2,9 @@ import * as THREE from 'three';
 import { buildArena, floorHeight } from './arena.js';
 import { MAPS, MAP_LIST } from '../maps.js';
 import { getCharacter, CHARACTERS } from '../characters/index.js';
-import { MATCH, WORLD, CAMERA, EMOTE, EMOTES, SHOWCASE, NET } from '../config.js';
+import { MATCH, WORLD, CAMERA, EMOTE, EMOTES, SHOWCASE, NET, DOOMSDAY } from '../config.js';
 import { Effects } from './effects.js';
+import { Doomsday } from './doomsday.js';
 import { Fighter, randomDeathPose } from './fighter.js';
 import { PlayerControls } from './player.js';
 import { EnemyAI } from './enemy.js';
@@ -48,6 +49,7 @@ export class Game {
     });
     this.hud.onResume(() => this.lock());
     this.hud.onQuit(() => this.quit());
+    this.hud.onRestart(() => this.restart(true));
   }
 
   get canAct() { return this.state === 'playing' && !this.paused; }
@@ -84,6 +86,7 @@ export class Game {
   // mode: 'duel' (vs bot) | 'training' (showcase) | 'multi' (vs a friend over the network, opts.role = host | guest)
   start(playerDef, enemyDef, mode = 'duel', mapId = MAP_LIST[0].id, opts = {}) {
     this.cleanup();
+    this.setup = { mode, mapId, opts };   // to play the same match again
     this.training = mode === 'training';
     this.multi = mode === 'multi';
     const map = this.map = MAPS[mapId] ?? MAP_LIST[0];
@@ -136,6 +139,8 @@ export class Game {
     this.hud.setup(playerDef, enemyDef);
     this.hud.setScore(0, 0);
     this.hud.setTimer(this.training ? null : this.duration, this.timeLeft);
+    this.hud.setDoomFlash(0);
+    this.doom = null;
     this.hud.setScope(false);
     this.hud.showPause(false);
     this.lastEmote = null;
@@ -184,6 +189,7 @@ export class Game {
     // Gravity first: the camera is placed in controls.update, so it must already see this frame's height
     for (const f of fighters) if (!f.remote) f.updateVertical(dt, this.arena.colliders, WORLD.gravity);
     this.controls.update(dt, canAct);
+    this.doom?.shake(this.camera);
     this.bots.forEach(b => b.update(dt, canAct));
     for (const f of fighters) {
       f.update(dt);
@@ -247,6 +253,7 @@ export class Game {
         if (died) { net.send({ t: 'died' }); this.onKill(this.enemy, this.player); }
         break;
       }
+      case 'restart': this.restart(false); break;
       case 'died':   // our shot killed the friend
         this.hud.hitMarker(this.lastHitHead, true);
         if (this.lastHitHead) sfx.headshotKill();
@@ -282,7 +289,16 @@ export class Game {
     if (!this.duration || this.state !== 'playing') return;
     this.timeLeft = Math.max(0, this.timeLeft - dt);
     this.hud.setTimer(this.duration, this.timeLeft);
-    if (this.timeLeft === 0) this.finish();
+    if (this.map.doomsday) this.updateDoomsday(dt);
+    else if (this.timeLeft === 0) this.finish();
+  }
+
+  // Moon easter egg: the nuke goes off in the last seconds and the match ends when the blast arrives
+  updateDoomsday(dt) {
+    if (this.timeLeft > DOOMSDAY.warnSeconds) return;
+    this.doom ??= new Doomsday(this.scene, this.arena.earth, this.hud);
+    this.doom.update(dt);
+    if (this.doom.done) this.finish();
   }
 
   // Time is up: freeze the match and show who won
@@ -291,6 +307,7 @@ export class Game {
     this.controls.setScope(false);
     this.controls.mouseDown = false;
     this.hud.toast('', 0);
+    this.doom?.fadeOut();
     const { player, enemy } = this.scores;
     const result = player > enemy ? 'win' : player < enemy ? 'lose' : 'draw';
     this.hud.showResult(result, player, enemy);
@@ -439,6 +456,13 @@ export class Game {
     }
   }
 
+  // Plays the same match again. Online, the friend restarts too
+  restart(notifyFriend) {
+    if (this.multi && notifyFriend) net.send({ t: 'restart' });
+    const { mode, mapId, opts } = this.setup;
+    this.start(this.playerDef, this.enemyDef, mode, mapId, opts);
+  }
+
   // Training: swap the player or the enemy character and restart on the same map
   changeCharacter(side, id) {
     const def = getCharacter(id);
@@ -465,7 +489,7 @@ export class Game {
       o.geometry?.dispose?.();
       if (o.material?.map) o.material.map.dispose();
     });
-    this.controls = this.bots = this.scene = null;
+    this.controls = this.bots = this.scene = this.doom = null;
     this.state = 'idle';
   }
 }

@@ -14,7 +14,7 @@ const el = {
   scoreP: $('sc-p'), scoreE: $('sc-e'), toast: $('toast'),
   slots: $('slots'), ammo: $('ammo'), reloadNote: $('reload-note'), reloadIcon: $('reload-icon'),
   crosshair: $('crosshair'), scope: $('scope'), hit: $('hitmarker'), hitText: $('hit-text'),
-  banner: $('banner'), changePanel: $('change-panel'), changePickers: $('change-pickers'), weaponFlash: $('weapon-flash'), score: $('score'), timer: $('timer'), result: $('result'), resultTitle: $('result-title'), resultScore: $('result-score'), pause: $('pause'), vignette: $('vignette'),
+  banner: $('banner'), changePanel: $('change-panel'), changePickers: $('change-pickers'), weaponFlash: $('weapon-flash'), score: $('score'), timer: $('timer'), result: $('result'), resultTitle: $('result-title'), resultScore: $('result-score'), pause: $('pause'), vignette: $('vignette'), doomFlash: $('doom-flash'),
 };
 
 // Sensitivity sliders in the pause menu
@@ -99,6 +99,12 @@ export const hud = {
     el.result.style.display = 'flex';
   },
 
+  // White screen of the Moon easter egg. fadeSeconds > 0 eases the change instead of following every frame
+  setDoomFlash(opacity, fadeSeconds = 0) {
+    el.doomFlash.style.transition = fadeSeconds ? `opacity ${fadeSeconds}s ease-out` : 'none';
+    el.doomFlash.style.opacity = opacity;
+  },
+
   // on: aiming. sniper: the full scope view (black mask) instead of a tighter crosshair
   setScope(on, sniper = false) {
     el.scope.classList.toggle('on', on && sniper);
@@ -171,5 +177,6 @@ export const hud = {
     $('btn-resume').onclick = fn;
     $('btn-fs-pause').onclick = toggleFullscreen;
   },
+  onRestart(fn) { $('btn-result-restart').onclick = fn; },
   onQuit(fn) { $('btn-quit').onclick = $('btn-result-quit').onclick = fn; },
 };

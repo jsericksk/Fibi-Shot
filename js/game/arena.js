@@ -136,7 +136,7 @@ function addCeiling(scene, map, blockers) {
   }
 }
 
-// Stars and a distant Earth for space maps (fog does not affect them)
+// Stars and a distant Earth for space maps (fog does not affect them). Returns the Earth mesh
 function addSpace(scene) {
   const pts = [];
   for (let i = 0; i < 900; i++) {
@@ -158,6 +158,7 @@ function addSpace(scene) {
   const earth = new THREE.Mesh(new THREE.SphereGeometry(16, 32, 24), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), fog: false }));
   earth.position.set(-70, 55, -110);
   scene.add(earth);
+  return earth;
 }
 
 // Builds floor, walls and cover for a map definition.
@@ -246,7 +247,7 @@ export function buildArena(scene, map) {
       scene.add(l);
     }
   }
-  if (map.space) addSpace(scene);
+  const earth = map.space ? addSpace(scene) : null;
   if (map.forest) addForest(scene, map.forest);
   if (map.ceiling) addCeiling(scene, map, blockers);
 
@@ -254,5 +255,5 @@ export function buildArena(scene, map) {
   const isFree = (x, z, margin = 1) =>
     colliders.every(c => x < c.minX - margin || x > c.maxX + margin || z < c.minZ - margin || z > c.maxZ + margin);
 
-  return { blockers, colliders, isFree };
+  return { blockers, colliders, isFree, earth };
 }

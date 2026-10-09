@@ -125,6 +125,14 @@ export const sfx = {
     noise(0.3, { type: 'lowpass', freq: 500, vol: 0.6 });
     tone(320, 90, 0.12, { type: 'square', vol: 0.15, delay: 0.02 });
   }),
+  // Huge boom: sharp crack, then a deep rumble that rolls on for seconds
+  nuke: safe((vol = 1) => {
+    noise(0.25, { type: 'highpass', freq: 1200, vol: 0.9 * vol });
+    tone(90, 20, 4, { type: 'sine', vol: 1 * vol });
+    tone(55, 18, 5, { type: 'sawtooth', vol: 0.35 * vol });
+    noise(5, { type: 'lowpass', freq: 380, vol: 1 * vol });
+    noise(3, { type: 'lowpass', freq: 160, vol: 0.9 * vol, delay: 0.8 });
+  }),
   hurt: safe(() => { tone(180, 70, 0.2, { type: 'sawtooth', vol: 0.3 }); noise(0.1, { type: 'lowpass', freq: 600, vol: 0.3 }); }),
   beep: safe(high => tone(high ? 880 : 520, high ? 880 : 520, 0.14, { type: 'square', vol: 0.12 })),
   click: safe(() => tone(700, 900, 0.05, { type: 'triangle', vol: 0.12 })),

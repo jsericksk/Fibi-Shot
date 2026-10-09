@@ -147,6 +147,8 @@ button { -webkit-tap-highlight-color: transparent; }
 #vignette.flash { animation: hurt .45s ease-out; }
 @keyframes hurt { 0% { box-shadow: inset 0 0 120px 40px rgba(255, 40, 70, .7); } 100% { box-shadow: inset 0 0 120px 40px rgba(255, 40, 70, 0); } }
 
+#doom-flash { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; }
+
 #banner { display: none; position: absolute; left: 50%; top: 32%; transform: translate(-50%, -50%); font-size: clamp(48px, 10vw, 110px); font-weight: 900; color: #fff; text-shadow: 0 4px 0 var(--accent), 0 0 24px rgba(224, 24, 45, .6); pointer-events: none; }
 
 #weapon-panel { position: absolute; right: 20px; bottom: 18px; text-align: right; text-shadow: 0 2px 0 #000; pointer-events: none; }
