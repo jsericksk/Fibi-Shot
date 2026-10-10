@@ -60,7 +60,6 @@ export function buildYotsuba() {
   addEyes(head, { outer: 0x1f7a3d, inner: 0x57c46d, mouth: 'none', brow: C.hair, lidSY: 0.02, blush: 0.5 });
   add(head, sphere, M(C.mouth), [0, -0.25, 0.51], [0.14, 0.11, 0.04]);
   add(head, sphere, M(0xff9a85), [0, -0.285, 0.535], [0.08, 0.05, 0.02]);   // tongue
-  for (const s of [-1, 1]) add(head, sphere, M(C.skin), [s * 0.6, -0.05, 0], [0.07, 0.1, 0.08]);   // ears
 
   // Hair: one tall rounded shape shifted back, so the face pokes out of it and the hairline forms by itself (no seams)
   add(head, sphere, M(C.hair), [0, 0.2, -0.12], [0.7, 0.62, 0.66]);
