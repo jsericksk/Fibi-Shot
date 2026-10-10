@@ -7,7 +7,7 @@
 // half (half the map size in meters, default WORLD.arenaHalf)
 // town { ground } (rows of houses beyond the walls, on that ground color)
 // road { z, width, color } (a flat strip of asphalt across the map, centered on z, with a dashed center line)
-// backdrop: 'rio' | 'mars' (far scenery beyond the walls, see game/backdrops.js)
+// backdrop: 'rio' | 'mars' | 'snow' (far scenery beyond the walls, see game/backdrops.js)
 // doomsday: true (needs `space`) ends timed matches with the Earth being nuked
 // Gravity is the same on every map (WORLD.gravity): fighters can jump onto cover up to ~3 m high.
 
@@ -284,6 +284,44 @@ export const MAPS = {
     ],
     center: [
       [0, 0, 5, 5, 0.9, 'boulder'],
+    ],
+  },
+
+  snow: {
+    id: 'snow',
+    name: 'Neve',
+    preview: 'linear-gradient(#6f93c4 0 40%, #7d8fa6 40% 54%, #f4f8fc 54%)',
+    sky: 0x6f93c4,
+    fog: [50, 210],
+    hemi: [0xe6f0ff, 0xb4c6dc, 1.4],
+    sun: { color: 0xfff0e0, intensity: 2.8, pos: [-35, 30, -20] },
+    floor: 'snow',
+    wall: { color: 0xe4eef8, stripe: null, height: 2.4 },   // a bank of packed snow around the clearing
+    backdrop: 'snow',
+    sunDisc: true,
+    kinds: {
+      ice: { color: 0xaedbee, trim: 0x9fe8ff },
+      hut: { color: 0x8a5a35, trim: null, split: 0xf4f8fc },   // wooden cabin under a snow roof
+      pine: { color: 0x5a3c25, trim: null, crown: 0x2b6b46 },
+      drift: { color: 0xf2f7fb, trim: null },
+      rock: { color: 0x7b8591, trim: null },
+    },
+    lights: null,
+    quarter: [
+      [9, 8, 3.6, 3.6, 2.6, 'ice'],
+      [20, 5, 5, 2.4, 2.4, 'hut'],
+      [5, 20, 2.4, 5, 2.4, 'hut'],
+      [16, 16, 1.4, 1.4, 5.5, 'pine'],
+      [26, 22, 1.4, 1.4, 5.5, 'pine'],
+      [12, 27, 1.4, 1.4, 5.5, 'pine'],
+      [26, 12, 5, 1, 1.2, 'drift'],
+      [12, 26, 1, 5, 1.2, 'drift'],
+      [24, 26, 3, 3, 2.2, 'rock'],
+      [14, 3, 2.4, 2.4, 1.6, 'drift'],
+      [3, 13, 2.4, 2.4, 1.6, 'drift'],
+    ],
+    center: [
+      [0, 0, 4.4, 4.4, 2.4, 'rock'],
     ],
   },
 };

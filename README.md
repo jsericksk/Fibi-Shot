@@ -84,6 +84,8 @@ All the numbers can be tweaked in `js/config.js`.
   Redeemer on a far hill, Sugarloaf, towers and the sea around.
 - **Mars:** a rust red crater with habitat modules, solar panels and masts, ridges and Olympus Mons far away, and
   Phobos in the sky.
+- **Snow:** a snowy clearing with ice blocks, cabins under snow roofs, pines and drifts, snowy mountains around and
+  an aurora in the sky.
 - **Plaza:** a bigger town square with a terrace, stairs, a street and houses around it.
 
 ## Multiplayer

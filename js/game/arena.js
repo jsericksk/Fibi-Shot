@@ -178,7 +178,33 @@ function marsFloor(half) {
   return { tex, roughness: 1, metalness: 0 };
 }
 
-const FLOORS = { tiles: tilesFloor, moon: moonFloor, grass: grassFloor, concrete: concreteFloor, pavers: paversFloor, rio: rioFloor, mars: marsFloor };
+// Fresh snow: soft blue shadows, a few trampled patches and glitter
+function snowFloor(half) {
+  const S = 512;
+  const c = document.createElement('canvas');
+  c.width = c.height = S;
+  const g = c.getContext('2d');
+  g.fillStyle = '#eef4fa'; g.fillRect(0, 0, S, S);
+  for (let i = 0; i < 70; i++) {
+    const x = Math.random() * S, y = Math.random() * S, r = 20 + Math.random() * 60;
+    const grad = g.createRadialGradient(x, y, 0, x, y, r);
+    grad.addColorStop(0, 'rgba(160,190,220,0.3)');
+    grad.addColorStop(1, 'rgba(160,190,220,0)');
+    g.fillStyle = grad;
+    g.fillRect(x - r, y - r, r * 2, r * 2);
+  }
+  for (let i = 0; i < 2500; i++) {
+    g.fillStyle = Math.random() < 0.5 ? 'rgba(255,255,255,0.9)' : 'rgba(150,180,215,0.35)';
+    g.fillRect(Math.random() * S, Math.random() * S, 2, 2);
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(half / 14, half / 14);
+  tex.anisotropy = 4;
+  return { tex, roughness: 0.85, metalness: 0 };
+}
+
+const FLOORS = { tiles: tilesFloor, moon: moonFloor, grass: grassFloor, concrete: concreteFloor, pavers: paversFloor, rio: rioFloor, mars: marsFloor, snow: snowFloor };
 
 // Trees all around the playable area, beyond the walls (instanced: two draw calls for the whole forest)
 function addForest(scene, { count, spread }, half) {
