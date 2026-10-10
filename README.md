@@ -79,6 +79,10 @@ All the numbers can be tweaked in `js/config.js`.
 - **Arena:** a dark red and black arena.
 - **Forest:** a green clearing with rocks, logs and trees.
 - **Assault:** an indoor warehouse with stacked containers.
+- **Rio:** the Copacabana promenade with its black and white waves, palm trees and kiosks, with the Christ the
+  Redeemer on a far hill, Sugarloaf, towers and the sea around.
+- **Mars:** a rust red crater with habitat modules, solar panels and masts, ridges and Olympus Mons far away, and
+  Phobos in the sky.
 - **Plaza:** a bigger town square with a terrace, stairs, a street and houses around it.
 
 ## Multiplayer

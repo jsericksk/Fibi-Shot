@@ -445,7 +445,7 @@ export class Game {
     const { stats } = shooter;
     stats.hits++;
     stats.damage += Math.min(damage, target.hp);   // no credit for overkill
-    if (headshot) stats.headshots++;
+    if (headshot && shooter.weapon.id === 'awp') stats.headshots++;   // the result screen only counts AWP headshots
     if (this.training) {   // training shows the damage as floating numbers
       const head = target.headPos();
       this.effects.damageNumber(head, damage, headshot, Math.max(1, this.camera.position.distanceTo(head) / TRAINING.numberDistance));

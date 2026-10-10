@@ -7,6 +7,7 @@
 // half (half the map size in meters, default WORLD.arenaHalf)
 // town { ground } (rows of houses beyond the walls, on that ground color)
 // road { z, width, color } (a flat strip of asphalt across the map, centered on z, with a dashed center line)
+// backdrop: 'rio' | 'mars' (far scenery beyond the walls, see game/backdrops.js)
 // doomsday: true (needs `space`) ends timed matches with the Earth being nuked
 // Gravity is the same on every map (WORLD.gravity): fighters can jump onto cover up to ~3 m high.
 
@@ -212,6 +213,79 @@ export const MAPS = {
     ],
   },
 
+  rio: {
+    id: 'rio',
+    name: 'Rio',
+    preview: 'linear-gradient(#59b8f0 0 45%, #2e7d46 45% 62%, #efe9da 62%)',
+    sky: 0x7cc8f2,
+    fog: [140, 300],
+    hemi: [0xeaf6ff, 0xcfc29a, 1.0],
+    sun: { color: 0xfff0c8, intensity: 2.6, pos: [30, 50, 15] },
+    floor: 'rio',
+    wall: { color: 0xf4f1e8, stripe: null, height: 4 },   // tall enough to look unclimbable
+    backdrop: 'rio',
+    sunDisc: true,
+    kinds: {
+      kiosk: { color: 0xf3ecd8, trim: null, split: 0x2a9fd8 },   // white kiosk with a blue top
+      block: { color: 0xd9d3c4, trim: null },
+      palm: { color: 0x7a5a3a, trim: null, crown: 0x2f9a45 },
+      planter: { color: 0xc9b79a, trim: null },
+      bench: { color: 0xb08a5a, trim: null },
+    },
+    lights: null,
+    quarter: [
+      [9, 8, 4, 3, 2.6, 'kiosk'],
+      [20, 6, 6, 2.2, 2.4, 'block'],
+      [6, 19, 2.2, 6, 2.4, 'block'],
+      [16, 16, 1.2, 1.2, 5.5, 'palm'],
+      [12, 27, 1.2, 1.2, 5.5, 'palm'],
+      [26, 22, 1.2, 1.2, 5.5, 'palm'],
+      [24, 14, 3, 3, 1.1, 'planter'],
+      [14, 3, 3, 0.8, 0.5, 'bench'],
+      [3, 12, 0.8, 3, 0.5, 'bench'],
+      [27, 4, 2.6, 2.6, 2.4, 'kiosk'],
+    ],
+    center: [
+      [0, 0, 5, 5, 1.0, 'planter'],
+    ],
+  },
+
+  mars: {
+    id: 'mars',
+    name: 'Marte',
+    preview: 'linear-gradient(#e0a77d 0 45%, #93482a 45% 58%, #b5593a 58%)',
+    sky: 0xe0a77d,
+    fog: [60, 230],
+    hemi: [0xffd9b8, 0x6a3220, 0.9],
+    sun: { color: 0xfff0dd, intensity: 2.2, pos: [-30, 42, 20] },
+    floor: 'mars',
+    wall: { color: 0x8a4328, stripe: null, height: 2.4 },   // a rock rim around the crater
+    backdrop: 'mars',
+    sunDisc: true,
+    kinds: {
+      rock: { color: 0x9a4a2e, trim: null },
+      boulder: { color: 0x7d3c26, trim: null },
+      module: { color: 0xe6e2dc, trim: 0xff7a3a },
+      solar: { color: 0x1d2a4a, trim: null },
+      mast: { color: 0xcfd2d8, trim: 0xff3030 },
+    },
+    lights: null,
+    quarter: [
+      [9, 9, 3.4, 3, 2.4, 'rock'],
+      [20, 5, 5, 3, 2.6, 'module'],
+      [5, 20, 3, 5, 2.6, 'module'],
+      [16, 16, 1.4, 1.4, 4, 'mast'],
+      [26, 10, 5, 0.6, 1.4, 'solar'],
+      [10, 26, 0.6, 5, 1.4, 'solar'],
+      [24, 24, 4, 3.6, 2.8, 'boulder'],
+      [27, 17, 2, 2, 1.6, 'rock'],
+      [17, 27, 2, 2, 1.6, 'rock'],
+      [13, 2, 1.2, 1.2, 3.4, 'mast'],
+    ],
+    center: [
+      [0, 0, 5, 5, 0.9, 'boulder'],
+    ],
+  },
 };
 
 export const MAP_LIST = Object.values(MAPS);

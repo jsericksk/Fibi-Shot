@@ -141,7 +141,7 @@ button { -webkit-tap-highlight-color: transparent; }
 .plate.right { right: 16px; justify-content: flex-end; text-align: right; }
 .plate img { width: 64px; height: 64px; object-fit: contain; object-position: top; border-radius: 50%; background: rgba(20, 10, 14, .8); border: 3px solid var(--accent); }
 .plate > div { flex: 1; }
-.pname { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-weight: 900; font-size: 18px; text-shadow: 0 2px 0 #000; }
+.pname { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 5px; font-weight: 900; font-size: 18px; text-shadow: 0 2px 0 #000; }
 .pname b { font-size: 16px; opacity: .85; }
 .plate.right .pname { flex-direction: row-reverse; }
 .plate.second { top: 92px; }   /* same size as the first, right under it */
@@ -328,7 +328,7 @@ button { -webkit-tap-highlight-color: transparent; }
 /* smaller life bars on phones, to leave the screen free */
 .touch .plate { gap: 6px; width: min(30vw, 260px); }
 .touch .plate img { width: 42px; height: 42px; border-width: 2px; }
-.touch .pname { font-size: 14px; }
+.touch .pname { font-size: 14px; margin-bottom: 3px; }
 .touch .pname b { font-size: 13px; }
 .touch .bar { height: 11px; border-width: 1.5px; }
 .touch .plate.second { top: 62px; }
