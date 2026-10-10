@@ -1,4 +1,5 @@
 import { CHARACTERS, getCharacter } from '../characters/index.js';
+import { renderSkins } from './skins.js';
 import { thumbnail } from './thumbnails.js';
 import { MAP_LIST } from '../maps.js';
 import { sfx } from '../audio.js';
@@ -30,7 +31,7 @@ export function initLobby({ onStart, onBack }) {
     $('lobby-name-me').textContent = me.name;
     const pick = $('lobby-pick');
     pick.innerHTML = CHARACTERS.map(c => `
-      <button class="card ${c.id === state.me ? 'selected' : ''}" data-id="${c.id}">
+      <button class="card ${c.id === me.id ? 'selected' : ''}" data-id="${c.id}">
         <img src="${thumbnail(c)}" alt="${c.name}"><span>${c.name}</span>
       </button>`).join('');
     pick.querySelectorAll('.card').forEach(btn => {
@@ -40,6 +41,13 @@ export function initLobby({ onStart, onBack }) {
         net.send({ t: 'char', id: state.me });
         render();
       };
+    });
+
+    renderSkins($('lobby-skins'), state.me, look => {
+      state.me = look;
+      sfx.click();
+      net.send({ t: 'char', id: state.me });
+      render();
     });
 
     const friend = state.friend && getCharacter(state.friend);

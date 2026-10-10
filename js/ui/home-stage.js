@@ -21,14 +21,14 @@ export function initHomeStage(canvas, emoteButton) {
   camera.position.set(0, 2.3, 5.2);
   camera.lookAt(0, 0.95, 0);
 
-  const rigs = {};   // built once per character
+  const rigs = {};   // built once per look
   let def = null, rig = null, emote = null, yaw = HOME_STAGE.startYaw;
 
   function show(next) {
     stopEmote();
     if (rig) scene.remove(rig.root);
     def = next;
-    rig = rigs[def.id] ??= buildRig(def);
+    rig = rigs[def.key] ??= buildRig(def);
     scene.add(rig.root);
   }
 

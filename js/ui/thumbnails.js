@@ -5,7 +5,7 @@ const cache = {};
 
 // Renders a character once into a transparent PNG data URL (used for menu cards and the HUD)
 export function thumbnail(def) {
-  if (cache[def.id]) return cache[def.id];
+  if (cache[def.key]) return cache[def.key];
 
   const W = 300, H = 380;
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
@@ -28,8 +28,8 @@ export function thumbnail(def) {
   camera.lookAt(0, 0.95, 0);
   renderer.render(scene, camera);
 
-  cache[def.id] = renderer.domElement.toDataURL('image/png');
+  cache[def.key] = renderer.domElement.toDataURL('image/png');
   renderer.dispose();
   renderer.forceContextLoss();
-  return cache[def.id];
+  return cache[def.key];
 }

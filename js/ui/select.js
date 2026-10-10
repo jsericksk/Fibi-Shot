@@ -1,4 +1,5 @@
 import { CHARACTERS, getCharacter } from '../characters/index.js';
+import { renderSkins } from './skins.js';
 import { thumbnail } from './thumbnails.js';
 import { initHomeStage } from './home-stage.js';
 import { ICONS } from './touch.js';
@@ -28,7 +29,9 @@ export function initSelect({ onStart, onMultiplayer }) {
 
   // Only toggles classes, so the strip keeps its scroll position
   function markRoster() {
-    $('roster').querySelectorAll('.card').forEach(c => c.classList.toggle('selected', c.dataset.id === state[state.picking]));
+    const picked = state[state.picking];
+    $('roster').querySelectorAll('.card').forEach(c => c.classList.toggle('selected', c.dataset.id === getCharacter(picked).id));
+    renderSkins($('skins'), picked, look => { state[state.picking] = look; sfx.click(); refresh(); });
     $('pick-for').textContent = t(state.picking === 'player' ? 'you' : state.picking === 'enemy' ? 'enemy' : 'enemy2');
     document.querySelectorAll('.fighter').forEach(f => f.classList.toggle('active', f.dataset.side === state.picking));
   }
@@ -48,8 +51,8 @@ export function initSelect({ onStart, onMultiplayer }) {
   function refresh() {
     for (const side of state.enemy2 ? ['player', 'enemy', 'enemy2'] : ['player', 'enemy']) {
       const def = getCharacter(state[side]);
-      if (staged[side] !== def.id) showFighter[side](def);
-      staged[side] = def.id;
+      if (staged[side] !== def.key) showFighter[side](def);
+      staged[side] = def.key;
       $(`name-${side}`).textContent = def.name;
     }
     markRoster();
@@ -70,7 +73,7 @@ export function initSelect({ onStart, onMultiplayer }) {
   // The second enemy starts as the first character that is neither you nor the first enemy
   $('btn-add-enemy').onclick = () => {
     sfx.click();
-    state.enemy2 = CHARACTERS.find(c => c.id !== state.player && c.id !== state.enemy).id;
+    state.enemy2 = CHARACTERS.find(c => c.id !== getCharacter(state.player).id && c.id !== getCharacter(state.enemy).id).id;
     state.picking = 'enemy2';
     showFighter.enemy2 ??= initHomeStage($('stage-enemy2'));
     refresh();
