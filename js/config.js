@@ -10,7 +10,7 @@ export const MATCH = {
   minSpawnDistance: 20,       // respawn spots are at least this far from the other fighter
   maxHp: 100,
   bulletRange: 140,           // hitscan max distance
-  timedSeconds: [180, 300],   // lengths of the timed matches (the other option is unlimited)
+  timedSeconds: [30, 180, 300],   // lengths of the timed matches (the other option is unlimited)
 };
 
 // ---- Moon easter egg: a nuke hits the Earth at the end of timed matches ----------

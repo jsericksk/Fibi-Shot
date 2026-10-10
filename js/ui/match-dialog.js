@@ -10,7 +10,7 @@ const $ = id => document.getElementById(id);
 export function askMatchDuration(onPick) {
   const options = [
     { seconds: 0, big: '∞', label: t('matchDialog.unlimited') },
-    ...MATCH.timedSeconds.map(seconds => ({ seconds, big: formatTime(seconds), label: t('matchDialog.timed', { min: seconds / 60 }) })),
+    ...MATCH.timedSeconds.map(seconds => ({ seconds, big: formatTime(seconds), label: seconds < 60 ? t('matchDialog.seconds', { n: seconds }) : t('matchDialog.timed', { min: seconds / 60 }) })),
   ];
   const dialog = $('match-dialog');
   $('match-options').innerHTML = options.map((o, i) => `
