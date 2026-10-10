@@ -61,8 +61,9 @@ export function buildDoro() {
     add(head, box, M(C.hairDark), [s * 0.25, 0.2, 0.55], [0.2, 0.04, 0.03], [0, s * 0.3, s * -0.2]);
   }
 
-  // Pouty "v" mouth
-  for (const s of [-1, 1]) add(head, box, M(0x9a4a5a), [s * 0.04, -0.255, 0.575], [0.09, 0.02, 0.012], [0, 0, s * 0.7]);
+  // Cat-like "w" mouth: two small down-facing arcs side by side
+  const mouthArc = new THREE.TorusGeometry(0.045, 0.011, 8, 16, Math.PI);
+  for (const s of [-1, 1]) add(head, mouthArc, M(C.line), [s * 0.045, -0.225, 0.575], [1, 1, 1], [0, 0, Math.PI]);
 
   // Pink hair: top cap, bangs with a center part, long side locks and back hair
   add(head, new THREE.SphereGeometry(1, 32, 24, 0, Math.PI * 2, 0, 1.2), M(C.hair), [0, 0.04, -0.02], [0.74, 0.64, 0.67]);
