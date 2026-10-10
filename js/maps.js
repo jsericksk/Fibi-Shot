@@ -3,6 +3,10 @@
 // Optional: wall.height (default 3.5), wall.stripe (null = none), kinds[].split (color of the top half of a stacked pair),
 // kinds[].crown (leaves on top of a tree), forest { count, spread } (trees beyond the walls),
 // ceiling { height, color } (indoor map: needs lights; light panels are drawn over `lights.at`), lights.y (default 3)
+// sunDisc: true (draws a sun in the sky where `sun.pos` points)
+// half (half the map size in meters, default WORLD.arenaHalf)
+// town { ground } (rows of houses beyond the walls, on that ground color)
+// road { z, width, color } (a flat strip of asphalt across the map, centered on z, with a dashed center line)
 // doomsday: true (needs `space`) ends timed matches with the Earth being nuked
 // Gravity is the same on every map (WORLD.gravity): fighters can jump onto cover up to ~3 m high.
 
@@ -159,6 +163,55 @@ export const MAPS = {
       [0, 0, 1.6, 1.6, 2.2, 'crate'],
     ],
   },
+  plaza: {
+    id: 'plaza',
+    name: 'Praça',
+    preview: 'linear-gradient(#8fd1ff 0 38%, #d9ccb8 38% 50%, #c98e6a 50% 84%, #45464c 84%)',
+    half: 44,                  // bigger than the default (WORLD.arenaHalf)
+    sky: 0x8fd1ff,
+    fog: [90, 220],
+    hemi: [0xe8f3ff, 0x9a6a4a, 1.0],
+    sun: { color: 0xfff1cc, intensity: 2.6, pos: [-25, 45, 10] },
+    floor: 'pavers',
+    wall: { color: 0xece7da, stripe: null },   // the long white wall behind the square
+    road: { z: 39.5, width: 9, color: 0x45464c },
+    town: { ground: 0xc9a27a },
+    sunDisc: true,
+    kinds: {
+      platform: { color: 0xcfc4b0, trim: null },
+      step: { color: 0xb9ad99, trim: null },
+      planter: { color: 0xc29a86, trim: null },
+      bench: { color: 0x9a8a78, trim: null },
+      block: { color: 0xd2c4ac, trim: null },
+      barrier: { color: 0xc9a690, trim: null },
+      tree: { color: 0x6b4a2b, trim: null, crown: 0x3f9a3a },
+      house: { color: 0xe9dcc0, trim: null, split: 0xb5502f },   // cream walls, terracotta roof
+      curb: { color: 0x9a9a98, trim: null },
+    },
+    lights: null,
+    quarter: [
+      [8, 5, 3, 0.8, 0.5, 'bench'],
+      [10, 12, 5, 5, 2.6, 'block'],
+      [22, 6, 8, 2.4, 2.6, 'barrier'],
+      [7, 16, 2.4, 7, 2.6, 'barrier'],
+      [20, 18, 6, 3, 1.6, 'block'],
+      [14, 12, 1.2, 1.2, 5, 'tree'],
+      [24, 14, 1.2, 1.2, 5, 'tree'],
+      [20, 4, 6, 1.4, 0.9, 'planter'],
+      [5, 15, 1.4, 5, 0.9, 'planter'],
+    ],
+    // Raised terrace at the back with two staircases (each step is 0.35 m: walkable without jumping), houses on the sides, curb along the street
+    center: [
+      [0, 0, 6, 6, 1.0, 'planter'],
+      [0, -37, 88, 14, 1.05, 'platform'],
+      ...[-18, 18].flatMap(x => [
+        [x, -28.8, 10, 2.4, 0.35, 'step'], [x, -29.2, 10, 1.6, 0.7, 'step'], [x, -29.6, 10, 0.8, 1.05, 'step'],
+      ]),
+      [-39, -12, 5, 8, 3.4, 'house'], [-39, 12, 5, 7, 3.4, 'house'], [39, -10, 5, 8, 3.4, 'house'], [39, 14, 5, 7, 3.4, 'house'],
+      [0, 34.8, 88, 0.6, 0.2, 'curb'],
+    ],
+  },
+
 };
 
 export const MAP_LIST = Object.values(MAPS);

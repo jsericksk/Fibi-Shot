@@ -17,8 +17,6 @@ import { isSwitchingFullscreen, enterFullscreen } from '../fullscreen.js';
 import { rand, isTouch } from '../utils.js';
 import { t } from '../i18n.js';
 
-const ARENA_HALF = WORLD.arenaHalf;
-
 const COUNTDOWN = MATCH.countdown;
 const FAR = MATCH.bulletRange;
 
@@ -101,15 +99,15 @@ export class Game {
     sun.position.set(...map.sun.pos);
     sun.castShadow = true;
     sun.shadow.mapSize.set(4096, 4096);
-    const R = ARENA_HALF + 6;
-    Object.assign(sun.shadow.camera, { left: -R, right: R, top: R, bottom: -R, near: 1, far: 120 });
     sun.shadow.bias = -0.0005;
     scene.add(sun);
 
-    this.arena = buildArena(scene, map);
+    const arena = this.arena = buildArena(scene, map);
+    const R = arena.half + 6;
+    Object.assign(sun.shadow.camera, { left: -R, right: R, top: R, bottom: -R, near: 1, far: 120 });
     this.effects = new Effects(scene);
 
-    this.player = new Fighter(playerDef, true);
+    this.player = new Fighter(playerDef, true, arena.half);
     this.player.training = this.training;
     scene.add(this.player.root);
     // Online: host starts on the west side and guest on the east side
@@ -119,7 +117,7 @@ export class Game {
     // Duel: one hunting enemy. Training: every other character wanders around as a showcase.
     const defs = this.training ? CHARACTERS.filter(c => c.id !== playerDef.id) : [enemyDef];
     this.bots = defs.map(def => {
-      const f = new Fighter(def, false);
+      const f = new Fighter(def, false, arena.half);
       f.training = this.training;
       f.unarmed = this.training;
       scene.add(f.root);
@@ -318,7 +316,7 @@ export class Game {
   // Random free spot far from `other`, preferring places out of its line of sight.
   // If every free spot tried is closer than `minDistance`, the farthest one wins.
   pickSpawn(other, minDistance = MATCH.minSpawnDistance, filter = null) {
-    const lim = ARENA_HALF - 2;
+    const lim = this.arena.half - 2;
     const valid = [], hidden = [];
     let farthest = null, farthestDist = -1;
     for (let i = 0; i < 80; i++) {

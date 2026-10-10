@@ -5,7 +5,7 @@ import { buildDoro } from './doro.js';
 import { buildMambo } from './mambo.js';
 
 export const CHARACTERS = [
-  { id: 'fibi', name: 'Fibi', build: buildFibi },
+  { id: 'fibi', name: 'Fibi', build: buildFibi, radius: 1.1 },   // radius: collision size, wider than the default because of her big hat brim
   { id: 'guga', name: 'Guga', build: buildGuga },
   { id: 'nono', name: 'Nono', build: buildNono },
   { id: 'doro', name: 'Doro', build: buildDoro },

@@ -2,13 +2,11 @@ import * as THREE from 'three';
 import { M, add, sphere, rand } from '../utils.js';
 import { WORLD } from '../config.js';
 
-export const ARENA_HALF = WORLD.arenaHalf;
-const SPREAD = ARENA_HALF / WORLD.designHalf;   // stretches the positions written in maps.js
 
 const glow = color => M(color, { emissive: color, emissiveIntensity: 1.2 });
 
 // Dark tiled floor with thin red grid lines
-function tilesFloor() {
+function tilesFloor(half) {
   const c = document.createElement('canvas');
   c.width = c.height = 128;
   const g = c.getContext('2d');
@@ -17,7 +15,7 @@ function tilesFloor() {
   g.fillStyle = '#5a1119'; g.fillRect(0, 0, 128, 2); g.fillRect(0, 0, 2, 128);
   const tex = new THREE.CanvasTexture(c);
   tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-  tex.repeat.set(ARENA_HALF / 2, ARENA_HALF / 2);
+  tex.repeat.set(half / 2, half / 2);
   return { tex, roughness: 0.7, metalness: 0.2 };
 }
 
@@ -49,7 +47,7 @@ function moonFloor() {
 }
 
 // Short grass with lighter and darker blades, tiled
-function grassFloor() {
+function grassFloor(half) {
   const S = 256;
   const c = document.createElement('canvas');
   c.width = c.height = S;
@@ -62,7 +60,7 @@ function grassFloor() {
   }
   const tex = new THREE.CanvasTexture(c);
   tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-  tex.repeat.set(ARENA_HALF / 5, ARENA_HALF / 5);
+  tex.repeat.set(half / 5, half / 5);
   return { tex, roughness: 1, metalness: 0 };
 }
 
@@ -91,11 +89,38 @@ function concreteFloor() {
   return { tex: new THREE.CanvasTexture(c), roughness: 0.9, metalness: 0.05 };
 }
 
-const FLOORS = { tiles: tilesFloor, moon: moonFloor, grass: grassFloor, concrete: concreteFloor };
+// Terracotta hexagon pavers (the hexagons are squashed a bit so the pattern tiles exactly in the square texture)
+function paversFloor(half) {
+  const S = 256, W = 32, ROW = 32, RY = ROW * 2 / 3;
+  const c = document.createElement('canvas');
+  c.width = c.height = S;
+  const g = c.getContext('2d');
+  g.fillStyle = '#a8704f'; g.fillRect(0, 0, S, S);
+  g.strokeStyle = 'rgba(70,40,28,0.55)';
+  g.lineWidth = 1.5;
+  for (let row = -1; row <= S / ROW; row++) {
+    for (let col = -1; col <= S / W; col++) {
+      const cx = col * W + (row % 2 ? W / 2 : 0), cy = row * ROW;
+      g.beginPath();
+      [[0, -RY], [W / 2, -RY / 2], [W / 2, RY / 2], [0, RY], [-W / 2, RY / 2], [-W / 2, -RY / 2]].forEach(([x, y], i) => g[i ? 'lineTo' : 'moveTo'](cx + x, cy + y));
+      g.closePath();
+      g.fillStyle = `hsl(${18 + Math.random() * 6},${42 + Math.random() * 8}%,${48 + Math.random() * 9}%)`;
+      g.fill();
+      g.stroke();
+    }
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(half / 2, half / 2);
+  tex.anisotropy = 4;
+  return { tex, roughness: 0.95, metalness: 0 };
+}
+
+const FLOORS = { tiles: tilesFloor, moon: moonFloor, grass: grassFloor, concrete: concreteFloor, pavers: paversFloor };
 
 // Trees all around the playable area, beyond the walls (instanced: two draw calls for the whole forest)
-function addForest(scene, { count, spread }) {
-  const inner = ARENA_HALF + 4;
+function addForest(scene, { count, spread }, half) {
+  const inner = half + 4;
   const trunks = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.35, 0.5, 3, 8), M(0x6b4a2b), count);
   const leaves = new THREE.InstancedMesh(new THREE.ConeGeometry(2.4, 6, 8), M(0xffffff), count);
   const m = new THREE.Matrix4(), color = new THREE.Color();
@@ -116,24 +141,85 @@ function addForest(scene, { count, spread }) {
   scene.add(ground);
 }
 
+// Two rows of small houses beyond the walls on every side, on dirt ground (instanced: two draw calls for the whole town)
+const HOUSE_COLORS = [0xe9dcc0, 0xf1d9a8, 0xe8b9a8, 0xc9dcc0, 0xf4efe4, 0xd9c2a4];
+function addTown(scene, { ground }, half) {
+  const spots = [];
+  for (let row = 0; row < 2; row++) {
+    const offset = half + 6 + row * 10;
+    for (let along = -half - 14; along <= half + 14; along += 9) {
+      for (const [x, z] of [[along, offset], [along, -offset], [offset, along], [-offset, along]]) {
+        spots.push([x + rand(-1.5, 1.5), z + rand(-1.5, 1.5), rand(5, 7), rand(5, 7), rand(3.6, 4.8)]);
+      }
+    }
+  }
+  const bodies = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), M(0xffffff), spots.length);
+  const roofGeo = new THREE.ConeGeometry(1, 1, 4);
+  roofGeo.rotateY(Math.PI / 4);   // square roof with its sides facing the house walls
+  const roofs = new THREE.InstancedMesh(roofGeo, M(0xb5502f), spots.length);
+  const m = new THREE.Matrix4(), color = new THREE.Color();
+  spots.forEach(([x, z, w, d, h], i) => {
+    const roofH = rand(1.4, 2);
+    bodies.setMatrixAt(i, m.makeScale(w, h, d).setPosition(x, h / 2, z));
+    bodies.setColorAt(i, color.set(HOUSE_COLORS[Math.floor(rand(0, HOUSE_COLORS.length))]));
+    roofs.setMatrixAt(i, m.makeScale(w * 0.78, roofH, d * 0.78).setPosition(x, h + roofH / 2, z));
+  });
+  scene.add(bodies, roofs);
+
+  const dirt = new THREE.Mesh(new THREE.PlaneGeometry(400, 400), new THREE.MeshStandardMaterial({ color: ground, roughness: 1 }));
+  dirt.rotation.x = -Math.PI / 2;
+  dirt.position.y = -0.05;
+  dirt.receiveShadow = true;
+  scene.add(dirt);
+}
+
+// Asphalt strip across the map with a dashed white center line (flat, so it never blocks anyone)
+function addRoad(scene, { z, width, color }, half) {
+  const road = new THREE.Mesh(new THREE.PlaneGeometry(half * 2, width), M(color, { roughness: 1 }));
+  road.rotation.x = -Math.PI / 2;
+  road.position.set(0, 0.01, z);
+  road.receiveShadow = true;
+  scene.add(road);
+  const dash = new THREE.PlaneGeometry(2, 0.2);
+  for (let x = -half + 2; x < half; x += 4) {
+    const line = new THREE.Mesh(dash, M(0xf2f2f2, { roughness: 1 }));
+    line.rotation.x = -Math.PI / 2;
+    line.position.set(x, 0.02, z);
+    scene.add(line);
+  }
+}
+
 // Roof of an indoor map: dark ceiling, beams and glowing light panels over each light
-function addCeiling(scene, map, blockers) {
+function addCeiling(scene, map, blockers, half) {
   const { height, color } = map.ceiling;
-  const roof = new THREE.Mesh(new THREE.PlaneGeometry(ARENA_HALF * 2 + 1.2, ARENA_HALF * 2 + 1.2), new THREE.MeshStandardMaterial({ color, side: THREE.DoubleSide, roughness: 1 }));
+  const spread = half / WORLD.designHalf;
+  const roof = new THREE.Mesh(new THREE.PlaneGeometry(half * 2 + 1.2, half * 2 + 1.2), new THREE.MeshStandardMaterial({ color, side: THREE.DoubleSide, roughness: 1 }));
   roof.rotation.x = Math.PI / 2;
   roof.position.y = height;
   scene.add(roof);
   blockers.push(roof);
-  for (const z of [-20 * SPREAD, 0, 20 * SPREAD]) {
-    const beam = new THREE.Mesh(new THREE.BoxGeometry(ARENA_HALF * 2, 0.4, 0.5), M(0x2a2018));
+  for (const z of [-20 * spread, 0, 20 * spread]) {
+    const beam = new THREE.Mesh(new THREE.BoxGeometry(half * 2, 0.4, 0.5), M(0x2a2018));
     beam.position.set(0, height - 0.25, z);
     scene.add(beam);
   }
   for (const [x, z] of map.lights.at) {
     const panel = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.1, 1.1), glow(0xfff6e0));
-    panel.position.set(x * SPREAD, height - 0.1, z * SPREAD);
+    panel.position.set(x * spread, height - 0.1, z * spread);
     scene.add(panel);
   }
+}
+
+// A sun disc with a soft glow, high in the sky where the light comes from (fog does not affect it)
+function addSunDisc(scene, { pos }) {
+  const dir = new THREE.Vector3(...pos).normalize().multiplyScalar(200);
+  const disc = (radius, opacity) => {
+    const mesh = new THREE.Mesh(new THREE.SphereGeometry(radius, 24, 16), new THREE.MeshBasicMaterial({ color: 0xfff4c8, transparent: opacity < 1, opacity, depthWrite: false, fog: false }));
+    mesh.position.copy(dir);
+    scene.add(mesh);
+  };
+  disc(9, 1);
+  disc(15, 0.25);
 }
 
 // Stars and a distant Earth for space maps (fog does not affect them). Returns the Earth mesh
@@ -174,11 +260,13 @@ export function floorHeight(colliders, x, z, maxY, margin = 0) {
 
 // blockers: meshes that stop bullets; colliders: 2D boxes that block movement
 export function buildArena(scene, map) {
+  const half = map.half ?? WORLD.arenaHalf;
+  const spread = half / WORLD.designHalf;   // stretches the positions written in maps.js
   const blockers = [];
   const colliders = [];
 
-  const f = FLOORS[map.floor]();
-  const floor = new THREE.Mesh(new THREE.PlaneGeometry(ARENA_HALF * 2, ARENA_HALF * 2), new THREE.MeshStandardMaterial({ map: f.tex, roughness: f.roughness, metalness: f.metalness }));
+  const f = FLOORS[map.floor](half);
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(half * 2, half * 2), new THREE.MeshStandardMaterial({ map: f.tex, roughness: f.roughness, metalness: f.metalness }));
   f.tex.colorSpace = THREE.SRGBColorSpace;
   floor.rotation.x = -Math.PI / 2;
   floor.receiveShadow = true;
@@ -186,8 +274,8 @@ export function buildArena(scene, map) {
   blockers.push(floor);
 
   const wallMat = M(map.wall.color);
-  const t = 0.6, h = map.wall.height ?? 3.5, len = ARENA_HALF * 2 + t * 2;
-  for (const [x, z, w, d] of [[0, ARENA_HALF + t / 2, len, t], [0, -ARENA_HALF - t / 2, len, t], [ARENA_HALF + t / 2, 0, t, len], [-ARENA_HALF - t / 2, 0, t, len]]) {
+  const t = 0.6, h = map.wall.height ?? 3.5, len = half * 2 + t * 2;
+  for (const [x, z, w, d] of [[0, half + t / 2, len, t], [0, -half - t / 2, len, t], [half + t / 2, 0, t, len], [-half - t / 2, 0, t, len]]) {
     const wall = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), wallMat);
     wall.position.set(x, h / 2, z);
     wall.castShadow = wall.receiveShadow = true;
@@ -202,7 +290,7 @@ export function buildArena(scene, map) {
   const cover = [
     ...map.center,
     ...map.quarter.flatMap(([x, z, w, d, ch, k]) => {
-      const sx = x * SPREAD, sz = z * SPREAD;
+      const sx = x * spread, sz = z * spread;
       return [[sx, sz, w, d, ch, k], [-sx, sz, w, d, ch, k], [sx, -sz, w, d, ch, k], [-sx, -sz, w, d, ch, k]];
     }),
   ];
@@ -243,17 +331,20 @@ export function buildArena(scene, map) {
     const L = map.lights;
     for (const [x, z] of L.at) {
       const l = new THREE.PointLight(L.color, L.intensity, L.distance, 1.6);
-      l.position.set(x * SPREAD, L.y ?? 3, z * SPREAD);
+      l.position.set(x * spread, L.y ?? 3, z * spread);
       scene.add(l);
     }
   }
   const earth = map.space ? addSpace(scene) : null;
-  if (map.forest) addForest(scene, map.forest);
-  if (map.ceiling) addCeiling(scene, map, blockers);
+  if (map.forest) addForest(scene, map.forest, half);
+  if (map.ceiling) addCeiling(scene, map, blockers, half);
+  if (map.road) addRoad(scene, map.road, half);
+  if (map.town) addTown(scene, map.town, half);
+  if (map.sunDisc) addSunDisc(scene, map.sun);
 
   // True when a circle of `margin` radius at (x, z) does not touch any cover
   const isFree = (x, z, margin = 1) =>
     colliders.every(c => x < c.minX - margin || x > c.maxX + margin || z < c.minZ - margin || z > c.maxZ + margin);
 
-  return { blockers, colliders, isFree, earth };
+  return { blockers, colliders, isFree, earth, half };
 }

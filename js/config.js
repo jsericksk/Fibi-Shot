@@ -33,7 +33,7 @@ export const WORLD = {
   arenaHalf: 36,              // map is a square of (2 * arenaHalf) meters
   designHalf: 30,             // maps.js positions are drawn for this half size and spread out to fit arenaHalf
   gravity: 10,                // same floaty, moon-like jump on every map
-  fighterRadius: 0.45,        // collision radius
+  fighterRadius: 0.45,        // default collision radius (a character can set its own in characters/index.js)
   stepUp: 0.35,               // max height difference walked onto without jumping
   deathBodyLength: 1.4,       // how far a fallen body reaches from the feet
 };
