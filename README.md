@@ -7,8 +7,9 @@ The game is based on the AI-generated chibi characters that became popular in 20
 
 The whole game was made with 100% vibe coding.
 
-Pick a cute character, grab a gun and duel a bot, hang out in a showcase of all characters,
-or play 1v1 against a friend online.
+Pick a cute character, grab a gun and duel one or two bots, hang out in a showcase of all characters,
+or play 1v1 against a friend online. It works with mouse and keyboard on the computer and with touch
+controls on phones (landscape).
 
 ## How to play
 
@@ -23,9 +24,11 @@ An internet connection is needed (three.js and PeerJS are loaded from a CDN).
 
 ### Game modes
 
-- **1v1:** an endless deathmatch against a bot.
-- **Training:** every character walks around the map, jumps and dances. Infinite ammo and no deaths,
-  so it is a good place to try things out.
+- **1v1:** a deathmatch against a bot, endless or timed (3 or 5 minutes).
+- **1v2:** the same, against two bots at once. Tap the **+** slot next to the enemy to add a second one
+  and pick who it is (the **✕** removes it).
+- **Training:** every character walks around the map, jumps and dances. Infinite ammo and no deaths, and every
+  hit shows its damage as a floating number, so it is a good place to try things out.
 - **Multiplayer:** a 1v1 against a friend over the network.
 
 ### Controls
@@ -36,7 +39,7 @@ An internet connection is needed (three.js and PeerJS are loaded from a CDN).
 | Mouse | Aim |
 | Left click | Shoot |
 | Right click | Aim (small zoom, exact shots; full scope on the AWP) |
-| `1` `2` `3` `4` | Switch weapon |
+| `1` `2` `3` `4` `5` | Switch weapon |
 | `R` | Reload |
 | `Space` | Jump |
 | `H` | Emote |
@@ -44,24 +47,37 @@ An internet connection is needed (three.js and PeerJS are loaded from a CDN).
 | `F` | Fullscreen |
 | `Esc` | Pause menu |
 
+On a phone the screen has a joystick and buttons for shooting, aiming, jumping, reloading, emotes and the
+weapon menu. Their size and position can be changed in **Pause > Edit controls**.
+
 ## Characters
 
 - **Fibi:** blonde girl with a wide white hat.
 - **Guga:** girl in a penguin hoodie.
 - **Nono:** sleepy girl with long gray-green hair.
 - **Doro:** chubby, grumpy mochi girl with pink hair.
+- **Mambo:** horse girl in a sailor-style outfit, with a periwinkle beret and a tail.
+- **Yotsuba:** cheerful girl with spiky green hair, a white tee and mustard shorts.
+
+Each character has its own emotes with sound (press `H`).
 
 ## Weapons
 
-Pistol, AK-47, AWP (sniper) and Shotgun. Each one has its own feel: the shotgun is strong up close,
-the AWP is a sniper with a full scope, and the AK-47 is a reliable automatic.
+Pistol, AK-47, AWP (sniper), Shotgun and Bazooka. Each one has its own feel: the shotgun is strong up close,
+the AWP is a sniper with a full scope (70 to the body, 100 to the head) and the AK-47 is a reliable automatic.
+The pistol, AK-47 and shotgun lose damage with distance. The bazooka holds 3 rockets and takes a long time to
+reload; its rocket flies slowly, so it can be dodged, and explodes on impact with area damage (a direct hit does
+full damage).
 Every weapon can aim for a small zoom, and shots fired while aiming are exact.
 All the numbers can be tweaked in `js/config.js`.
 
 ## Maps
 
-- **Moon:** a lunar map with low gravity.
+- **Moon:** a lunar surface under a starry sky, with the Earth in the distance.
 - **Arena:** a dark red and black arena.
+- **Forest:** a green clearing with rocks, logs and trees.
+- **Assault:** an indoor warehouse with stacked containers.
+- **Plaza:** a bigger town square with a terrace, stairs, a street and houses around it.
 
 ## Multiplayer
 
