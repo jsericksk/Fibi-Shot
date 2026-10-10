@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { WEAPON_ORDER } from './weapons.js';
 import { rand, randInt, lerpAngle, clamp } from '../utils.js';
-import { ENEMY, PLAYER, SHOWCASE, EMOTES, WORLD } from '../config.js';
+import { ENEMY, PLAYER, SHOWCASE, EMOTES } from '../config.js';
 
 const SPEED = PLAYER.walkSpeed;   // bots move as fast as the player
 const MIN_RANGE = ENEMY.minRange, MAX_RANGE = ENEMY.maxRange;
@@ -140,7 +140,7 @@ export class EnemyAI {
 
     this.wayT -= dt;
     if (!this.way || this.wayT <= 0 || Math.hypot(this.way.x - f.pos.x, this.way.z - f.pos.z) < 1) {
-      const lim = WORLD.arenaHalf - 3;
+      const lim = this.game.arena.half - 3;
       for (let i = 0; i < 30; i++) {
         const x = rand(-lim, lim), z = rand(-lim, lim);
         if (this.game.arena.isFree(x, z, 1.2)) { this.way = { x, z }; break; }
@@ -262,9 +262,9 @@ export class EnemyAI {
       this.charge += dt;
       this.showScopeGlint();
       if (this.charge >= AWP_CHARGE && f.canFire()) { this.shoot(origin, aim); this.charge = 0; this.reaction = rand(0.4, 1); }
-    } else if (w.id === 'pistol' || w.id === 'shotgun') {
+    } else if (w.id === 'pistol' || w.id === 'shotgun' || w.id === 'bazooka') {
       this.burstWait -= dt;
-      if (this.burstWait <= 0 && f.canFire()) { this.shoot(origin, aim); this.burstWait = w.id === 'shotgun' ? rand(0.6, 1.2) : rand(0.3, 0.9); }
+      if (this.burstWait <= 0 && f.canFire()) { this.shoot(origin, aim); this.burstWait = w.id === 'pistol' ? rand(0.3, 0.9) : rand(0.6, 1.2); }
     } else {
       if (this.burstLeft > 0) {
         if (f.canFire()) { this.shoot(origin, aim); this.burstLeft--; if (this.burstLeft === 0) this.burstWait = rand(0.9, 1.9); }

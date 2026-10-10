@@ -14,6 +14,9 @@
 </head>
 <body>
 
+<!-- Splash: shown while the modules and three.js download, removed by main.js -->
+<div id="splash"><h1 class="logo">Fibi Shot</h1><div class="spinner"></div></div>
+
 <!-- Screen 1: home (pick fighters and map, start) -->
 <section id="screen-select" class="screen">
   <header class="home-top">
@@ -26,7 +29,7 @@
 
   <div class="home-body">
     <div class="home-left">
-      <div class="duel">
+      <div class="duel three">
         <div class="fighter-row">
           <button id="btn-stage-emote" class="tbtn stage-emote"></button>
           <div class="fighter active" data-side="player">
@@ -36,10 +39,21 @@
           </div>
         </div>
         <div class="vs">VS</div>
-        <div class="fighter" data-side="enemy">
-          <h2 data-i18n="enemy"></h2>
-          <div class="stage art"><canvas id="stage-enemy" width="480" height="380"></canvas></div>
-          <div id="name-enemy" class="fname"></div>
+        <div class="enemies">
+          <div class="fighter" data-side="enemy">
+            <h2 data-i18n="enemy"></h2>
+            <div class="stage art"><canvas id="stage-enemy" width="480" height="380"></canvas></div>
+            <div id="name-enemy" class="fname"></div>
+          </div>
+          <div class="enemy2-slot">
+            <div class="fighter empty" id="fighter-enemy2" data-side="enemy2">
+              <button id="btn-remove-enemy" class="remove-enemy">✕</button>
+              <h2 data-i18n="enemy2"></h2>
+              <div class="stage art"><canvas id="stage-enemy2" width="480" height="380"></canvas></div>
+              <div id="name-enemy2" class="fname"></div>
+            </div>
+            <button id="btn-add-enemy" class="add-enemy">＋</button>
+          </div>
         </div>
       </div>
       <h3 class="section"><span data-i18n="section.pick"></span> <b id="pick-for"></b></h3>
@@ -50,7 +64,7 @@
       <h3 class="section" data-i18n="section.map"></h3>
       <div class="maps" id="pick-map"></div>
       <div class="actions">
-        <button id="btn-start" class="act play"><i>⚔️</i><span><b data-i18n="mode.duel"></b><em data-i18n="mode.duel.desc"></em></span></button>
+        <button id="btn-start" class="act play"><i id="play-icon"></i><span><b id="play-title"></b><em id="play-desc"></em></span></button>
         <button id="btn-train" class="act"><i>🎯</i><b data-i18n="mode.training"></b></button>
         <button id="btn-multi" class="act"><i>🌐</i><b data-i18n="mode.multi"></b></button>
       </div>
@@ -113,8 +127,9 @@
   <div id="toast"></div>
   <div id="reload-icon"><svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></div>
 
-  <div class="plate left"><img id="p-portrait" alt=""><div><div id="p-name" class="pname"></div><div class="bar"><div id="p-hp"></div></div></div></div>
-  <div class="plate right"><div><div id="e-name" class="pname"></div><div class="bar"><div id="e-hp" class="enemy"></div></div></div><img id="e-portrait" alt=""></div>
+  <div class="plate left"><img id="p-portrait" alt=""><div><div class="pname"><span id="p-name"></span><b id="p-hpnum"></b></div><div class="bar"><div id="p-hp"></div></div></div></div>
+  <div class="plate right"><div><div class="pname"><span id="e-name"></span><b id="e-hpnum"></b></div><div class="bar"><div id="e-hp" class="enemy"></div></div></div><img id="e-portrait" alt=""></div>
+  <div class="plate right second" id="plate-e2"><div><div class="pname"><span id="e2-name"></span><b id="e2-hpnum"></b></div><div class="bar"><div id="e2-hp" class="enemy"></div></div></div><img id="e2-portrait" alt=""></div>
 
   <div id="weapon-panel">
     <div id="slots"></div>

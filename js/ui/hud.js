@@ -11,6 +11,8 @@ const $ = id => document.getElementById(id);
 const el = {
   pName: $('p-name'), pPortrait: $('p-portrait'), pHp: $('p-hp'),
   eName: $('e-name'), ePortrait: $('e-portrait'), eHp: $('e-hp'),
+  pHpNum: $('p-hpnum'), eHpNum: $('e-hpnum'),
+  plate2: $('plate-e2'), e2Name: $('e2-name'), e2Portrait: $('e2-portrait'), e2Hp: $('e2-hp'), e2HpNum: $('e2-hpnum'),
   scoreP: $('sc-p'), scoreE: $('sc-e'), toast: $('toast'),
   slots: $('slots'), ammo: $('ammo'), reloadNote: $('reload-note'), reloadIcon: $('reload-icon'),
   crosshair: $('crosshair'), scope: $('scope'), hit: $('hitmarker'), hitText: $('hit-text'),
@@ -30,12 +32,14 @@ bindSensitivity('sens', 'sensitivity');
 bindSensitivity('aim-sens', 'aimSensitivity');
 
 let bannerTimer, hitTimer, toastTimer, flashTimer, lastKey = '';
+let hasSecond = false;   // the second enemy plate is in use (1v2)
 
 // Simple white weapon silhouettes (viewBox 0 0 120 44)
 const ICONS = {
   pistol: '<rect x="26" y="8" width="70" height="13" rx="2"/><polygon points="34,21 52,21 46,42 32,42"/><rect x="96" y="11" width="10" height="5"/>',
   ak47: '<rect x="14" y="14" width="66" height="10" rx="2"/><rect x="80" y="16" width="38" height="5"/><polygon points="0,12 16,14 16,30 0,32"/><polygon points="46,24 60,24 66,42 52,42"/><polygon points="28,24 38,24 35,40 26,40"/><rect x="62" y="10" width="24" height="4"/>',
   shotgun: '<rect x="6" y="15" width="108" height="5" rx="2"/><rect x="6" y="21" width="84" height="4" rx="2"/><rect x="54" y="19" width="26" height="8" rx="2"/><polygon points="0,14 22,14 22,30 0,34"/><polygon points="24,25 34,25 31,40 22,40"/>',
+  bazooka: '<rect x="8" y="12" width="100" height="13" rx="4"/><rect x="0" y="9" width="14" height="19" rx="3"/><polygon points="108,12 120,18.5 108,25"/><polygon points="44,25 58,25 54,42 42,42"/><rect x="60" y="6" width="16" height="5"/>',
   awp: '<rect x="8" y="17" width="108" height="6" rx="2"/><rect x="38" y="5" width="34" height="8" rx="3"/><rect x="46" y="12" width="3" height="6"/><rect x="62" y="12" width="3" height="6"/><polygon points="0,14 22,16 22,32 0,28"/><polygon points="26,23 36,23 33,38 24,38"/><rect x="30" y="12" width="8" height="3"/>',
 };
 
@@ -43,11 +47,19 @@ export const weaponIcon = id => `<svg viewBox="0 0 120 44">${ICONS[id]}</svg>`;
 
 // DOM-based HUD for the match screen
 export const hud = {
-  setup(playerDef, enemyDef) {
+  // enemyDefs: one or two opponents (the second one gets its own plate under the first)
+  setup(playerDef, enemyDefs) {
+    const [enemyDef, second] = enemyDefs;
     el.pName.textContent = playerDef.name;
     el.eName.textContent = enemyDef.name;
     el.pPortrait.src = thumbnail(playerDef);
     el.ePortrait.src = thumbnail(enemyDef);
+    hasSecond = !!second;
+    el.plate2.style.display = second ? 'flex' : 'none';
+    if (second) {
+      el.e2Name.textContent = second.name;
+      el.e2Portrait.src = thumbnail(second);
+    }
     el.slots.innerHTML = WEAPON_ORDER.map((id, i) => `<div class="slot" data-id="${id}"><b>${i + 1}</b> ${t('weapon.' + id)}</div>`).join('');
     lastKey = '';
     el.result.style.display = 'none';
@@ -57,9 +69,14 @@ export const hud = {
     el.weaponFlash.style.display = 'none';
   },
 
-  update(player, enemy) {
-    el.pHp.style.width = (player.hp / MATCH.maxHp) * 100 + '%';
-    el.eHp.style.width = (enemy.hp / MATCH.maxHp) * 100 + '%';
+  update(player, enemies) {
+    const bar = (fill, number, fighter) => {
+      fill.style.width = (fighter.hp / MATCH.maxHp) * 100 + '%';
+      number.textContent = Math.ceil(fighter.hp);
+    };
+    bar(el.pHp, el.pHpNum, player);
+    bar(el.eHp, el.eHpNum, enemies[0]);
+    if (hasSecond) bar(el.e2Hp, el.e2HpNum, enemies[1]);
 
     // Reload icon in the middle of the screen with a progress ring
     const w = player.weapon;

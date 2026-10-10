@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { WORLD, THROWN } from '../config.js';
 import { rand } from '../utils.js';
 
+const TAU = Math.PI * 2;
 const UP = new THREE.Vector3(0, 1, 0);
 const tracerGeo = new THREE.CylinderGeometry(1, 1, 1, 6);
 const flashGeo = new THREE.SphereGeometry(1, 8, 6);
@@ -52,6 +53,50 @@ export class Effects {
     }
   }
 
+  // Floating damage number above a target (white, bigger and gold on a headshot); `size` keeps it readable from afar
+  damageNumber(pos, amount, headshot, size = 1) {
+    const c = document.createElement('canvas');
+    c.width = 128; c.height = 64;
+    const g = c.getContext('2d');
+    g.font = '900 46px sans-serif';
+    g.textAlign = g.textBaseline = 'center';
+    g.lineWidth = 8;
+    g.strokeStyle = '#000';
+    g.strokeText(Math.round(amount), 64, 34);
+    g.fillStyle = headshot ? '#ffd23a' : '#fff';
+    g.fillText(Math.round(amount), 64, 34);
+    const map = new THREE.CanvasTexture(c);
+    map.colorSpace = THREE.SRGBColorSpace;
+    const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map, transparent: true, depthTest: false }));
+    sprite.renderOrder = 10;
+    sprite.scale.set((headshot ? 1.4 : 1.1) * size, (headshot ? 0.7 : 0.55) * size, 1);
+    sprite.position.copy(pos).add(new THREE.Vector3(rand(-0.3, 0.3), 0.3, rand(-0.3, 0.3)));
+    this.scene.add(sprite);
+    this.items.push({ mesh: sprite, life: 0.9, max: 0.9, fade: true, float: 1.2 });
+  }
+
+  // Smoke puff that swells and fades (rocket trail)
+  puff(pos) {
+    const mat = new THREE.MeshBasicMaterial({ color: 0xb8b8c0, transparent: true, depthWrite: false });
+    const mesh = new THREE.Mesh(flashGeo, mat);
+    mesh.position.copy(pos);
+    this.scene.add(mesh);
+    this.items.push({ mesh, life: 0.7, max: 0.7, fade: true, alpha: 0.45, grow: [0.06, 0.28] });
+  }
+
+  // Fireball, bright core, sparks and smoke of a rocket blast
+  explosion(pos, radius) {
+    for (const [color, size, life] of [[0xff8a2a, radius * 0.8, 0.4], [0xfff0b0, radius * 0.5, 0.2]]) {
+      const mat = new THREE.MeshBasicMaterial({ color, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false });
+      const mesh = new THREE.Mesh(flashGeo, mat);
+      mesh.position.copy(pos);
+      this.scene.add(mesh);
+      this.items.push({ mesh, life, max: life, fade: true, grow: [0.4, size] });
+    }
+    for (let i = 0; i < 3; i++) this.impact(pos, 0xffa040);
+    for (let i = 0; i < 5; i++) this.puff(pos.clone().add(new THREE.Vector3(rand(-1, 1), rand(0, 1.2), rand(-1, 1))));
+  }
+
   // Copies a part of a fighter (weapon, hat) into the scene and throws it: it tumbles, lands flat on whatever floorAt(x, z, y) says, then disappears
   throwOff(source, yaw, floorAt) {
     const mesh = source.clone(true);
@@ -78,6 +123,13 @@ export class Effects {
         mesh.rotation.x += g.spin.x * dt;
         mesh.rotation.y += g.spin.y * dt;
         mesh.rotation.z += g.spin.z * dt;
+        if (!g.bounced) {   // the tumble settles on the way down (spin fades, tilt eases to level), so it never snaps flat at the landing
+          const level = Math.min(1, dt * THROWN.levelRate);
+          for (const axis of ['x', 'z']) {
+            g.spin[axis] *= 1 - level;
+            mesh.rotation[axis] += (Math.round(mesh.rotation[axis] / TAU) * TAU - mesh.rotation[axis]) * level;
+          }
+        }
         // The floor under it right now: the ground, or the top of cover it is above
         const floor = g.floorAt(mesh.position.x, mesh.position.z, mesh.position.y + THROWN.coverReach);
         if (lowestY(mesh) <= floor) {
@@ -105,12 +157,16 @@ export class Effects {
         it.vel.y -= 9 * dt;
         it.mesh.position.addScaledVector(it.vel, dt);
       }
+      if (it.float) it.mesh.position.y += it.float * dt;
       if (it.life <= 0) {
         this.scene.remove(it.mesh);
+        it.mesh.material.map?.dispose();
         it.mesh.material.dispose();
         this.items.splice(i, 1);
-      } else if (it.fade) {
-        it.mesh.material.opacity = it.life / it.max;
+      } else {
+        const done = 1 - it.life / it.max;
+        if (it.grow) it.mesh.scale.setScalar(it.grow[0] + (it.grow[1] - it.grow[0]) * done);
+        if (it.fade) it.mesh.material.opacity = (it.alpha ?? 1) * (1 - done);
       }
     }
   }

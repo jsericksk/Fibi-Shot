@@ -4,9 +4,7 @@ import { WORLD, MATCH } from '../config.js';
 import { MODEL_SCALE } from '../characters/rig.js';
 import { floorHeight } from './arena.js';
 
-const RADIUS = WORLD.fighterRadius;
 const STEP_UP = WORLD.stepUp;
-const ARENA_HALF = WORLD.arenaHalf;
 export const MAX_HP = MATCH.maxHp;
 
 // Each fall is different: on the back or on the belly, arms raised or at the sides
@@ -14,8 +12,10 @@ export const randomDeathPose = () => ({ faceUp: Math.random() < 0.5, armsUp: Mat
 
 // Shared state for the player and the enemy: model, health, weapons and movement
 export class Fighter {
-  constructor(def, isPlayer) {
+  constructor(def, isPlayer, arenaHalf) {
     this.def = def;
+    this.arenaHalf = arenaHalf;
+    this.radius = def.radius ?? WORLD.fighterRadius;
     this.isPlayer = isPlayer;
     this.rig = def.build();
     this.root = this.rig.root;
@@ -77,7 +77,7 @@ export class Fighter {
     this.weaponId = id;
     this.guns[id].group.visible = true;
     this.reloading = false;
-    this.cooldown = 0.35;
+    this.cooldown = 0;   // a freshly drawn weapon fires right away
     this.bloom = 0;
     return true;
   }
@@ -174,20 +174,20 @@ export class Fighter {
       const cz = Math.max(c.minZ, Math.min(this.pos.z, c.maxZ));
       let ox = this.pos.x - cx, oz = this.pos.z - cz;
       const d = Math.hypot(ox, oz);
-      if (d >= RADIUS) continue;
+      if (d >= this.radius) continue;
       if (d > 1e-5) {
-        this.pos.x = cx + (ox / d) * RADIUS;
-        this.pos.z = cz + (oz / d) * RADIUS;
+        this.pos.x = cx + (ox / d) * this.radius;
+        this.pos.z = cz + (oz / d) * this.radius;
       } else {
         // Center is inside the box: push out along the nearest side
         const gaps = [[this.pos.x - c.minX, -1, 0], [c.maxX - this.pos.x, 1, 0], [this.pos.z - c.minZ, 0, -1], [c.maxZ - this.pos.z, 0, 1]];
         gaps.sort((a, b) => a[0] - b[0]);
         const [g, sx, sz] = gaps[0];
-        this.pos.x += sx * (g + RADIUS);
-        this.pos.z += sz * (g + RADIUS);
+        this.pos.x += sx * (g + this.radius);
+        this.pos.z += sz * (g + this.radius);
       }
     }
-    const lim = ARENA_HALF - RADIUS;
+    const lim = this.arenaHalf - this.radius;
     this.pos.x = Math.max(-lim, Math.min(lim, this.pos.x));
     this.pos.z = Math.max(-lim, Math.min(lim, this.pos.z));
   }

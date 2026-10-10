@@ -30,10 +30,10 @@ const lobby = initLobby({
 });
 
 initSelect({
-  onStart(playerDef, enemyDef, mode, mapId, duration) {
+  onStart(playerDef, enemyDef, mode, mapId, duration, secondEnemy) {
     show('game');
     game.resize();
-    game.start(playerDef, enemyDef, mode, mapId, { duration });
+    game.start(playerDef, enemyDef, mode, mapId, { duration, secondEnemy });
   },
   onMultiplayer() {
     show('lobby');
@@ -47,3 +47,8 @@ if (room) {
   show('lobby');
   lobby.open(room);
 }
+
+// Everything is loaded: fade the splash out and drop it
+const splash = document.getElementById('splash');
+splash.classList.add('done');
+splash.addEventListener('transitionend', () => splash.remove());

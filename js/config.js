@@ -33,8 +33,9 @@ export const WORLD = {
   arenaHalf: 36,              // map is a square of (2 * arenaHalf) meters
   designHalf: 30,             // maps.js positions are drawn for this half size and spread out to fit arenaHalf
   gravity: 10,                // same floaty, moon-like jump on every map
-  fighterRadius: 0.45,        // collision radius
+  fighterRadius: 0.6,         // default collision radius (a character can set its own in characters/index.js)
   stepUp: 0.35,               // max height difference walked onto without jumping
+  deathBodyLength: 1.4,       // how far a fallen body reaches from the feet
 };
 
 // ---- Camera ----------------------------------------------------------------
@@ -62,20 +63,23 @@ export const PLAYER = {
 
 // ---- Emotes (H key) ----------------------------------------------------------
 // Each character has its own emotes; one is picked at random when pressing H.
-// dance: animation name from js/characters/dances.js (ballet, idol, penguin, flail, backflip, gallop, fingerGuns) | duration: seconds | sound: mp3 in audio/emotes
+// dance: animation name from js/characters/dances.js (ballet, idol, penguin, groove, robot, cancan, hops, backflip, gallop) | duration: seconds | sound: mp3 in audio/emotes
 export const EMOTES = {
   fibi: [
     { dance: 'ballet', duration: 7, sound: 'audio/emotes/fibi-emote-1.mp3' },
     { dance: 'idol', duration: 5, sound: 'audio/emotes/fibi-emote-2.mp3' },
   ],
   guga: [{ dance: 'penguin', duration: 5, sound: 'audio/emotes/guga-emote-1.mp3' }],
-  nono: [{ dance: 'flail', duration: 5, sound: 'audio/emotes/nono-emote-1.mp3' }],
+  nono: [{ dance: 'groove', duration: 5, sound: 'audio/emotes/nono-emote-1.mp3' }],
+  doro: [
+    { dance: 'robot', duration: 6, sound: 'audio/emotes/doro-emote-1.mp3' },
+    { dance: 'cancan', duration: 6, sound: 'audio/emotes/doro-emote-2.mp3' },
+  ],
+  yotsuba: [{ dance: 'hops', duration: 6, sound: 'audio/emotes/yotsuba-emote-1.mp3' }],
   mambo: [
     { dance: 'backflip', duration: 7.3, sound: 'audio/emotes/mambo-1.mp3' },
     { dance: 'gallop', duration: 8.5, sound: 'audio/emotes/mambo-2.mp3' },
   ],
-  lula: [{ dance: 'idol', duration: 5, sound: 'audio/emotes/lula-emote-1.mp3' }],
-  bolso: [{ dance: 'fingerGuns', duration: 6.4, sound: 'audio/emotes/bolso-emote-1.mp3' }],
   default: [{ dance: 'idol', duration: 5, sound: null }],   // characters without their own emotes
 };
 export const EMOTE = {
@@ -135,8 +139,13 @@ export const ENEMY = {
   mirrorChance: 0.7,          // odds of strafing the other way when the player changes its sliding side
   mirrorDelay: [0.15, 0.45],  // seconds of reaction before it does
   mirrorMinSpeed: 1.2,        // m/s the player must slide across the bot's line of sight to count as a side
-  aimError: { pistol: 0.04, ak47: 0.055, awp: 0.04, shotgun: 0.032 },     // radians, lower is more accurate
-  fireRange: { pistol: 26, ak47: 34, awp: 70, shotgun: 14 },          // meters
+  aimError: { pistol: 0.04, ak47: 0.055, awp: 0.04, shotgun: 0.032, bazooka: 0.03 },     // radians, lower is more accurate
+  fireRange: { pistol: 26, ak47: 34, awp: 70, shotgun: 14, bazooka: 45 },          // meters
+};
+
+// ---- Training ----------------------------------------------------------
+export const TRAINING = {
+  numberDistance: 8,          // damage numbers grow with distance beyond this many meters so they stay readable
 };
 
 // ---- Gun and hat thrown off on death ------------------------------------
@@ -144,6 +153,7 @@ export const THROWN = {
   upSpeed: 3.5,               // m/s thrown upward
   throwSpeed: 1.8,            // m/s thrown forward (a little random sideways too)
   spin: 7,                    // max rad/s of tumbling
+  levelRate: 4,               // how fast the tumble fades and the tilt levels out while falling (per second)
   coverReach: 0.3,            // m above the gun that cover tops still catch it
   bounce: 0.3,                // share of the speed kept on the first landing
   life: 3,                    // seconds before it is gone
@@ -181,8 +191,10 @@ export const SHOWCASE = {
 const LIGHT_AIM = { fov: 50, spread: 0, speed: 5 };   // a small zoom, shots land exactly on the crosshair
 
 export const WEAPON_STATS = {
-  pistol: { id: 'pistol', name: 'Pistola', damage: 24, headMult: 2, interval: 0.3, auto: false, mag: 12, reload: 1.1, spread: 0.004, bloom: 0.006, bloomMax: 0.03, recoil: 0.016, scoped: LIGHT_AIM },
-  ak47: { id: 'ak47', name: 'AK-47', damage: 14, headMult: 2.2, interval: 0.1, auto: true, mag: 30, reload: 1.9, spread: 0.0008, bloom: 0.0015, bloomMax: 0.01, recoil: 0.014, touchAim: true, scoped: LIGHT_AIM },
+  pistol: { id: 'pistol', name: 'Pistola', damage: 24, headMult: 2, interval: 0.3, auto: false, mag: 12, reload: 1.1, spread: 0.004, bloom: 0.006, bloomMax: 0.03, recoil: 0.016, falloff: { start: 10, end: 35, min: 0.5 }, scoped: LIGHT_AIM },
+  ak47: { id: 'ak47', name: 'AK-47', damage: 14, headMult: 2.2, interval: 0.1, auto: true, mag: 30, reload: 1.9, spread: 0.0008, bloom: 0.0015, bloomMax: 0.01, recoil: 0.014, touchAim: true, falloff: { start: 15, end: 50, min: 0.5 }, scoped: LIGHT_AIM },
   shotgun: { id: 'shotgun', name: 'Escopeta', damage: 12, headMult: 1.5, interval: 0.9, auto: false, mag: 6, reload: 2.4, spread: 0.004, bloom: 0, bloomMax: 0, recoil: 0.06, pellets: 8, pelletSpread: 0.055, falloff: { start: 5, end: 20, min: 0.08 }, scoped: LIGHT_AIM },
-  awp: { id: 'awp', name: 'AWP', damage: 90, headMult: 2, interval: 0.8, auto: false, mag: 5, reload: 2.4, spread: 0.06, bloom: 0, bloomMax: 0, recoil: 0.07, scoped: { fov: 18, spread: 0, speed: 3.2, sniper: true } },
+  awp: { id: 'awp', name: 'AWP', damage: 70, headMult: 10 / 7, interval: 0.8, auto: false, mag: 5, reload: 2.4, spread: 0.06, bloom: 0, bloomMax: 0, recoil: 0.07, scoped: { fov: 18, spread: 0, speed: 3.2, sniper: true } },
+  // Rocket: flies visibly (dodge it!) and explodes on impact; damage falls off linearly from the blast center down to `edge` (fraction) at `radius`
+  bazooka: { id: 'bazooka', name: 'Bazuca', damage: 100, headMult: 1, interval: 1, auto: false, mag: 3, reload: 5.5, spread: 0.002, bloom: 0, bloomMax: 0, recoil: 0.09, scoped: LIGHT_AIM, projectile: { speed: 22, radius: 4.5, edge: 0.3, life: 8, trailInterval: 0.025, maxAimAngle: 0.14 } },
 };

@@ -2,8 +2,9 @@ import * as THREE from 'three';
 import { buildArena, floorHeight } from './arena.js';
 import { MAPS, MAP_LIST } from '../maps.js';
 import { getCharacter, CHARACTERS } from '../characters/index.js';
-import { MATCH, WORLD, CAMERA, EMOTE, EMOTES, SHOWCASE, NET, DOOMSDAY } from '../config.js';
+import { MATCH, WORLD, CAMERA, EMOTE, EMOTES, SHOWCASE, TRAINING, NET, DOOMSDAY } from '../config.js';
 import { Effects } from './effects.js';
+import { Rockets } from './rockets.js';
 import { Doomsday } from './doomsday.js';
 import { Fighter, randomDeathPose } from './fighter.js';
 import { PlayerControls } from './player.js';
@@ -16,8 +17,6 @@ import { sfx } from '../audio.js';
 import { isSwitchingFullscreen, enterFullscreen } from '../fullscreen.js';
 import { rand, isTouch } from '../utils.js';
 import { t } from '../i18n.js';
-
-const ARENA_HALF = WORLD.arenaHalf;
 
 const COUNTDOWN = MATCH.countdown;
 const FAR = MATCH.bulletRange;
@@ -101,15 +100,16 @@ export class Game {
     sun.position.set(...map.sun.pos);
     sun.castShadow = true;
     sun.shadow.mapSize.set(4096, 4096);
-    const R = ARENA_HALF + 6;
-    Object.assign(sun.shadow.camera, { left: -R, right: R, top: R, bottom: -R, near: 1, far: 120 });
     sun.shadow.bias = -0.0005;
     scene.add(sun);
 
-    this.arena = buildArena(scene, map);
+    const arena = this.arena = buildArena(scene, map);
+    const R = arena.half + 6;
+    Object.assign(sun.shadow.camera, { left: -R, right: R, top: R, bottom: -R, near: 1, far: 120 });
     this.effects = new Effects(scene);
+    this.rockets = new Rockets(this);
 
-    this.player = new Fighter(playerDef, true);
+    this.player = new Fighter(playerDef, true, arena.half);
     this.player.training = this.training;
     scene.add(this.player.root);
     // Online: host starts on the west side and guest on the east side
@@ -117,9 +117,9 @@ export class Game {
     this.place(this.player, null, undefined, side);
 
     // Duel: one hunting enemy. Training: every other character wanders around as a showcase.
-    const defs = this.training ? CHARACTERS.filter(c => c.id !== playerDef.id) : [enemyDef];
+    const defs = this.training ? CHARACTERS.filter(c => c.id !== playerDef.id) : opts.secondEnemy ? [enemyDef, opts.secondEnemy] : [enemyDef];
     this.bots = defs.map(def => {
-      const f = new Fighter(def, false);
+      const f = new Fighter(def, false, arena.half);
       f.training = this.training;
       f.unarmed = this.training;
       scene.add(f.root);
@@ -136,7 +136,7 @@ export class Game {
     this.duration = this.training ? 0 : opts.duration ?? 0;   // seconds, 0 = unlimited
     this.timeLeft = this.duration;
 
-    this.hud.setup(playerDef, enemyDef);
+    this.hud.setup(playerDef, this.training ? [enemyDef] : defs);
     this.hud.setScore(0, 0);
     this.hud.setTimer(this.training ? null : this.duration, this.timeLeft);
     this.hud.setDoomFlash(0);
@@ -148,7 +148,6 @@ export class Game {
     sfx.preload(Object.values(EMOTES).flat().map(e => e.sound));
     this.hud.setTraining(this.training);
     this.hud.setupChange(playerDef, this.training ? null : enemyDef, (side, id) => this.changeCharacter(side, id));
-    if (!this.training && !isTouch) this.hud.toast(t('toast.pickWeapon'), 0);   // touch players know the buttons
 
     if (this.multi) {
       this.netT = 0;
@@ -218,7 +217,8 @@ export class Game {
       } else if (em) sfx.setVoiceVolume(key, this.emoteVolume(b.f));
     });
     this.effects.update(dt);
-    this.hud.update(this.player, this.enemy);
+    this.rockets.update(dt);
+    this.hud.update(this.player, this.bots.map(b => b.f));
     if (this.multi) this.sendState(dt);
   }
 
@@ -279,7 +279,6 @@ export class Game {
     if (this.countdownT <= 0.6) {
       this.state = 'playing';
       this.hud.banner(t('banner.go'), 700);
-      this.hud.toast('', 0);
       sfx.beep(true);
     }
   }
@@ -318,7 +317,7 @@ export class Game {
   // Random free spot far from `other`, preferring places out of its line of sight.
   // If every free spot tried is closer than `minDistance`, the farthest one wins.
   pickSpawn(other, minDistance = MATCH.minSpawnDistance, filter = null) {
-    const lim = ARENA_HALF - 2;
+    const lim = this.arena.half - 2;
     const valid = [], hidden = [];
     let farthest = null, farthestDist = -1;
     for (let i = 0; i < 80; i++) {
@@ -361,10 +360,10 @@ export class Game {
   // Hitscan shot: casts one ray (or several pellets for the shotgun), draws effects, applies damage.
   // The player can hit any bot; bots only target the player.
   fire(shooter, origin, dir) {
-    this.scene.updateMatrixWorld();
     const w = shooter.weapon;
-    const objects = [...this.arena.blockers];
-    for (const c of shooter.isPlayer ? this.bots.map(b => b.f) : [this.player]) if (!c.dead) objects.push(...c.hitboxes);
+    if (w.projectile) return this.rockets.launch(shooter, origin, dir);
+    this.scene.updateMatrixWorld();
+    const objects = this.hittables(shooter);
 
     const muzzle = shooter.muzzleWorld();
     const pellets = w.pellets ?? 1;
@@ -404,19 +403,36 @@ export class Game {
       net.send({ t: 'shot', w: w.id, mz: r(muzzle), e: ends.map(r) });
     }
 
-    for (const [target, { damage, headshot }] of hits) {
-      if (target.remote) {   // the friend applies the damage to themselves
-        net.send({ t: 'hit', d: damage });
-        this.lastHitHead = headshot;
-        this.hud.hitMarker(headshot, false);
-        sfx.hit(headshot);
-        continue;
-      }
-      const died = target.takeDamage(damage);
-      if (shooter.isPlayer) { this.hud.hitMarker(headshot, died); sfx.hit(headshot); if (died && headshot) sfx.headshotKill(); }
-      else { this.hud.damageFlash(); sfx.hurt(); }
-      if (died) this.onKill(shooter, target);
+    for (const [target, { damage, headshot }] of hits) this.damage(shooter, target, damage, headshot);
+  }
+
+  // The fighters on the other side of a shooter
+  opponentsOf(shooter) { return shooter.isPlayer ? this.bots.map(b => b.f) : [this.player]; }
+
+  // Everything a shot of this shooter can hit: cover and the living opponents' hitboxes
+  hittables(shooter) {
+    const objects = [...this.arena.blockers];
+    for (const c of this.opponentsOf(shooter)) if (!c.dead) objects.push(...c.hitboxes);
+    return objects;
+  }
+
+  // Applies damage from a shooter to a target, with the matching feedback
+  damage(shooter, target, damage, headshot = false) {
+    if (this.training) {   // training shows the damage as floating numbers
+      const head = target.headPos();
+      this.effects.damageNumber(head, damage, headshot, Math.max(1, this.camera.position.distanceTo(head) / TRAINING.numberDistance));
     }
+    if (target.remote) {   // the friend applies the damage to themselves
+      net.send({ t: 'hit', d: damage });
+      this.lastHitHead = headshot;
+      this.hud.hitMarker(headshot, false);
+      sfx.hit(headshot);
+      return;
+    }
+    const died = target.takeDamage(damage);
+    if (shooter.isPlayer) { this.hud.hitMarker(headshot, died); sfx.hit(headshot); if (died && headshot) sfx.headshotKill(); }
+    else { this.hud.damageFlash(); sfx.hurt(); }
+    if (died) this.onKill(shooter, target);
   }
 
   // Tracers, muzzle flash and gun sound of a shot (ours or the friend's)
@@ -437,9 +453,21 @@ export class Game {
     return 1 - k * (1 - f.min);
   }
 
+  // Random fall, flipped when cover stands where the body would land so it does not sink into it
+  freeDeathPose(f) {
+    const pose = randomDeathPose();
+    const blocked = faceUp => [0.5, WORLD.deathBodyLength].some(d => {
+      const sign = faceUp ? -1 : 1;   // on the back the body lies behind the feet, on the belly in front
+      const x = f.pos.x + Math.sin(f.yaw) * d * sign, z = f.pos.z + Math.cos(f.yaw) * d * sign;
+      return floorHeight(this.arena.colliders, x, z, Infinity, 0.2) > f.pos.y + 0.1;
+    });
+    if (blocked(pose.faceUp) && !blocked(!pose.faceUp)) pose.faceUp = !pose.faceUp;
+    return pose;
+  }
+
   onKill(killer, victim) {
     victim.respawnT = MATCH.respawnDelay;
-    victim.deathPose = randomDeathPose();
+    victim.deathPose = this.freeDeathPose(victim);
     const floorAt = (x, z, y) => floorHeight(this.arena.colliders, x, z, y);
     this.effects.throwOff(victim.guns[victim.weaponId].group, victim.yaw, floorAt);
     if (victim.rig.hat) this.effects.throwOff(victim.rig.hat, victim.yaw, floorAt);
