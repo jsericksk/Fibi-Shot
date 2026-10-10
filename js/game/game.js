@@ -146,7 +146,6 @@ export class Game {
     sfx.preload(Object.values(EMOTES).flat().map(e => e.sound));
     this.hud.setTraining(this.training);
     this.hud.setupChange(playerDef, this.training ? null : enemyDef, (side, id) => this.changeCharacter(side, id));
-    if (!this.training && !isTouch) this.hud.toast(t('toast.pickWeapon'), 0);   // touch players know the buttons
 
     if (this.multi) {
       this.netT = 0;
@@ -277,7 +276,6 @@ export class Game {
     if (this.countdownT <= 0.6) {
       this.state = 'playing';
       this.hud.banner(t('banner.go'), 700);
-      this.hud.toast('', 0);
       sfx.beep(true);
     }
   }
