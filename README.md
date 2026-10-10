@@ -54,11 +54,11 @@ weapon menu. Their size and position can be changed in **Pause > Edit controls**
 ## Characters
 
 - **Fibi:** blonde girl with a wide white hat. Skins: no hat, and a black and red outfit.
-- **Guga:** girl in a penguin hoodie.
-- **Nono:** sleepy girl with long gray-green hair.
-- **Doro:** chubby, grumpy mochi girl with pink hair.
-- **Mambo:** horse girl in a sailor-style outfit, with a periwinkle beret and a tail.
-- **Yotsuba:** cheerful girl with spiky green hair, a white tee and mustard shorts.
+- **Guga:** girl in a penguin hoodie. Skins: inverted colors (white), and Fibi's hat.
+- **Nono:** sleepy girl with long gray-green hair. Skins: Fibi's outfit, and Fibi's hat.
+- **Doro:** chubby, grumpy mochi girl with pink hair. Skin: black.
+- **Mambo:** horse girl in a sailor-style outfit, with a periwinkle beret and a tail. Skin: Fibi's hat.
+- **Yotsuba:** cheerful girl with spiky green hair, a white tee and mustard shorts. Skins: Fibi's hat, and Fibi's colors without a hat.
 
 Each character has its own emotes with sound (press `H`).
 Characters can have skins: pick one of the round portraits under the character list (also in the multiplayer lobby).

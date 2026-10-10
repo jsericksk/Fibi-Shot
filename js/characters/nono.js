@@ -1,37 +1,42 @@
 import * as THREE from 'three';
 import { M, add, sphere, cyl, box } from '../utils.js';
 import { createRig, addEyes } from './rig.js';
+import { addFibiOutfit, addFibiHat } from './fibi.js';
 
 const C = { skin: 0xffe3d2, hair: 0x9fb8ae, red: 0xd8483e, cream: 0xfbf3ec, dark: 0x3a3a46, bow: 0xe8584a };
 
-// Sleepy girl with long wavy gray-green hair and a red/white kimono-style outfit
-export function buildNono() {
+// Sleepy girl with long wavy gray-green hair and a red/white kimono-style outfit.
+// Skins: { fibiOutfit: true } and { fibiHat: true } borrow Fibi's clothes and hat
+export function buildNono({ fibiOutfit = false, fibiHat = false } = {}) {
   const rig = createRig();
   const { legs, body, arms, head } = rig;
 
-  // Dark socks and shoes
-  for (const leg of legs) {
-    add(leg, cyl, M(C.dark), [0, -0.23, 0], [0.09, 0.34, 0.09]);   // reaches down to the shoe
-    add(leg, sphere, M(0x2a2420), [0, -0.44, 0.07], [0.12, 0.07, 0.18]);
-  }
+  if (fibiOutfit) addFibiOutfit(rig);
+  else {
+    // Dark socks and shoes
+    for (const leg of legs) {
+      add(leg, cyl, M(C.dark), [0, -0.23, 0], [0.09, 0.34, 0.09]);   // reaches down to the shoe
+      add(leg, sphere, M(0x2a2420), [0, -0.44, 0.07], [0.12, 0.07, 0.18]);
+    }
 
-  // Layered kimono: dark skirt, red robe, cream collar, obi and bow
-  add(body, new THREE.CylinderGeometry(0.3, 0.44, 0.34, 32), M(C.dark), [0, 0.6, 0]);
-  add(body, new THREE.CylinderGeometry(0.27, 0.4, 0.42, 32), M(C.red), [0, 0.82, 0]);
-  add(body, new THREE.CylinderGeometry(0.405, 0.41, 0.05, 32), M(C.cream), [0, 0.64, 0]);
-  add(body, cyl, M(C.dark), [0, 0.88, 0], [0.285, 0.07, 0.285]);
-  add(body, new THREE.TorusGeometry(0.27, 0.05, 12, 32), M(C.cream), [0, 1.02, 0], [1, 1, 1], [Math.PI / 2, 0, 0]);
-  for (const s of [-1, 1]) {
-    add(body, new THREE.ConeGeometry(0.13, 0.26, 4), M(C.bow), [s * 0.14, 0.95, 0.3], [1, 1, 0.4], [0, 0, s * -Math.PI / 2]);
-  }
-  add(body, sphere, M(C.bow), [0, 0.95, 0.31], [0.07, 0.07, 0.06]);
-  add(body, new THREE.ConeGeometry(0.06, 0.3, 4), M(C.cream), [0, 0.72, 0.32], [1, 1, 0.3], [Math.PI, 0, 0]);
+    // Layered kimono: dark skirt, red robe, cream collar, obi and bow
+    add(body, new THREE.CylinderGeometry(0.3, 0.44, 0.34, 32), M(C.dark), [0, 0.6, 0]);
+    add(body, new THREE.CylinderGeometry(0.27, 0.4, 0.42, 32), M(C.red), [0, 0.82, 0]);
+    add(body, new THREE.CylinderGeometry(0.405, 0.41, 0.05, 32), M(C.cream), [0, 0.64, 0]);
+    add(body, cyl, M(C.dark), [0, 0.88, 0], [0.285, 0.07, 0.285]);
+    add(body, new THREE.TorusGeometry(0.27, 0.05, 12, 32), M(C.cream), [0, 1.02, 0], [1, 1, 1], [Math.PI / 2, 0, 0]);
+    for (const s of [-1, 1]) {
+      add(body, new THREE.ConeGeometry(0.13, 0.26, 4), M(C.bow), [s * 0.14, 0.95, 0.3], [1, 1, 0.4], [0, 0, s * -Math.PI / 2]);
+    }
+    add(body, sphere, M(C.bow), [0, 0.95, 0.31], [0.07, 0.07, 0.06]);
+    add(body, new THREE.ConeGeometry(0.06, 0.3, 4), M(C.cream), [0, 0.72, 0.32], [1, 1, 0.3], [Math.PI, 0, 0]);
 
-  // Wide cream sleeves with red trim
-  for (const arm of arms) {
-    add(arm, new THREE.CylinderGeometry(0.11, 0.2, 0.5, 20), M(C.cream), [0, -0.25, 0]);
-    add(arm, cyl, M(C.red), [0, -0.5, 0], [0.205, 0.025, 0.205]);
-    add(arm, sphere, M(C.skin), [0, -0.6, 0], [0.09, 0.09, 0.09]);
+    // Wide cream sleeves with red trim
+    for (const arm of arms) {
+      add(arm, new THREE.CylinderGeometry(0.11, 0.2, 0.5, 20), M(C.cream), [0, -0.25, 0]);
+      add(arm, cyl, M(C.red), [0, -0.5, 0], [0.205, 0.025, 0.205]);
+      add(arm, sphere, M(C.skin), [0, -0.6, 0], [0.09, 0.09, 0.09]);
+    }
   }
 
   // Head with sleepy half-closed eyes
@@ -58,7 +63,8 @@ export function buildNono() {
 
   // Golden bell on the hair ribbon and little cream pom-poms on the shoes
   add(head, sphere, M(0xf2c14e, { metalness: 0.6, roughness: 0.35 }), [-0.5, 0.26, 0.38], [0.055, 0.055, 0.055]);
-  for (const leg of legs) add(leg, sphere, M(C.cream), [0, -0.39, 0.16], [0.045, 0.045, 0.045]);
+  if (!fibiOutfit) for (const leg of legs) add(leg, sphere, M(C.cream), [0, -0.39, 0.16], [0.045, 0.045, 0.045]);
+  if (fibiHat) addFibiHat(rig);
 
   return rig;
 }

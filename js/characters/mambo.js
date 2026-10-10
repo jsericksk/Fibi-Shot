@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { M, add, sphere, cyl, box } from '../utils.js';
 import { createRig, addEyes } from './rig.js';
+import { addFibiHat } from './fibi.js';
 
 const C = {
   skin: 0xffe3d2,
@@ -20,8 +21,9 @@ const C = {
   sock: 0xc9b6e4,
 };
 
-// Horse girl in a sailor-style outfit: chestnut wavy hair, periwinkle beret, amber eyes and a tail
-export function buildMambo() {
+// Horse girl in a sailor-style outfit: chestnut wavy hair, periwinkle beret, amber eyes and a tail.
+// Skin: { fibiHat: true } trades the beret for Fibi's hat
+export function buildMambo({ fibiHat = false } = {}) {
   const rig = createRig();
   const { legs, body, arms, head } = rig;
 
@@ -84,19 +86,22 @@ export function buildMambo() {
     add(ear, new THREE.ConeGeometry(0.1, 0.38, 4), M(C.earInner), [0, 0.22, 0.04], [1, 1, 0.4]);
   }
 
-  // Beret with a white band, a visor and a little pin
-  const hat = new THREE.Group();
-  hat.position.set(0.03, 0.4, 0.02);
-  hat.rotation.set(-0.1, 0, 0.14);
-  hat.scale.setScalar(1.05);
-  head.add(hat);
-  add(hat, new THREE.SphereGeometry(1, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2), M(C.hat), [0, 0.02, 0], [0.66, 0.5, 0.66]);
-  add(hat, cyl, M(C.hatLight), [0, 0.02, 0], [0.655, 0.07, 0.655]);
-  add(hat, box, M(C.hatLight), [0, 0.0, 0.62], [0.5, 0.04, 0.22], [0.2, 0, 0]);
-  add(hat, box, M(C.hatLight), [0.05, 0.32, 0.3], [0.3, 0.02, 0.22], [-0.9, 0, 0.1]);   // shiny panel
-  add(hat, sphere, M(C.hatLight), [0, 0.5, 0], [0.05, 0.05, 0.05]);
-  add(hat, sphere, M(0x4aa0ff), [-0.58, 0.14, 0.12], [0.07, 0.07, 0.07]);
-  add(hat, sphere, M(0xd63a4a), [-0.62, 0.06, 0.08], [0.05, 0.05, 0.05]);
+  if (fibiHat) addFibiHat(rig);
+  else {
+    // Beret with a white band, a visor and a little pin
+    const hat = new THREE.Group();
+    hat.position.set(0.03, 0.4, 0.02);
+    hat.rotation.set(-0.1, 0, 0.14);
+    hat.scale.setScalar(1.05);
+    head.add(hat);
+    add(hat, new THREE.SphereGeometry(1, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2), M(C.hat), [0, 0.02, 0], [0.66, 0.5, 0.66]);
+    add(hat, cyl, M(C.hatLight), [0, 0.02, 0], [0.655, 0.07, 0.655]);
+    add(hat, box, M(C.hatLight), [0, 0.0, 0.62], [0.5, 0.04, 0.22], [0.2, 0, 0]);
+    add(hat, box, M(C.hatLight), [0.05, 0.32, 0.3], [0.3, 0.02, 0.22], [-0.9, 0, 0.1]);   // shiny panel
+    add(hat, sphere, M(C.hatLight), [0, 0.5, 0], [0.05, 0.05, 0.05]);
+    add(hat, sphere, M(0x4aa0ff), [-0.58, 0.14, 0.12], [0.07, 0.07, 0.07]);
+    add(hat, sphere, M(0xd63a4a), [-0.62, 0.06, 0.08], [0.05, 0.05, 0.05]);
+  }
 
   // Two red hairclips
   for (const y of [0.3, 0.2]) add(head, box, M(0xe04050), [0.48, y, 0.4], [0.17, 0.035, 0.03], [0, 0.9, 0.5]);
