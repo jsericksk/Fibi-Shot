@@ -35,9 +35,9 @@ export function buildYotsuba() {
 
   // Thin bare legs under rolled-up shorts, salmon shoes with white toe caps
   for (const leg of legs) {
-    add(leg, cyl, M(C.shorts), [0, -0.07, 0], [0.16, 0.13, 0.16]);
-    add(leg, cyl, M(C.shortsDark), [0, -0.2, 0], [0.165, 0.025, 0.165]);   // rolled cuff
-    add(leg, cyl, M(C.skin), [0, -0.32, 0], [0.075, 0.12, 0.075]);
+    add(leg, cyl, M(C.shorts), [0, -0.085, 0], [0.16, 0.17, 0.16]);
+    add(leg, cyl, M(C.shortsDark), [0, -0.19, 0], [0.17, 0.04, 0.17]);   // rolled cuff
+    add(leg, cyl, M(C.skin), [0, -0.3, 0], [0.08, 0.18, 0.08]);
     add(leg, sphere, M(C.salmon), [0, -0.44, 0.05], [0.12, 0.08, 0.17]);
     add(leg, sphere, M(C.white), [0, -0.455, 0.14], [0.115, 0.06, 0.1]);
   }

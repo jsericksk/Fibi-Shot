@@ -143,6 +143,11 @@ export const ENEMY = {
   fireRange: { pistol: 26, ak47: 34, awp: 70, shotgun: 14, bazooka: 45 },          // meters
 };
 
+// ---- Training ----------------------------------------------------------
+export const TRAINING = {
+  numberDistance: 8,          // damage numbers grow with distance beyond this many meters so they stay readable
+};
+
 // ---- Gun and hat thrown off on death ------------------------------------
 export const THROWN = {
   upSpeed: 3.5,               // m/s thrown upward
@@ -185,10 +190,10 @@ export const SHOWCASE = {
 const LIGHT_AIM = { fov: 50, spread: 0, speed: 5 };   // a small zoom, shots land exactly on the crosshair
 
 export const WEAPON_STATS = {
-  pistol: { id: 'pistol', name: 'Pistola', damage: 24, headMult: 2, interval: 0.3, auto: false, mag: 12, reload: 1.1, spread: 0.004, bloom: 0.006, bloomMax: 0.03, recoil: 0.016, scoped: LIGHT_AIM },
-  ak47: { id: 'ak47', name: 'AK-47', damage: 14, headMult: 2.2, interval: 0.1, auto: true, mag: 30, reload: 1.9, spread: 0.0008, bloom: 0.0015, bloomMax: 0.01, recoil: 0.014, touchAim: true, scoped: LIGHT_AIM },
+  pistol: { id: 'pistol', name: 'Pistola', damage: 24, headMult: 2, interval: 0.3, auto: false, mag: 12, reload: 1.1, spread: 0.004, bloom: 0.006, bloomMax: 0.03, recoil: 0.016, falloff: { start: 10, end: 35, min: 0.5 }, scoped: LIGHT_AIM },
+  ak47: { id: 'ak47', name: 'AK-47', damage: 14, headMult: 2.2, interval: 0.1, auto: true, mag: 30, reload: 1.9, spread: 0.0008, bloom: 0.0015, bloomMax: 0.01, recoil: 0.014, touchAim: true, falloff: { start: 15, end: 50, min: 0.5 }, scoped: LIGHT_AIM },
   shotgun: { id: 'shotgun', name: 'Escopeta', damage: 12, headMult: 1.5, interval: 0.9, auto: false, mag: 6, reload: 2.4, spread: 0.004, bloom: 0, bloomMax: 0, recoil: 0.06, pellets: 8, pelletSpread: 0.055, falloff: { start: 5, end: 20, min: 0.08 }, scoped: LIGHT_AIM },
-  awp: { id: 'awp', name: 'AWP', damage: 90, headMult: 2, interval: 0.8, auto: false, mag: 5, reload: 2.4, spread: 0.06, bloom: 0, bloomMax: 0, recoil: 0.07, scoped: { fov: 18, spread: 0, speed: 3.2, sniper: true } },
+  awp: { id: 'awp', name: 'AWP', damage: 70, headMult: 10 / 7, interval: 0.8, auto: false, mag: 5, reload: 2.4, spread: 0.06, bloom: 0, bloomMax: 0, recoil: 0.07, scoped: { fov: 18, spread: 0, speed: 3.2, sniper: true } },
   // Rocket: flies visibly (dodge it!) and explodes on impact; damage falls off linearly from the blast center down to `edge` (fraction) at `radius`
-  bazooka: { id: 'bazooka', name: 'Bazuca', damage: 100, headMult: 1, interval: 1, auto: false, mag: 3, reload: 5.5, spread: 0.002, bloom: 0, bloomMax: 0, recoil: 0.09, scoped: LIGHT_AIM, projectile: { speed: 22, radius: 4.5, edge: 0.3, life: 8, trailInterval: 0.025 } },
+  bazooka: { id: 'bazooka', name: 'Bazuca', damage: 100, headMult: 1, interval: 1, auto: false, mag: 3, reload: 5.5, spread: 0.002, bloom: 0, bloomMax: 0, recoil: 0.09, scoped: LIGHT_AIM, projectile: { speed: 22, radius: 4.5, edge: 0.3, life: 8, trailInterval: 0.025, maxAimAngle: 0.14 } },
 };

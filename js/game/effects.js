@@ -52,6 +52,28 @@ export class Effects {
     }
   }
 
+  // Floating damage number above a target (white, bigger and gold on a headshot); `size` keeps it readable from afar
+  damageNumber(pos, amount, headshot, size = 1) {
+    const c = document.createElement('canvas');
+    c.width = 128; c.height = 64;
+    const g = c.getContext('2d');
+    g.font = '900 46px sans-serif';
+    g.textAlign = g.textBaseline = 'center';
+    g.lineWidth = 8;
+    g.strokeStyle = '#000';
+    g.strokeText(Math.round(amount), 64, 34);
+    g.fillStyle = headshot ? '#ffd23a' : '#fff';
+    g.fillText(Math.round(amount), 64, 34);
+    const map = new THREE.CanvasTexture(c);
+    map.colorSpace = THREE.SRGBColorSpace;
+    const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map, transparent: true, depthTest: false }));
+    sprite.renderOrder = 10;
+    sprite.scale.set((headshot ? 1.4 : 1.1) * size, (headshot ? 0.7 : 0.55) * size, 1);
+    sprite.position.copy(pos).add(new THREE.Vector3(rand(-0.3, 0.3), 0.3, rand(-0.3, 0.3)));
+    this.scene.add(sprite);
+    this.items.push({ mesh: sprite, life: 0.9, max: 0.9, fade: true, float: 1.2 });
+  }
+
   // Smoke puff that swells and fades (rocket trail)
   puff(pos) {
     const mat = new THREE.MeshBasicMaterial({ color: 0xb8b8c0, transparent: true, depthWrite: false });
@@ -127,8 +149,10 @@ export class Effects {
         it.vel.y -= 9 * dt;
         it.mesh.position.addScaledVector(it.vel, dt);
       }
+      if (it.float) it.mesh.position.y += it.float * dt;
       if (it.life <= 0) {
         this.scene.remove(it.mesh);
+        it.mesh.material.map?.dispose();
         it.mesh.material.dispose();
         this.items.splice(i, 1);
       } else {

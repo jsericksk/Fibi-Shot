@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { buildArena, floorHeight } from './arena.js';
 import { MAPS, MAP_LIST } from '../maps.js';
 import { getCharacter, CHARACTERS } from '../characters/index.js';
-import { MATCH, WORLD, CAMERA, EMOTE, EMOTES, SHOWCASE, NET, DOOMSDAY } from '../config.js';
+import { MATCH, WORLD, CAMERA, EMOTE, EMOTES, SHOWCASE, TRAINING, NET, DOOMSDAY } from '../config.js';
 import { Effects } from './effects.js';
 import { Rockets } from './rockets.js';
 import { Doomsday } from './doomsday.js';
@@ -418,6 +418,10 @@ export class Game {
 
   // Applies damage from a shooter to a target, with the matching feedback
   damage(shooter, target, damage, headshot = false) {
+    if (this.training) {   // training shows the damage as floating numbers
+      const head = target.headPos();
+      this.effects.damageNumber(head, damage, headshot, Math.max(1, this.camera.position.distanceTo(head) / TRAINING.numberDistance));
+    }
     if (target.remote) {   // the friend applies the damage to themselves
       net.send({ t: 'hit', d: damage });
       this.lastHitHead = headshot;

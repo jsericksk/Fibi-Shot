@@ -36,19 +36,32 @@ export class Rockets {
     const { game } = this, w = shooter.weapon;
     game.scene.updateMatrixWorld();
     const muzzle = shooter.muzzleWorld();
+    game.effects.flash(muzzle, 0.4);
+    sfx.shot(w.id, shooter.isPlayer ? 1 : Math.max(0.3, 1 - game.player.pos.distanceTo(shooter.pos) / 60));
+
+    // Cover between the camera and the muzzle (firing point-blank): it blows up right there
+    const toMuzzle = muzzle.clone().sub(origin);
+    game.raycaster.set(origin, toMuzzle.clone().normalize());
+    game.raycaster.far = toMuzzle.length();
+    const wall = game.raycaster.intersectObjects(game.arena.blockers, false)[0];
+    if (wall) return this.explode({ shooter, weapon: w }, wall.point);
+
     game.raycaster.set(origin, dir);
     game.raycaster.far = FAR;
     const hit = game.raycaster.intersectObjects(game.hittables(shooter), false)[0];
     const target = hit ? hit.point : origin.clone().addScaledVector(dir, FAR);
+    // The rocket bends toward the crosshair point, but never by more than `maxAimAngle`: a target close in front of the
+    // muzzle (or behind it) would otherwise send it sharply up, down or backwards
+    const p = w.projectile, ahead = target.sub(muzzle);
+    let aim = ahead.dot(dir) > 0 ? ahead.normalize() : dir.clone();
+    const angle = aim.angleTo(dir);
+    if (angle > p.maxAimAngle) aim = dir.clone().lerp(aim, p.maxAimAngle / angle).normalize();
 
     const mesh = buildRocket();
     mesh.position.copy(muzzle);
-    mesh.lookAt(target);
+    mesh.lookAt(muzzle.clone().add(aim));
     game.scene.add(mesh);
-    this.list.push({ mesh, shooter, weapon: w, dir: target.sub(muzzle).normalize(), life: w.projectile.life, trailT: 0 });
-
-    game.effects.flash(muzzle, 0.4);
-    sfx.shot(w.id, shooter.isPlayer ? 1 : Math.max(0.3, 1 - game.player.pos.distanceTo(shooter.pos) / 60));
+    this.list.push({ mesh, shooter, weapon: w, dir: aim, life: w.projectile.life, trailT: 0 });
   }
 
   update(dt) {
@@ -60,7 +73,7 @@ export class Rockets {
       const hit = game.raycaster.intersectObjects(game.hittables(r.shooter), false)[0];
       r.life -= dt;
       if (hit || r.life <= 0) {
-        if (hit) this.explode(r, hit.point);
+        if (hit) this.explode(r, hit.point, hit.object.userData.fighter);   // set only on a fighter's hitbox
         game.scene.remove(r.mesh);
         this.list.splice(i, 1);
         continue;
@@ -71,8 +84,8 @@ export class Rockets {
     }
   }
 
-  // Everyone on the other side within the radius is hurt, less the farther from the center
-  explode(r, point) {
+  // Everyone on the other side within the radius is hurt, less the farther from the center; a direct hit takes the full damage
+  explode(r, point, direct) {
     const { game } = this, { damage, projectile: p } = r.weapon;
     game.effects.explosion(point, p.radius);
     sfx.explosion(Math.max(0.3, 1 - game.player.pos.distanceTo(point) / 60));
@@ -81,7 +94,7 @@ export class Rockets {
       if (target.dead || target.invuln > 0) continue;
       const d = point.distanceTo(target.chestPos(tmp));
       if (d > p.radius) continue;
-      game.damage(r.shooter, target, damage * (1 - (1 - p.edge) * (d / p.radius)));
+      game.damage(r.shooter, target, target === direct ? damage : damage * (1 - (1 - p.edge) * (d / p.radius)));
     }
   }
 }
