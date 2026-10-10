@@ -77,7 +77,7 @@ export class Fighter {
     this.weaponId = id;
     this.guns[id].group.visible = true;
     this.reloading = false;
-    this.cooldown = 0.35;
+    this.cooldown = 0;   // a freshly drawn weapon fires right away
     this.bloom = 0;
     return true;
   }

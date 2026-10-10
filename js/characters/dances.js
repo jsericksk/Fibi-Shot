@@ -8,7 +8,6 @@
 const { sin: s, cos: c, abs, PI, min, max } = Math;
 const ease = x => { const k = min(1, max(0, x)); return k * k * (3 - 2 * k); };   // smoothstep, clamped to 0..1
 const SIDE = [-1, 1];
-const HIP = [0, 0.75];    // arm pose with the hand on the hip
 const FLIP_CENTER = 0.6;   // height of the body's middle: somersaults spin around it, not around the feet
 
 // Neutral starting pose; each dance then overrides what it needs
@@ -37,35 +36,6 @@ function backSomersault({ model, legs, head, arms }, f) {
 }
 
 export const DANCES = {
-  // Bolso: one-hand finger gun (6.4 s, 150 BPM) - sweeping shots left and right, crouch, backflip, shots at the camera
-  fingerGuns(rig, t) {
-    reset(rig);
-    const { model, legs, head } = rig;
-    // The right hand (arms[0]) points forward while the left one rests on the hip; every beat (0.4 s) the body sweeps to one side and the hand kicks back
-    const shoot = (beat, sweep) => {
-      const kick = max(0, -c(beat * PI * 2)) ** 6;
-      model.rotation.y = sweep * s(beat * PI);
-      model.rotation.z = 0.08 * s(beat * PI);
-      model.position.y = abs(s(beat * PI * 2)) * 0.05;
-      armsPose(rig, [-1.45 - 0.35 * kick, -0.05], HIP);
-      head.rotation.set(-0.1 * kick, 0, 0.15 * s(beat * PI));
-    };
-    if (t < 2.4) shoot(t * 2.5, 0.6);
-    else if (t < 3.2) {
-      const w = ease((t - 2.4) / 0.8);                                 // crouch, arms swung back
-      model.rotation.x = 0.25 * w;
-      model.position.y = -0.14 * w;
-      legs[0].rotation.z = -0.15 * w; legs[1].rotation.z = 0.15 * w;
-      armsPose(rig, [0.5 * w, 0.3], [0.5 * w, 0.3]);
-    } else if (t < 4.4) backSomersault(rig, (t - 3.2) / 1.2);
-    else if (t < 4.7) {
-      const w = s(((t - 4.4) / 0.3) * PI);                             // landing
-      model.rotation.x = 0.25 * w;
-      model.position.y = -0.14 * w;
-      armsPose(rig, [-1.45, -0.05], HIP);
-    } else shoot((t - 4.7) * 2.5, 0.25);
-  },
-
   // Fibi: ballet show (7 s) - curtsy, pirouettes, arabesque, backflip, final curtsy
   ballet(rig, t) {
     reset(rig);

@@ -35,6 +35,7 @@ export const WORLD = {
   gravity: 10,                // same floaty, moon-like jump on every map
   fighterRadius: 0.45,        // collision radius
   stepUp: 0.35,               // max height difference walked onto without jumping
+  deathBodyLength: 1.4,       // how far a fallen body reaches from the feet
 };
 
 // ---- Camera ----------------------------------------------------------------
@@ -62,7 +63,7 @@ export const PLAYER = {
 
 // ---- Emotes (H key) ----------------------------------------------------------
 // Each character has its own emotes; one is picked at random when pressing H.
-// dance: animation name from js/characters/dances.js (ballet, idol, penguin, flail, backflip, gallop, fingerGuns) | duration: seconds | sound: mp3 in audio/emotes
+// dance: animation name from js/characters/dances.js (ballet, idol, penguin, flail, backflip, gallop) | duration: seconds | sound: mp3 in audio/emotes
 export const EMOTES = {
   fibi: [
     { dance: 'ballet', duration: 7, sound: 'audio/emotes/fibi-emote-1.mp3' },
@@ -74,8 +75,6 @@ export const EMOTES = {
     { dance: 'backflip', duration: 7.3, sound: 'audio/emotes/mambo-1.mp3' },
     { dance: 'gallop', duration: 8.5, sound: 'audio/emotes/mambo-2.mp3' },
   ],
-  lula: [{ dance: 'idol', duration: 5, sound: 'audio/emotes/lula-emote-1.mp3' }],
-  bolso: [{ dance: 'fingerGuns', duration: 6.4, sound: 'audio/emotes/bolso-emote-1.mp3' }],
   default: [{ dance: 'idol', duration: 5, sound: null }],   // characters without their own emotes
 };
 export const EMOTE = {

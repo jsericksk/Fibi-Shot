@@ -437,9 +437,21 @@ export class Game {
     return 1 - k * (1 - f.min);
   }
 
+  // Random fall, flipped when cover stands where the body would land so it does not sink into it
+  freeDeathPose(f) {
+    const pose = randomDeathPose();
+    const blocked = faceUp => [0.5, WORLD.deathBodyLength].some(d => {
+      const sign = faceUp ? -1 : 1;   // on the back the body lies behind the feet, on the belly in front
+      const x = f.pos.x + Math.sin(f.yaw) * d * sign, z = f.pos.z + Math.cos(f.yaw) * d * sign;
+      return floorHeight(this.arena.colliders, x, z, Infinity, 0.2) > f.pos.y + 0.1;
+    });
+    if (blocked(pose.faceUp) && !blocked(!pose.faceUp)) pose.faceUp = !pose.faceUp;
+    return pose;
+  }
+
   onKill(killer, victim) {
     victim.respawnT = MATCH.respawnDelay;
-    victim.deathPose = randomDeathPose();
+    victim.deathPose = this.freeDeathPose(victim);
     const floorAt = (x, z, y) => floorHeight(this.arena.colliders, x, z, y);
     this.effects.throwOff(victim.guns[victim.weaponId].group, victim.yaw, floorAt);
     if (victim.rig.hat) this.effects.throwOff(victim.rig.hat, victim.yaw, floorAt);

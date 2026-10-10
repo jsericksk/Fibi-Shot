@@ -5,6 +5,12 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: var(--bg); c
 .screen { position: fixed; inset: 0; }
 button { font: inherit; cursor: pointer; }
 
+/* ---------- splash ---------- */
+#splash { position: fixed; inset: 0; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px; background: var(--bg); transition: opacity .35s; }
+#splash.done { opacity: 0; pointer-events: none; }
+.spinner { width: 40px; height: 40px; border: 5px solid rgba(255, 255, 255, .15); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
 /* ---------- select screen ---------- */
 #screen-select, #screen-lobby { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; background: radial-gradient(ellipse at 50% 30%, #2a0a10, #0a0507 70%); overflow: auto; }
 .logo { margin: 0; font-size: clamp(40px, 7vw, 72px); font-weight: 900; letter-spacing: 3px; text-shadow: 0 3px 0 #6b0a15, 0 0 28px rgba(224, 24, 45, .55); }

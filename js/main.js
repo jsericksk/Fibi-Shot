@@ -47,3 +47,8 @@ if (room) {
   show('lobby');
   lobby.open(room);
 }
+
+// Everything is loaded: fade the splash out and drop it
+const splash = document.getElementById('splash');
+splash.classList.add('done');
+splash.addEventListener('transitionend', () => splash.remove());
