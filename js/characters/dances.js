@@ -227,6 +227,41 @@ export const DANCES = {
     }
   },
 
+  // Yotsuba: happy hops (6 s, 120 BPM) - banzai bounces, side hops with swinging arms, wiggle, big jumps, fist pump (no spinning)
+  hops(rig, t) {
+    reset(rig);
+    const { model, legs, arms, head } = rig;
+    const beat = t * PI * 2;                                           // one bounce per 0.5 s
+    if (t < 1.5) {
+      const p = s(beat / 2), dip = max(0, -s(beat)) * 0.06;            // arms up, waving, knees bending on each landing
+      model.position.y = abs(s(beat)) * 0.2 - dip;
+      armsPose(rig, [-2.9, 0.3 + 0.25 * p], [-2.9, 0.3 - 0.25 * p]);
+      legs[0].rotation.x = legs[1].rotation.x = -0.3 * abs(s(beat));
+      head.rotation.set(-0.1, 0, p * 0.2);
+    } else if (t < 3) {
+      const p = s(beat / 2);                                           // hops left and right, arms swinging like running
+      model.position.set(p * 0.25, abs(s(beat)) * 0.22, 0);
+      model.rotation.z = -p * 0.12;
+      arms[0].rotation.set(s(beat) * 1.1, 0, -0.25); arms[1].rotation.set(-s(beat) * 1.1, 0, 0.25);
+      legs[0].rotation.x = s(beat) * 0.7; legs[1].rotation.x = -s(beat) * 0.7;
+      head.rotation.set(0, p * 0.3, p * 0.15);
+    } else if (t < 4.5) {
+      const p = s(t * 12);                                             // happy wiggle: hips shaking, elbows out, fists by the cheeks
+      model.rotation.z = p * 0.2;
+      model.position.y = abs(s(beat)) * 0.08;
+      armsPose(rig, [-2.2, 0.9], [-2.2, 0.9]);
+      legs[0].rotation.z = -0.15; legs[1].rotation.z = 0.15;
+      head.rotation.set(0.1, 0, -p * 0.25);
+    } else {
+      const u = (t - 4.5) / 1.5, jump = abs(s(u * PI * 3)) * 0.55;     // three big jumps, then a fist pump held up
+      const end = ease((u - 0.8) / 0.2);
+      model.position.y = u < 0.8 ? jump : 0;
+      legs[0].rotation.x = legs[1].rotation.x = u < 0.8 ? -0.5 * jump / 0.55 : 0;
+      armsPose(rig, [-2.9, 0.3 + 0.2 * s(t * 14) * (1 - end)], [-2.9 * (1 - end) - 1.3 * end, 0.3]);
+      head.rotation.set(-0.15 * end, 0, 0.1 * end);
+    }
+  },
+
   // Mambo 1: backflip show (7.3 s) - sway, crouch, backflip at about 4 s, celebration, final pose
   backflip(rig, t) {
     reset(rig);
