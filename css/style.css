@@ -209,6 +209,11 @@ button { -webkit-tap-highlight-color: transparent; }
 
 /* end of a timed match */
 #result-score { font-size: clamp(36px, 6vw, 56px); font-weight: 900; }
+#result-stats table { border-collapse: collapse; font-weight: 800; font-size: clamp(13px, 2.4vw, 18px); text-shadow: none; }
+#result-stats th, #result-stats td { padding: 4px 18px; text-align: center; }
+#result-stats tbody th { text-align: left; font-weight: 700; opacity: .8; }
+#result-stats tbody tr { border-top: 1px solid rgba(255, 255, 255, .15); }
+#result-stats .me { color: #ff8a98; }
 #result .primary { margin-top: 12px; }
 
 /* match type dialog */

@@ -26,6 +26,7 @@ export class RemotePlayer {
     f.onGround = s.gr;
     f.hp = s.hp;
     f.pitch = s.pitch;
+    [f.stats.shots, f.stats.hits, f.stats.headshots, f.stats.damage] = s.st;   // kills and deaths are counted on both sides
     if (s.dead && !f.dead) f.deadT = 0;
     f.dead = s.dead;
     if (!f.dead && s.w !== f.weaponId) f.setWeapon(s.w);

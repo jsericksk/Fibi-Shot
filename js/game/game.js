@@ -233,6 +233,7 @@ export class Game {
     net.send({
       t: 's', x: r(p.pos.x), y: r(p.pos.y), z: r(p.pos.z), yaw: r(p.yaw, 3), pitch: r(p.pitch + p.kick, 3),
       mv: p.moving, gr: p.onGround, w: p.weaponId, hp: Math.round(p.hp), dead: p.dead,
+      st: [p.stats.shots, p.stats.hits, p.stats.headshots, Math.round(p.stats.damage)],   // the friend shows these on the result screen
       em: em ? { dance: em.dance, duration: em.duration, sound: em.sound, id: em.id } : null,
     });
   }
@@ -309,7 +310,7 @@ export class Game {
     this.doom?.fadeOut();
     const { player, enemy } = this.scores;
     const result = player > enemy ? 'win' : player < enemy ? 'lose' : 'draw';
-    this.hud.showResult(result, player, enemy);
+    this.hud.showResult(result, player, enemy, [this.player, ...this.bots.map(b => b.f)]);
     if (result === 'win') sfx.win(); else if (result === 'lose') sfx.lose(); else sfx.beep(true);
     document.exitPointerLock?.();
   }
@@ -361,8 +362,10 @@ export class Game {
   // The player can hit any bot; bots only target the player.
   fire(shooter, origin, dir) {
     const w = shooter.weapon;
+    shooter.stats.shots++;
     if (w.projectile) return this.rockets.launch(shooter, origin, dir);
     this.scene.updateMatrixWorld();
+    if (w.melee) return this.swing(shooter, dir);
     const objects = this.hittables(shooter);
 
     const muzzle = shooter.muzzleWorld();
@@ -398,12 +401,33 @@ export class Game {
     }
 
     this.shotEffects(shooter, w, muzzle, ends);
-    if (this.multi && shooter.isPlayer) {
-      const r = v => [+v.x.toFixed(2), +v.y.toFixed(2), +v.z.toFixed(2)];
-      net.send({ t: 'shot', w: w.id, mz: r(muzzle), e: ends.map(r) });
-    }
-
+    this.sendShot(shooter, w, muzzle, ends);
     for (const [target, { damage, headshot }] of hits) this.damage(shooter, target, damage, headshot);
+  }
+
+  // Melee: hits every opponent in front of the fighter (a wide cone, not the crosshair: the camera is behind the
+  // fighter, so a ray from it would be hard to land on someone this close) that is in reach and not behind cover
+  swing(shooter, dir) {
+    const w = shooter.weapon, muzzle = shooter.muzzleWorld();
+    this.shotEffects(shooter, w, muzzle, []);
+    this.sendShot(shooter, w, muzzle, []);
+    const from = shooter.chestPos(), facing = new THREE.Vector2(dir.x, dir.z).normalize();
+    for (const target of this.opponentsOf(shooter)) {
+      if (target.dead || target.invuln > 0) continue;
+      const to = target.chestPos(), reach = new THREE.Vector2(to.x - from.x, to.z - from.z);
+      const dist = reach.length();
+      if (dist > w.melee.range || (dist > 0.01 && reach.normalize().dot(facing) < w.melee.arc)) continue;
+      if (!this.hasLineOfSight(from, to)) continue;
+      this.effects.impact(to, 0xff6a8a);
+      this.damage(shooter, target, w.damage);
+    }
+  }
+
+  // Tells the friend about our shot so they see and hear it
+  sendShot(shooter, w, muzzle, ends) {
+    if (!this.multi || !shooter.isPlayer) return;
+    const r = v => [+v.x.toFixed(2), +v.y.toFixed(2), +v.z.toFixed(2)];
+    net.send({ t: 'shot', w: w.id, mz: r(muzzle), e: ends.map(r) });
   }
 
   // The fighters on the other side of a shooter
@@ -418,6 +442,10 @@ export class Game {
 
   // Applies damage from a shooter to a target, with the matching feedback
   damage(shooter, target, damage, headshot = false) {
+    const { stats } = shooter;
+    stats.hits++;
+    stats.damage += Math.min(damage, target.hp);   // no credit for overkill
+    if (headshot) stats.headshots++;
     if (this.training) {   // training shows the damage as floating numbers
       const head = target.headPos();
       this.effects.damageNumber(head, damage, headshot, Math.max(1, this.camera.position.distanceTo(head) / TRAINING.numberDistance));
@@ -437,12 +465,13 @@ export class Game {
 
   // Tracers, muzzle flash and gun sound of a shot (ours or the friend's)
   shotEffects(shooter, w, muzzle, ends) {
+    const away = this.player.pos.distanceTo(shooter.pos);
+    sfx.shot(w.id, shooter.isPlayer ? 1 : Math.max(0.3, 1 - away / 60));
+    if (w.melee) return shooter.startSwing();
     const awp = w.id === 'awp', pellets = w.pellets ?? 1;
     const color = shooter.isPlayer ? 0xfff1a8 : 0xff9aa8;
     for (const end of ends) this.effects.tracer(muzzle, end, color, awp ? 0.03 : pellets > 1 ? 0.008 : 0.015, awp ? 0.18 : pellets > 1 ? 0.06 : 0.09);
     this.effects.flash(muzzle, awp ? 0.32 : pellets > 1 ? 0.3 : 0.2);
-    const away = this.player.pos.distanceTo(shooter.pos);
-    sfx.shot(w.id, shooter.isPlayer ? 1 : Math.max(0.3, 1 - away / 60));
   }
 
   // Damage multiplier by distance (only weapons with `falloff`, i.e. the shotgun)
@@ -466,6 +495,8 @@ export class Game {
   }
 
   onKill(killer, victim) {
+    killer.stats.kills++;
+    victim.stats.deaths++;
     victim.respawnT = MATCH.respawnDelay;
     victim.deathPose = this.freeDeathPose(victim);
     const floorAt = (x, z, y) => floorHeight(this.arena.colliders, x, z, y);

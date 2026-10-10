@@ -10,6 +10,8 @@ export const MAX_HP = MATCH.maxHp;
 // Each fall is different: on the back or on the belly, arms raised or at the sides
 export const randomDeathPose = () => ({ faceUp: Math.random() < 0.5, armsUp: Math.random() < 0.5 });
 
+export const emptyStats = () => ({ shots: 0, hits: 0, headshots: 0, damage: 0, kills: 0, deaths: 0 });
+
 // Shared state for the player and the enemy: model, health, weapons and movement
 export class Fighter {
   constructor(def, isPlayer, arenaHalf) {
@@ -54,6 +56,8 @@ export class Fighter {
     this.emote = null;       // { dance, duration, sound, t } while dancing
     this.deathPose = { faceUp: true, armsUp: false };   // how the body lies once dead (see randomDeathPose)
     this.training = false;   // training: infinite ammo, cannot die
+    this.stats = emptyStats();   // for the end-of-match screen
+    this.swingT = 0;         // seconds left of the sword swing animation
   }
 
   get weapon() { return WEAPONS[this.weaponId]; }
@@ -76,6 +80,8 @@ export class Fighter {
     this.guns[this.weaponId].group.visible = false;
     this.weaponId = id;
     this.guns[id].group.visible = true;
+    this.swingT = 0;
+    this.guns.sword.group.rotation.x = 0;
     this.reloading = false;
     this.cooldown = 0;   // a freshly drawn weapon fires right away
     this.bloom = 0;
@@ -90,6 +96,15 @@ export class Fighter {
     if (!this.training) this.ammo[w.id]--;
     this.cooldown = w.interval;
     this.bloom = Math.min(w.bloomMax, this.bloom + w.bloom);
+  }
+
+  startSwing() { this.swingT = WEAPONS.sword.melee.swingSeconds; }
+
+  // The sword rises, then chops down and comes back to rest
+  updateSwing(dt) {
+    const { swingSeconds, swingAngle } = WEAPONS.sword.melee;
+    this.swingT = Math.max(0, this.swingT - dt);
+    this.guns.sword.group.rotation.x = this.swingT > 0 ? -swingAngle * Math.sin((1 - this.swingT / swingSeconds) * Math.PI * 2) : 0;
   }
 
   startReload() {
@@ -109,6 +124,7 @@ export class Fighter {
     this.invuln = Math.max(0, this.invuln - dt);
     this.bloom = Math.max(0, this.bloom - dt * 0.05);
     this.kick *= Math.exp(-dt * 5);
+    if (this.swingT > 0) this.updateSwing(dt);
     if (this.reloading) {
       this.reloadT -= dt;
       if (this.reloadT <= 0) { this.reloading = false; this.ammo[this.weaponId] = this.weapon.mag; }

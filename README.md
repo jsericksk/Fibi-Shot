@@ -24,7 +24,8 @@ An internet connection is needed (three.js and PeerJS are loaded from a CDN).
 
 ### Game modes
 
-- **1v1:** a deathmatch against a bot, endless or timed (3 or 5 minutes).
+- **1v1:** a deathmatch against a bot, endless or timed (3 or 5 minutes). When a timed match ends, the result screen shows
+  every player's kills, deaths, accuracy, headshots and damage dealt.
 - **1v2:** the same, against two bots at once. Tap the **+** slot next to the enemy to add a second one
   and pick who it is (the **✕** removes it).
 - **Training:** every character walks around the map, jumps and dances. Infinite ammo and no deaths, and every
@@ -39,7 +40,7 @@ An internet connection is needed (three.js and PeerJS are loaded from a CDN).
 | Mouse | Aim |
 | Left click | Shoot |
 | Right click | Aim (small zoom, exact shots; full scope on the AWP) |
-| `1` `2` `3` `4` `5` | Switch weapon |
+| `1` `2` `3` `4` `5` `6` | Switch weapon |
 | `R` | Reload |
 | `Space` | Jump |
 | `H` | Emote |
@@ -63,12 +64,13 @@ Each character has its own emotes with sound (press `H`).
 
 ## Weapons
 
-Pistol, AK-47, AWP (sniper), Shotgun and Bazooka. Each one has its own feel: the shotgun is strong up close,
+Pistol, AK-47, AWP (sniper), Shotgun, Bazooka and Sword. Each one has its own feel: the shotgun is strong up close,
 the AWP is a sniper with a full scope (70 to the body, 100 to the head) and the AK-47 is a reliable automatic.
 The pistol, AK-47 and shotgun lose damage with distance. The bazooka holds 3 rockets and takes a long time to
 reload; its rocket flies slowly, so it can be dodged, and explodes on impact with area damage (a direct hit does
 full damage).
-Every weapon can aim for a small zoom, and shots fired while aiming are exact.
+The sword only works up close (3 meters), has no ammo and deals 50 damage, so two hits take a fighter down.
+Every weapon except the sword can aim for a small zoom, and shots fired while aiming are exact.
 All the numbers can be tweaked in `js/config.js`.
 
 ## Maps
@@ -90,7 +92,7 @@ It is made for playing with friends, not for stopping cheaters.
 
 ## Languages
 
-English and Portuguese. The language follows your browser and can be switched in the menu.
+English, Portuguese and Spanish. The language follows your browser and can be switched in the menu.
 
 ## Project structure
 
@@ -100,7 +102,7 @@ css/style.css     Styles
 audio/            Mp3 files
 js/config.js      Every tunable number
 js/maps.js        Map definitions
-js/i18n.js        Texts in English and Portuguese
+js/i18n.js        Texts in English, Portuguese and Spanish
 js/net.js         PeerJS connection
 js/characters/    Character models and dances
 js/game/          Game logic

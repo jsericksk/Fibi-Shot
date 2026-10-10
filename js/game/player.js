@@ -40,7 +40,7 @@ export class PlayerControls {
         e.preventDefault();
         if (!this.orbit) { this.orbit = true; this.orbitYaw = 0; this.orbitPitch = 0.15; }
       }
-      const idx = ['Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5'].indexOf(e.code);
+      const idx = ['Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6'].indexOf(e.code);
       if (e.code === 'Space') e.preventDefault();
       if (this.f.emote && ['KeyW', 'KeyA', 'KeyS', 'KeyD'].includes(e.code)) this.f.emote = null;   // a fresh move key ends the dance
       if (e.code === 'KeyF') toggleFullscreen();
@@ -131,7 +131,7 @@ export class PlayerControls {
   }
 
   toggleScope() {
-    if (this.game.canAct && !this.f.dead) this.setScope(!this.scoped);
+    if (this.game.canAct && !this.f.dead && !this.f.weapon.melee) this.setScope(!this.scoped);
   }
 
   jump() {

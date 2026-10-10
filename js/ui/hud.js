@@ -16,7 +16,7 @@ const el = {
   scoreP: $('sc-p'), scoreE: $('sc-e'), toast: $('toast'),
   slots: $('slots'), ammo: $('ammo'), reloadNote: $('reload-note'), reloadIcon: $('reload-icon'),
   crosshair: $('crosshair'), scope: $('scope'), hit: $('hitmarker'), hitText: $('hit-text'),
-  banner: $('banner'), changePanel: $('change-panel'), changePickers: $('change-pickers'), weaponFlash: $('weapon-flash'), score: $('score'), timer: $('timer'), result: $('result'), resultTitle: $('result-title'), resultScore: $('result-score'), pause: $('pause'), vignette: $('vignette'), doomFlash: $('doom-flash'),
+  banner: $('banner'), changePanel: $('change-panel'), changePickers: $('change-pickers'), weaponFlash: $('weapon-flash'), score: $('score'), timer: $('timer'), result: $('result'), resultTitle: $('result-title'), resultScore: $('result-score'), resultStats: $('result-stats'), pause: $('pause'), vignette: $('vignette'), doomFlash: $('doom-flash'),
 };
 
 // Sensitivity sliders in the pause menu
@@ -40,10 +40,27 @@ const ICONS = {
   ak47: '<rect x="14" y="14" width="66" height="10" rx="2"/><rect x="80" y="16" width="38" height="5"/><polygon points="0,12 16,14 16,30 0,32"/><polygon points="46,24 60,24 66,42 52,42"/><polygon points="28,24 38,24 35,40 26,40"/><rect x="62" y="10" width="24" height="4"/>',
   shotgun: '<rect x="6" y="15" width="108" height="5" rx="2"/><rect x="6" y="21" width="84" height="4" rx="2"/><rect x="54" y="19" width="26" height="8" rx="2"/><polygon points="0,14 22,14 22,30 0,34"/><polygon points="24,25 34,25 31,40 22,40"/>',
   bazooka: '<rect x="8" y="12" width="100" height="13" rx="4"/><rect x="0" y="9" width="14" height="19" rx="3"/><polygon points="108,12 120,18.5 108,25"/><polygon points="44,25 58,25 54,42 42,42"/><rect x="60" y="6" width="16" height="5"/>',
+  sword: '<polygon points="58,19 112,19 120,22 112,25 58,25"/><rect x="50" y="8" width="7" height="28" rx="2"/><rect x="20" y="20" width="30" height="4" rx="2"/><circle cx="15" cy="22" r="5"/>',
   awp: '<rect x="8" y="17" width="108" height="6" rx="2"/><rect x="38" y="5" width="34" height="8" rx="3"/><rect x="46" y="12" width="3" height="6"/><rect x="62" y="12" width="3" height="6"/><polygon points="0,14 22,16 22,32 0,28"/><polygon points="26,23 36,23 33,38 24,38"/><rect x="30" y="12" width="8" height="3"/>',
 };
 
 export const weaponIcon = id => `<svg viewBox="0 0 120 44">${ICONS[id]}</svg>`;
+
+const percent = (part, total) => total ? Math.round((Math.min(part, total) / total) * 100) + '%' : '–';
+
+// One column per fighter, one row per stat
+function statsTable(fighters) {
+  const rows = [
+    ['stats.kills', s => s.kills],
+    ['stats.deaths', s => s.deaths],
+    ['stats.accuracy', s => percent(s.hits, s.shots)],
+    ['stats.headshots', s => s.headshots],
+    ['stats.damage', s => Math.round(s.damage)],
+  ];
+  const head = fighters.map((f, i) => `<th class="${i === 0 ? 'me' : ''}">${f.def.name}</th>`).join('');
+  const body = rows.map(([key, value]) => `<tr><th>${t(key)}</th>${fighters.map((f, i) => `<td class="${i === 0 ? 'me' : ''}">${value(f.stats)}</td>`).join('')}</tr>`).join('');
+  return `<table><thead><tr><th></th>${head}</tr></thead><tbody>${body}</tbody></table>`;
+}
 
 // DOM-based HUD for the match screen
 export const hud = {
@@ -91,7 +108,7 @@ export const hud = {
     lastKey = key;
     const weaponBtn = $('t-weapon');   // touch only: the button shows the weapon in hand
     if (weaponBtn) weaponBtn.innerHTML = weaponIcon(player.weaponId);
-    el.ammo.textContent = player.training ? `∞ / ${w.mag}` : `${player.ammoNow} / ${w.mag}`;
+    el.ammo.textContent = w.melee ? '∞' : player.training ? `∞ / ${w.mag}` : `${player.ammoNow} / ${w.mag}`;
     el.reloadNote.textContent = player.reloading ? t('reloading') : player.ammoNow === 0 ? t('noAmmo') : '';
     el.slots.querySelectorAll('.slot').forEach(s => s.classList.toggle('active', s.dataset.id === player.weaponId));
   },
@@ -110,9 +127,11 @@ export const hud = {
     el.timer.classList.toggle('low', !!duration && left <= HUD.timerWarnSeconds);
   },
 
-  showResult(result, player, enemy) {
+  // fighters: the player first, then every opponent. Shows each one's stats side by side.
+  showResult(result, player, enemy, fighters) {
     el.resultTitle.textContent = t('result.' + result);
     el.resultScore.textContent = `${player} × ${enemy}`;
+    el.resultStats.innerHTML = statsTable(fighters);
     el.result.style.display = 'flex';
   },
 
