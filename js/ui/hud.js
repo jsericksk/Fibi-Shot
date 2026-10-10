@@ -36,6 +36,7 @@ const ICONS = {
   pistol: '<rect x="26" y="8" width="70" height="13" rx="2"/><polygon points="34,21 52,21 46,42 32,42"/><rect x="96" y="11" width="10" height="5"/>',
   ak47: '<rect x="14" y="14" width="66" height="10" rx="2"/><rect x="80" y="16" width="38" height="5"/><polygon points="0,12 16,14 16,30 0,32"/><polygon points="46,24 60,24 66,42 52,42"/><polygon points="28,24 38,24 35,40 26,40"/><rect x="62" y="10" width="24" height="4"/>',
   shotgun: '<rect x="6" y="15" width="108" height="5" rx="2"/><rect x="6" y="21" width="84" height="4" rx="2"/><rect x="54" y="19" width="26" height="8" rx="2"/><polygon points="0,14 22,14 22,30 0,34"/><polygon points="24,25 34,25 31,40 22,40"/>',
+  bazooka: '<rect x="8" y="12" width="100" height="13" rx="4"/><rect x="0" y="9" width="14" height="19" rx="3"/><polygon points="108,12 120,18.5 108,25"/><polygon points="44,25 58,25 54,42 42,42"/><rect x="60" y="6" width="16" height="5"/>',
   awp: '<rect x="8" y="17" width="108" height="6" rx="2"/><rect x="38" y="5" width="34" height="8" rx="3"/><rect x="46" y="12" width="3" height="6"/><rect x="62" y="12" width="3" height="6"/><polygon points="0,14 22,16 22,32 0,28"/><polygon points="26,23 36,23 33,38 24,38"/><rect x="30" y="12" width="8" height="3"/>',
 };
 

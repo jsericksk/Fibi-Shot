@@ -4,6 +4,7 @@ import { MAPS, MAP_LIST } from '../maps.js';
 import { getCharacter, CHARACTERS } from '../characters/index.js';
 import { MATCH, WORLD, CAMERA, EMOTE, EMOTES, SHOWCASE, NET, DOOMSDAY } from '../config.js';
 import { Effects } from './effects.js';
+import { Rockets } from './rockets.js';
 import { Doomsday } from './doomsday.js';
 import { Fighter, randomDeathPose } from './fighter.js';
 import { PlayerControls } from './player.js';
@@ -106,6 +107,7 @@ export class Game {
     const R = arena.half + 6;
     Object.assign(sun.shadow.camera, { left: -R, right: R, top: R, bottom: -R, near: 1, far: 120 });
     this.effects = new Effects(scene);
+    this.rockets = new Rockets(this);
 
     this.player = new Fighter(playerDef, true, arena.half);
     this.player.training = this.training;
@@ -215,6 +217,7 @@ export class Game {
       } else if (em) sfx.setVoiceVolume(key, this.emoteVolume(b.f));
     });
     this.effects.update(dt);
+    this.rockets.update(dt);
     this.hud.update(this.player, this.enemy);
     if (this.multi) this.sendState(dt);
   }
@@ -357,10 +360,10 @@ export class Game {
   // Hitscan shot: casts one ray (or several pellets for the shotgun), draws effects, applies damage.
   // The player can hit any bot; bots only target the player.
   fire(shooter, origin, dir) {
-    this.scene.updateMatrixWorld();
     const w = shooter.weapon;
-    const objects = [...this.arena.blockers];
-    for (const c of shooter.isPlayer ? this.bots.map(b => b.f) : [this.player]) if (!c.dead) objects.push(...c.hitboxes);
+    if (w.projectile) return this.rockets.launch(shooter, origin, dir);
+    this.scene.updateMatrixWorld();
+    const objects = this.hittables(shooter);
 
     const muzzle = shooter.muzzleWorld();
     const pellets = w.pellets ?? 1;
@@ -400,19 +403,32 @@ export class Game {
       net.send({ t: 'shot', w: w.id, mz: r(muzzle), e: ends.map(r) });
     }
 
-    for (const [target, { damage, headshot }] of hits) {
-      if (target.remote) {   // the friend applies the damage to themselves
-        net.send({ t: 'hit', d: damage });
-        this.lastHitHead = headshot;
-        this.hud.hitMarker(headshot, false);
-        sfx.hit(headshot);
-        continue;
-      }
-      const died = target.takeDamage(damage);
-      if (shooter.isPlayer) { this.hud.hitMarker(headshot, died); sfx.hit(headshot); if (died && headshot) sfx.headshotKill(); }
-      else { this.hud.damageFlash(); sfx.hurt(); }
-      if (died) this.onKill(shooter, target);
+    for (const [target, { damage, headshot }] of hits) this.damage(shooter, target, damage, headshot);
+  }
+
+  // The fighters on the other side of a shooter
+  opponentsOf(shooter) { return shooter.isPlayer ? this.bots.map(b => b.f) : [this.player]; }
+
+  // Everything a shot of this shooter can hit: cover and the living opponents' hitboxes
+  hittables(shooter) {
+    const objects = [...this.arena.blockers];
+    for (const c of this.opponentsOf(shooter)) if (!c.dead) objects.push(...c.hitboxes);
+    return objects;
+  }
+
+  // Applies damage from a shooter to a target, with the matching feedback
+  damage(shooter, target, damage, headshot = false) {
+    if (target.remote) {   // the friend applies the damage to themselves
+      net.send({ t: 'hit', d: damage });
+      this.lastHitHead = headshot;
+      this.hud.hitMarker(headshot, false);
+      sfx.hit(headshot);
+      return;
     }
+    const died = target.takeDamage(damage);
+    if (shooter.isPlayer) { this.hud.hitMarker(headshot, died); sfx.hit(headshot); if (died && headshot) sfx.headshotKill(); }
+    else { this.hud.damageFlash(); sfx.hurt(); }
+    if (died) this.onKill(shooter, target);
   }
 
   // Tracers, muzzle flash and gun sound of a shot (ours or the friend's)

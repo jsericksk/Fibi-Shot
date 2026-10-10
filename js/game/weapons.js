@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { M, add, box, cyl } from '../utils.js';
 import { WEAPON_STATS } from '../config.js';
 
-export const WEAPON_ORDER = ['pistol', 'ak47', 'awp', 'shotgun'];
+export const WEAPON_ORDER = ['pistol', 'ak47', 'awp', 'shotgun', 'bazooka'];
 
 // Stats live in config.js
 export const WEAPONS = WEAPON_STATS;
@@ -37,6 +37,14 @@ export function buildGun(id) {
     add(g, box, wood, [0, -0.03, -0.3], [0.07, 0.14, 0.5], [-0.12, 0, 0]);           // stock
     add(g, box, dark, [0, -0.1, 0.0], [0.06, 0.15, 0.07], [0.2, 0, 0]);              // grip
     muzzleZ = 1.25;
+  } else if (id === 'bazooka') {
+    add(g, cyl, green, [0, 0.06, 0.4], [0.1, 1.5, 0.1], [Math.PI / 2, 0, 0]);                  // launch tube
+    add(g, cyl, dark, [0, 0.06, -0.38], [0.14, 0.18, 0.14], [Math.PI / 2, 0, 0]);               // rear flare
+    add(g, cyl, dark, [0, 0.06, 1.1], [0.13, 0.12, 0.13], [Math.PI / 2, 0, 0]);                 // front ring
+    add(g, new THREE.ConeGeometry(0.075, 0.3, 12), M(0xc23030), [0, 0.06, 1.3], [1, 1, 1], [Math.PI / 2, 0, 0]);   // rocket nose peeking out
+    add(g, box, dark, [0, 0.18, 0.5], [0.04, 0.06, 0.2]);                                       // sight
+    add(g, box, dark, [0, -0.08, 0.2], [0.06, 0.15, 0.07], [0.2, 0, 0]);                        // grip
+    muzzleZ = 1.4;
   } else {
     add(g, box, green, [0, 0.02, 0.2], [0.075, 0.1, 0.9]);
     add(g, cyl, dark, [0, 0.04, 1.0], [0.026, 0.9, 0.026], [Math.PI / 2, 0, 0]);

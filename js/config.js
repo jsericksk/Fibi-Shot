@@ -139,8 +139,8 @@ export const ENEMY = {
   mirrorChance: 0.7,          // odds of strafing the other way when the player changes its sliding side
   mirrorDelay: [0.15, 0.45],  // seconds of reaction before it does
   mirrorMinSpeed: 1.2,        // m/s the player must slide across the bot's line of sight to count as a side
-  aimError: { pistol: 0.04, ak47: 0.055, awp: 0.04, shotgun: 0.032 },     // radians, lower is more accurate
-  fireRange: { pistol: 26, ak47: 34, awp: 70, shotgun: 14 },          // meters
+  aimError: { pistol: 0.04, ak47: 0.055, awp: 0.04, shotgun: 0.032, bazooka: 0.03 },     // radians, lower is more accurate
+  fireRange: { pistol: 26, ak47: 34, awp: 70, shotgun: 14, bazooka: 45 },          // meters
 };
 
 // ---- Gun and hat thrown off on death ------------------------------------
@@ -189,4 +189,6 @@ export const WEAPON_STATS = {
   ak47: { id: 'ak47', name: 'AK-47', damage: 14, headMult: 2.2, interval: 0.1, auto: true, mag: 30, reload: 1.9, spread: 0.0008, bloom: 0.0015, bloomMax: 0.01, recoil: 0.014, touchAim: true, scoped: LIGHT_AIM },
   shotgun: { id: 'shotgun', name: 'Escopeta', damage: 12, headMult: 1.5, interval: 0.9, auto: false, mag: 6, reload: 2.4, spread: 0.004, bloom: 0, bloomMax: 0, recoil: 0.06, pellets: 8, pelletSpread: 0.055, falloff: { start: 5, end: 20, min: 0.08 }, scoped: LIGHT_AIM },
   awp: { id: 'awp', name: 'AWP', damage: 90, headMult: 2, interval: 0.8, auto: false, mag: 5, reload: 2.4, spread: 0.06, bloom: 0, bloomMax: 0, recoil: 0.07, scoped: { fov: 18, spread: 0, speed: 3.2, sniper: true } },
+  // Rocket: flies visibly (dodge it!) and explodes on impact; damage falls off linearly from the blast center down to `edge` (fraction) at `radius`
+  bazooka: { id: 'bazooka', name: 'Bazuca', damage: 100, headMult: 1, interval: 1, auto: false, mag: 3, reload: 5.5, spread: 0.002, bloom: 0, bloomMax: 0, recoil: 0.09, scoped: LIGHT_AIM, projectile: { speed: 22, radius: 4.5, edge: 0.3, life: 8, trailInterval: 0.025 } },
 };

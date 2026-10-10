@@ -52,6 +52,28 @@ export class Effects {
     }
   }
 
+  // Smoke puff that swells and fades (rocket trail)
+  puff(pos) {
+    const mat = new THREE.MeshBasicMaterial({ color: 0xb8b8c0, transparent: true, depthWrite: false });
+    const mesh = new THREE.Mesh(flashGeo, mat);
+    mesh.position.copy(pos);
+    this.scene.add(mesh);
+    this.items.push({ mesh, life: 0.7, max: 0.7, fade: true, alpha: 0.45, grow: [0.06, 0.28] });
+  }
+
+  // Fireball, bright core, sparks and smoke of a rocket blast
+  explosion(pos, radius) {
+    for (const [color, size, life] of [[0xff8a2a, radius * 0.8, 0.4], [0xfff0b0, radius * 0.5, 0.2]]) {
+      const mat = new THREE.MeshBasicMaterial({ color, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false });
+      const mesh = new THREE.Mesh(flashGeo, mat);
+      mesh.position.copy(pos);
+      this.scene.add(mesh);
+      this.items.push({ mesh, life, max: life, fade: true, grow: [0.4, size] });
+    }
+    for (let i = 0; i < 3; i++) this.impact(pos, 0xffa040);
+    for (let i = 0; i < 5; i++) this.puff(pos.clone().add(new THREE.Vector3(rand(-1, 1), rand(0, 1.2), rand(-1, 1))));
+  }
+
   // Copies a part of a fighter (weapon, hat) into the scene and throws it: it tumbles, lands flat on whatever floorAt(x, z, y) says, then disappears
   throwOff(source, yaw, floorAt) {
     const mesh = source.clone(true);
@@ -109,8 +131,10 @@ export class Effects {
         this.scene.remove(it.mesh);
         it.mesh.material.dispose();
         this.items.splice(i, 1);
-      } else if (it.fade) {
-        it.mesh.material.opacity = it.life / it.max;
+      } else {
+        const done = 1 - it.life / it.max;
+        if (it.grow) it.mesh.scale.setScalar(it.grow[0] + (it.grow[1] - it.grow[0]) * done);
+        if (it.fade) it.mesh.material.opacity = (it.alpha ?? 1) * (1 - done);
       }
     }
   }
