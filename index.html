@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Fibi Shot</title>
 <link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta name="theme-color" content="#0a0507">
 <meta name="mobile-web-app-capable" content="yes">
@@ -56,6 +57,7 @@
           </div>
         </div>
       </div>
+      <div id="skins" class="skins hidden"></div>
       <h3 class="section"><span data-i18n="section.pick"></span> <b id="pick-for"></b></h3>
       <div id="roster" class="roster"></div>
     </div>
@@ -96,6 +98,7 @@
         <img id="lobby-big-me" class="big" alt="">
         <div id="lobby-name-me" class="fname"></div>
         <div id="lobby-pick" class="picker"></div>
+        <div id="lobby-skins" class="skins hidden"></div>
       </div>
       <div class="vs">VS</div>
       <div class="side">
@@ -144,6 +147,7 @@
   <div id="result" class="overlay">
     <h2 id="result-title"></h2>
     <div id="result-score"></div>
+    <div id="result-stats"></div>
     <button id="btn-result-restart" class="primary" data-i18n="result.restart"></button>
     <button id="btn-result-quit" class="primary alt" data-i18n="pause.quit"></button>
   </div>
@@ -151,7 +155,6 @@
   <div id="pause" class="overlay">
     <h2 data-i18n="pause.title"></h2>
     <p data-i18n="pause.hint"></p>
-    <button id="btn-resume" class="primary" data-i18n="pause.resume"></button>
     <div class="sens-group">
       <label class="sens-box">
         <span data-i18n="pause.sensitivity"></span>
@@ -171,6 +174,7 @@
       <div id="change-pickers"></div>
     </div>
     <button id="btn-quit" data-i18n="pause.quit"></button>
+    <button id="btn-resume" class="primary" data-i18n="pause.resume"></button>
   </div>
 </section>
 

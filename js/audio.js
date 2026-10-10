@@ -113,6 +113,7 @@ export const sfx = {
     if (id === 'ak47') { noise(0.14, { type: 'lowpass', freq: 3200, vol: 0.4 * vol }); tone(160, 45, 0.12, { type: 'sawtooth', vol: 0.2 * vol }); }
     if (id === 'shotgun') { noise(0.35, { type: 'lowpass', freq: 2600, vol: 0.7 * vol }); tone(110, 30, 0.3, { type: 'sawtooth', vol: 0.45 * vol }); noise(0.06, { type: 'highpass', freq: 2000, vol: 0.35 * vol }); }
     if (id === 'awp') { noise(0.5, { type: 'lowpass', freq: 1800, vol: 0.6 * vol }); tone(120, 28, 0.45, { type: 'sine', vol: 0.5 * vol }); noise(0.08, { type: 'highpass', freq: 2500, vol: 0.4 * vol }); }
+    if (id === 'sword') { noise(0.18, { type: 'bandpass', freq: 2400, vol: 0.4 * vol }); tone(900, 300, 0.14, { type: 'triangle', vol: 0.12 * vol }); }
     if (id === 'bazooka') { noise(0.45, { type: 'bandpass', freq: 700, vol: 0.55 * vol }); tone(140, 40, 0.4, { type: 'sawtooth', vol: 0.4 * vol }); }
   }),
   explosion: safe((vol = 1) => {

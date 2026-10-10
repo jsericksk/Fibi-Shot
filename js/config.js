@@ -135,12 +135,14 @@ export const ENEMY = {
   noticeAimDot: 0.99,         // a dancing bot stops when the player scopes within this (cosine) of it
   tauntChance: 0.35,          // odds of dancing to taunt after killing the player
   jumpEvery: [2.5, 6],        // seconds between random hops while moving
-  awpCounterChance: 0.8,      // when the player uses the AWP, odds the bot picks it too
+  counterWeapons: ['awp', 'sword'],   // when the player holds one of these, the bot answers with the same weapon
+  counterChance: 0.8,         // odds of answering
   mirrorChance: 0.7,          // odds of strafing the other way when the player changes its sliding side
   mirrorDelay: [0.15, 0.45],  // seconds of reaction before it does
   mirrorMinSpeed: 1.2,        // m/s the player must slide across the bot's line of sight to count as a side
-  aimError: { pistol: 0.04, ak47: 0.055, awp: 0.04, shotgun: 0.032, bazooka: 0.03 },     // radians, lower is more accurate
-  fireRange: { pistol: 26, ak47: 34, awp: 70, shotgun: 14, bazooka: 45 },          // meters
+  aimError: { pistol: 0.04, ak47: 0.055, awp: 0.04, shotgun: 0.032, bazooka: 0.03, sword: 0.02 },     // radians, lower is more accurate
+  fireRange: { pistol: 26, ak47: 34, awp: 70, shotgun: 14, bazooka: 45, sword: 2.6 },          // meters
+  closeRange: { shotgun: [3, 9], sword: [0.5, 2.2] },   // weapons the bot wants to use up close: backs off under the first number, chases past the second
 };
 
 // ---- Training ----------------------------------------------------------
@@ -186,6 +188,7 @@ export const SHOWCASE = {
 // recoil: camera kick per shot (radians) | scoped: aiming (right click / aim button): fov zoom, spread (0 = pinpoint),
 // speed = walking speed while aiming, sniper = full scope view (black mask) instead of the normal crosshair
 // touchAim: the touch fire button also aims while held (the sniper always does)
+// melee: swings instead of shooting a bullet; hits every opponent within `range` meters in front of the fighter (no ammo)
 // pellets/pelletSpread: shotgun fires this many rays inside a cone (radians); `damage` is per pellet
 // falloff: damage multiplier goes from 1 at `start` meters down to `min` at `end` meters (and stays there)
 const LIGHT_AIM = { fov: 50, spread: 0, speed: 5 };   // a small zoom, shots land exactly on the crosshair
@@ -197,4 +200,5 @@ export const WEAPON_STATS = {
   awp: { id: 'awp', name: 'AWP', damage: 70, headMult: 10 / 7, interval: 0.8, auto: false, mag: 5, reload: 2.4, spread: 0.06, bloom: 0, bloomMax: 0, recoil: 0.07, scoped: { fov: 18, spread: 0, speed: 3.2, sniper: true } },
   // Rocket: flies visibly (dodge it!) and explodes on impact; damage falls off linearly from the blast center down to `edge` (fraction) at `radius`
   bazooka: { id: 'bazooka', name: 'Bazuca', damage: 100, headMult: 1, interval: 1, auto: false, mag: 3, reload: 5.5, spread: 0.002, bloom: 0, bloomMax: 0, recoil: 0.09, scoped: LIGHT_AIM, projectile: { speed: 22, radius: 4.5, edge: 0.3, life: 8, trailInterval: 0.025, maxAimAngle: 0.14 } },
+  sword: { id: 'sword', name: 'Espada', damage: 50, headMult: 1, interval: 0.6, auto: false, mag: Infinity, reload: 0, spread: 0, bloom: 0, bloomMax: 0, recoil: 0.03, scoped: {}, melee: { range: 3, arc: 0.5, swingSeconds: 0.25, swingAngle: 1.1 } },   // arc: cosine of the half-angle in front of the fighter that can be hit; swingAngle: radians the blade tilts up and then down
 };

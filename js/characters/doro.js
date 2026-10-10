@@ -2,9 +2,13 @@ import * as THREE from 'three';
 import { M, add, sphere, cyl, box } from '../utils.js';
 import { createRig } from './rig.js';
 
+// Body colors that change with the look: the dough, its lighter belly and the puffed cheeks
+const LOOKS = {
+  default: { dough: 0xfff3ea, belly: 0xfffaf5, cheek: 0xffd6d0, line: 0x5a3a52 },   // soft white
+  black: { dough: 0x2a262d, belly: 0x38333c, cheek: 0x4a3a44, line: 0xe8c8dc },    // the lids and the mouth stay readable on black
+};
+
 const C = {
-  dough: 0xfff3ea,          // soft white body
-  cheek: 0xffd6d0,
   hair: 0xe7a3a0,           // dusty pink
   hairDark: 0xcf8a8a,
   rose: 0xe58f98,
@@ -13,35 +17,35 @@ const C = {
   ribbon: 0xffffff,
   eye: 0x8d7acb,
   eyeLight: 0xc3b4ee,
-  line: 0x5a3a52,
 };
 
-// Chubby, sweet mochi girl: puffy cheeks, big purple eyes, pink hair with a rose bun and a lavender bow
-export function buildDoro() {
+// Chubby, sweet mochi girl: puffy cheeks, big purple eyes, pink hair with a rose bun and a lavender bow. Skin: { look: 'black' }
+export function buildDoro({ look = 'default' } = {}) {
+  const L = LOOKS[look];
   const rig = createRig();
   const { legs, body, arms, head } = rig;
 
   // Short stubby legs and round feet
   for (const leg of legs) {
-    add(leg, sphere, M(C.dough), [0, -0.26, 0.02], [0.15, 0.2, 0.15]);
-    add(leg, sphere, M(C.dough), [0, -0.42, 0.08], [0.16, 0.09, 0.22]);
+    add(leg, sphere, M(L.dough), [0, -0.26, 0.02], [0.15, 0.2, 0.15]);
+    add(leg, sphere, M(L.dough), [0, -0.42, 0.08], [0.16, 0.09, 0.22]);
   }
 
   // Big round dough body with a lighter belly
-  add(body, sphere, M(C.dough), [0, 0.76, 0], [0.5, 0.5, 0.46]);
-  add(body, sphere, M(0xfffaf5), [0, 0.7, 0.2], [0.34, 0.36, 0.26]);
+  add(body, sphere, M(L.dough), [0, 0.76, 0], [0.5, 0.5, 0.46]);
+  add(body, sphere, M(L.belly), [0, 0.7, 0.2], [0.34, 0.36, 0.26]);
 
   // Tiny stubby arms with round mittens
   for (const arm of arms) {
     const s = arm.userData.side;
-    add(arm, sphere, M(C.dough), [s * 0.04, -0.2, 0], [0.14, 0.24, 0.14]);
-    add(arm, sphere, M(C.dough), [s * 0.04, -0.42, 0], [0.12, 0.12, 0.12]);
+    add(arm, sphere, M(L.dough), [s * 0.04, -0.2, 0], [0.14, 0.24, 0.14]);
+    add(arm, sphere, M(L.dough), [s * 0.04, -0.42, 0], [0.12, 0.12, 0.12]);
   }
 
   // Head: wide and squishy, with big puffed cheeks
-  add(head, sphere, M(C.dough), [0, 0, 0], [0.7, 0.58, 0.62]);
+  add(head, sphere, M(L.dough), [0, 0, 0], [0.7, 0.58, 0.62]);
   for (const s of [-1, 1]) {
-    add(head, sphere, M(C.cheek), [s * 0.42, -0.16, 0.3], [0.24, 0.2, 0.22]);
+    add(head, sphere, M(L.cheek), [s * 0.42, -0.16, 0.3], [0.24, 0.2, 0.22]);
     add(head, sphere, M(0xffb9b9, { transparent: true, opacity: 0.7 }), [s * 0.42, -0.14, 0.47], [0.15, 0.09, 0.03], [0, s * 0.5, 0]);
   }
 
@@ -57,12 +61,13 @@ export function buildDoro() {
     add(eye, sphere, M(0xffffff, { emissive: 0xffffff, emissiveIntensity: 0.6 }), [-0.04, 0.04, 0.07], [0.04, 0.04, 0.02]);
     add(eye, sphere, M(0xffffff), [0.045, -0.06, 0.07], [0.022, 0.022, 0.012]);
     // Soft upper lid and a relaxed brow: outer ends slightly lower = friendly
-    add(eye, sphere, M(C.line), [0, 0.13, 0.035], [0.2, 0.04, 0.05], [0, 0, s * -0.15]);
+    add(eye, sphere, M(L.line), [0, 0.13, 0.035], [0.2, 0.04, 0.05], [0, 0, s * -0.15]);
     add(head, box, M(C.hairDark), [s * 0.25, 0.2, 0.55], [0.2, 0.04, 0.03], [0, s * 0.3, s * -0.2]);
   }
 
-  // Pouty "v" mouth
-  for (const s of [-1, 1]) add(head, box, M(0x9a4a5a), [s * 0.04, -0.255, 0.575], [0.09, 0.02, 0.012], [0, 0, s * 0.7]);
+  // Cat-like "w" mouth: two small down-facing arcs side by side
+  const mouthArc = new THREE.TorusGeometry(0.045, 0.011, 8, 16, Math.PI);
+  for (const s of [-1, 1]) add(head, mouthArc, M(L.line), [s * 0.045, -0.225, 0.575], [1, 1, 1], [0, 0, Math.PI]);
 
   // Pink hair: top cap, bangs with a center part, long side locks and back hair
   add(head, new THREE.SphereGeometry(1, 32, 24, 0, Math.PI * 2, 0, 1.2), M(C.hair), [0, 0.04, -0.02], [0.74, 0.64, 0.67]);

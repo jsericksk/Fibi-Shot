@@ -24,7 +24,8 @@ An internet connection is needed (three.js and PeerJS are loaded from a CDN).
 
 ### Game modes
 
-- **1v1:** a deathmatch against a bot, endless or timed (3 or 5 minutes).
+- **1v1:** a deathmatch against a bot, endless or timed (3 or 5 minutes). When a timed match ends, the result screen shows
+  every player's kills, deaths, accuracy, headshots and damage dealt.
 - **1v2:** the same, against two bots at once. Tap the **+** slot next to the enemy to add a second one
   and pick who it is (the **✕** removes it).
 - **Training:** every character walks around the map, jumps and dances. Infinite ammo and no deaths, and every
@@ -39,7 +40,7 @@ An internet connection is needed (three.js and PeerJS are loaded from a CDN).
 | Mouse | Aim |
 | Left click | Shoot |
 | Right click | Aim (small zoom, exact shots; full scope on the AWP) |
-| `1` `2` `3` `4` `5` | Switch weapon |
+| `1` `2` `3` `4` `5` `6` | Switch weapon |
 | `R` | Reload |
 | `Space` | Jump |
 | `H` | Emote |
@@ -52,23 +53,25 @@ weapon menu. Their size and position can be changed in **Pause > Edit controls**
 
 ## Characters
 
-- **Fibi:** blonde girl with a wide white hat.
-- **Guga:** girl in a penguin hoodie.
-- **Nono:** sleepy girl with long gray-green hair.
-- **Doro:** chubby, grumpy mochi girl with pink hair.
-- **Mambo:** horse girl in a sailor-style outfit, with a periwinkle beret and a tail.
-- **Yotsuba:** cheerful girl with spiky green hair, a white tee and mustard shorts.
+- **Fibi:** blonde girl with a wide white hat. Skins: no hat, and a black and red outfit.
+- **Guga:** girl in a penguin hoodie. Skins: inverted colors (white), and Fibi's hat.
+- **Nono:** sleepy girl with long gray-green hair. Skins: Fibi's outfit, and Fibi's hat.
+- **Doro:** chubby, grumpy mochi girl with pink hair. Skin: black.
+- **Mambo:** horse girl in a sailor-style outfit, with a periwinkle beret and a tail. Skin: Fibi's hat.
+- **Yotsuba:** cheerful girl with spiky green hair, a white tee and mustard shorts. Skins: Fibi's hat, and Fibi's colors without a hat.
 
 Each character has its own emotes with sound (press `H`).
+Characters can have skins: pick one of the round portraits under the character list (also in the multiplayer lobby).
 
 ## Weapons
 
-Pistol, AK-47, AWP (sniper), Shotgun and Bazooka. Each one has its own feel: the shotgun is strong up close,
+Pistol, AK-47, AWP (sniper), Shotgun, Bazooka and Sword. Each one has its own feel: the shotgun is strong up close,
 the AWP is a sniper with a full scope (70 to the body, 100 to the head) and the AK-47 is a reliable automatic.
 The pistol, AK-47 and shotgun lose damage with distance. The bazooka holds 3 rockets and takes a long time to
 reload; its rocket flies slowly, so it can be dodged, and explodes on impact with area damage (a direct hit does
 full damage).
-Every weapon can aim for a small zoom, and shots fired while aiming are exact.
+The sword only works up close (3 meters), has no ammo and deals 50 damage, so two hits take a fighter down.
+Every weapon except the sword can aim for a small zoom, and shots fired while aiming are exact.
 All the numbers can be tweaked in `js/config.js`.
 
 ## Maps
@@ -77,6 +80,12 @@ All the numbers can be tweaked in `js/config.js`.
 - **Arena:** a dark red and black arena.
 - **Forest:** a green clearing with rocks, logs and trees.
 - **Assault:** an indoor warehouse with stacked containers.
+- **Rio:** the Copacabana promenade with its black and white waves, palm trees and kiosks, with the Christ the
+  Redeemer on a far hill, Sugarloaf, towers and the sea around.
+- **Mars:** a rust red crater with habitat modules, solar panels and masts, ridges and Olympus Mons far away, and
+  Phobos in the sky.
+- **Snow:** a snowy clearing with ice blocks, cabins under snow roofs, pines and drifts, snowy mountains around and
+  an aurora in the sky.
 - **Plaza:** a bigger town square with a terrace, stairs, a street and houses around it.
 
 ## Multiplayer
@@ -90,7 +99,7 @@ It is made for playing with friends, not for stopping cheaters.
 
 ## Languages
 
-English and Portuguese. The language follows your browser and can be switched in the menu.
+English, Portuguese and Spanish. The language follows your browser and can be switched in the menu.
 
 ## Project structure
 
@@ -100,7 +109,7 @@ css/style.css     Styles
 audio/            Mp3 files
 js/config.js      Every tunable number
 js/maps.js        Map definitions
-js/i18n.js        Texts in English and Portuguese
+js/i18n.js        Texts in English, Portuguese and Spanish
 js/net.js         PeerJS connection
 js/characters/    Character models and dances
 js/game/          Game logic

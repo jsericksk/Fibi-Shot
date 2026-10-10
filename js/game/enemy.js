@@ -61,7 +61,7 @@ export class EnemyAI {
     this.los = false;
     this.switchT = rand(5, 9);
     this.jumpT = rand(...ENEMY.jumpEvery);
-    this.seeAwpT = 0;
+    this.seeCounterT = 0;
     this.emoteT = rand(...SHOWCASE.emoteEvery);
     this.way = null;
     this.wayT = 0;
@@ -193,9 +193,8 @@ export class EnemyAI {
       this.strafeT = rand(0.7, 2);
     }
     // Chase when far or when cover has hidden the player for a while; slide sideways around obstacles
-    // The shotgun wants to be close; everything else keeps its distance
-    const close = f.weapon.id === 'shotgun';
-    const minRange = close ? 3 : MIN_RANGE, maxRange = close ? 9 : MAX_RANGE;
+    // Close-range weapons want the player near; everything else keeps its distance
+    const [minRange, maxRange] = ENEMY.closeRange[f.weapon.id] ?? [MIN_RANGE, MAX_RANGE];
     let range = dist > maxRange || this.noLosT > 1.5 ? 1 : dist < minRange ? -1 : 0;
     let strafe = this.strafeDir;
     if (this.detourT > 0) { range = 0; strafe = this.strafeDir || 1; }
@@ -222,11 +221,13 @@ export class EnemyAI {
     }
   }
 
-  // Random weapon, but when the player is on the AWP the bot likes to answer with its own
+  // Random weapon, but when the player holds the AWP or the sword the bot likes to answer with the same
   pickWeapon() {
-    if (this.target.weaponId === 'awp' && Math.random() < ENEMY.awpCounterChance) return 'awp';
+    if (this.countersTarget() && Math.random() < ENEMY.counterChance) return this.target.weaponId;
     return WEAPON_ORDER[randInt(0, WEAPON_ORDER.length - 1)];
   }
+
+  countersTarget() { return ENEMY.counterWeapons.includes(this.target.weaponId); }
 
   handleWeapons(dt) {
     const f = this.f;
@@ -238,15 +239,15 @@ export class EnemyAI {
       this.burstLeft = 0;
     }
 
-    // Noticed the player aiming with an AWP for a moment: switch to the AWP too
-    this.seeAwpT = this.target.weaponId === 'awp' && f.weaponId !== 'awp' ? this.seeAwpT + dt : 0;
-    if (this.seeAwpT > 1.2 && !f.reloading && Math.random() < ENEMY.awpCounterChance) {
-      f.setWeapon('awp');
+    // Noticed the player holding the AWP or the sword for a moment: switch to it too
+    this.seeCounterT = this.countersTarget() && f.weaponId !== this.target.weaponId ? this.seeCounterT + dt : 0;
+    if (this.seeCounterT > 1.2 && !f.reloading && Math.random() < ENEMY.counterChance) {
+      f.setWeapon(this.target.weaponId);
       this.switchT = rand(8, 12);
       this.charge = 0;
       this.burstLeft = 0;
-      this.seeAwpT = 0;
-    } else if (this.seeAwpT > 1.2) this.seeAwpT = 0;
+      this.seeCounterT = 0;
+    } else if (this.seeCounterT > 1.2) this.seeCounterT = 0;
     if (f.ammoNow <= 0 && !f.reloading) f.startReload();
   }
 
@@ -262,7 +263,7 @@ export class EnemyAI {
       this.charge += dt;
       this.showScopeGlint();
       if (this.charge >= AWP_CHARGE && f.canFire()) { this.shoot(origin, aim); this.charge = 0; this.reaction = rand(0.4, 1); }
-    } else if (w.id === 'pistol' || w.id === 'shotgun' || w.id === 'bazooka') {
+    } else if (['pistol', 'shotgun', 'bazooka', 'sword'].includes(w.id)) {
       this.burstWait -= dt;
       if (this.burstWait <= 0 && f.canFire()) { this.shoot(origin, aim); this.burstWait = w.id === 'pistol' ? rand(0.3, 0.9) : rand(0.6, 1.2); }
     } else {

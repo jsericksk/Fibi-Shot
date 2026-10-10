@@ -1,8 +1,8 @@
 import * as THREE from 'three';
-import { M, add, box, cyl } from '../utils.js';
+import { M, add, box, cyl, sphere } from '../utils.js';
 import { WEAPON_STATS } from '../config.js';
 
-export const WEAPON_ORDER = ['pistol', 'ak47', 'awp', 'shotgun', 'bazooka'];
+export const WEAPON_ORDER = ['pistol', 'ak47', 'awp', 'shotgun', 'bazooka', 'sword'];
 
 // Stats live in config.js
 export const WEAPONS = WEAPON_STATS;
@@ -11,6 +11,8 @@ const dark = M(0x2d2f38);
 const metal = M(0x5b5f6e, { metalness: 0.5, roughness: 0.4 });
 const wood = M(0x8a5a35);
 const green = M(0x4a5a3a);
+const steel = M(0xd5dbe6, { metalness: 0.6, roughness: 0.25 });
+const gold = M(0xd9a93a, { metalness: 0.5, roughness: 0.4 });
 
 // Gun models: origin at the grip, barrel along +Z. Returns the group and its muzzle point.
 export function buildGun(id) {
@@ -45,6 +47,13 @@ export function buildGun(id) {
     add(g, box, dark, [0, 0.18, 0.5], [0.04, 0.06, 0.2]);                                       // sight
     add(g, box, dark, [0, -0.08, 0.2], [0.06, 0.15, 0.07], [0.2, 0, 0]);                        // grip
     muzzleZ = 1.4;
+  } else if (id === 'sword') {
+    add(g, box, dark, [0, 0, -0.02], [0.05, 0.05, 0.3]);                // grip
+    add(g, sphere, gold, [0, 0, -0.2], [0.045, 0.045, 0.045]);          // pommel
+    add(g, box, gold, [0, 0, 0.16], [0.3, 0.05, 0.05]);                 // guard
+    add(g, box, steel, [0, 0, 0.8], [0.025, 0.11, 1.2]);                // blade, broad side up and down
+    add(g, box, steel, [0, 0, 1.45], [0.02, 0.06, 0.18]);               // narrower tip
+    muzzleZ = 1.5;
   } else {
     add(g, box, green, [0, 0.02, 0.2], [0.075, 0.1, 0.9]);
     add(g, cyl, dark, [0, 0.04, 1.0], [0.026, 0.9, 0.026], [Math.PI / 2, 0, 0]);

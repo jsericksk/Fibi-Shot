@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { M, add, sphere, rand } from '../utils.js';
 import { WORLD } from '../config.js';
+import { BACKDROPS } from './backdrops.js';
 
 
 const glow = color => M(color, { emissive: color, emissiveIntensity: 1.2 });
@@ -116,7 +117,94 @@ function paversFloor(half) {
   return { tex, roughness: 0.95, metalness: 0 };
 }
 
-const FLOORS = { tiles: tilesFloor, moon: moonFloor, grass: grassFloor, concrete: concreteFloor, pavers: paversFloor };
+// Rio street: asphalt with a dashed center line, and the Copacabana promenade (bold black and white waves) on the sea side (+Z).
+// One texture for the whole floor
+function rioFloor(half) {
+  const S = 2048, k = S / (half * 2);   // pixels per meter
+  const edge = S * 0.62;                // the promenade starts here (texture y grows toward +Z)
+  const c = document.createElement('canvas');
+  c.width = c.height = S;
+  const g = c.getContext('2d');
+  g.fillStyle = '#3b3c41'; g.fillRect(0, 0, S, edge);
+  for (let i = 0; i < 30000; i++) {
+    const v = 50 + Math.random() * 40;
+    g.fillStyle = `rgba(${v},${v},${v + 4},0.4)`;
+    g.fillRect(Math.random() * S, Math.random() * edge, 3, 3);
+  }
+  g.fillStyle = '#e8e6df';
+  for (let x = 0; x < S; x += 4 * k) g.fillRect(x, edge / 2 - 0.1 * k, 2 * k, 0.2 * k);
+
+  g.fillStyle = '#efe9da'; g.fillRect(0, edge, S, S - edge);
+  g.fillStyle = '#26262b';
+  const band = 1.5 * k, thick = 0.7 * k, amp = 0.28 * k, wave = Math.PI * 2 / (3 * k);   // 1.5 m rows, 3 m long waves
+  for (let y = edge; y < S; y += band) {
+    g.beginPath();
+    for (let x = 0; x <= S; x += 8) g.lineTo(x, y + Math.sin(x * wave) * amp);
+    for (let x = S; x >= 0; x -= 8) g.lineTo(x, y + thick + Math.sin(x * wave) * amp);
+    g.fill();
+  }
+  g.fillStyle = '#b8b6ae'; g.fillRect(0, edge - 0.25 * k, S, 0.5 * k);   // curb between street and promenade
+
+  const tex = new THREE.CanvasTexture(c);
+  tex.anisotropy = 4;
+  return { tex, roughness: 0.9, metalness: 0 };
+}
+
+// Rust red dust with dark specks, small stones and shallow craters
+function marsFloor(half) {
+  const S = 512;
+  const c = document.createElement('canvas');
+  c.width = c.height = S;
+  const g = c.getContext('2d');
+  g.fillStyle = '#b5593a'; g.fillRect(0, 0, S, S);
+  for (let i = 0; i < 6000; i++) {
+    const v = Math.random();
+    g.fillStyle = v < 0.5 ? 'rgba(90,35,20,0.35)' : 'rgba(225,140,95,0.3)';
+    g.fillRect(Math.random() * S, Math.random() * S, 2, 2);
+  }
+  for (let i = 0; i < 14; i++) {
+    const x = Math.random() * S, y = Math.random() * S, r = 14 + Math.random() * 40;
+    const grad = g.createRadialGradient(x, y, r * 0.3, x, y, r);
+    grad.addColorStop(0, 'rgba(95,40,25,0.5)');
+    grad.addColorStop(0.85, 'rgba(120,55,35,0.35)');
+    grad.addColorStop(1, 'rgba(120,55,35,0)');
+    g.fillStyle = grad;
+    g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill();
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(half / 18, half / 18);
+  tex.anisotropy = 4;
+  return { tex, roughness: 1, metalness: 0 };
+}
+
+// Fresh snow: soft blue shadows, a few trampled patches and glitter
+function snowFloor(half) {
+  const S = 512;
+  const c = document.createElement('canvas');
+  c.width = c.height = S;
+  const g = c.getContext('2d');
+  g.fillStyle = '#eef4fa'; g.fillRect(0, 0, S, S);
+  for (let i = 0; i < 70; i++) {
+    const x = Math.random() * S, y = Math.random() * S, r = 20 + Math.random() * 60;
+    const grad = g.createRadialGradient(x, y, 0, x, y, r);
+    grad.addColorStop(0, 'rgba(160,190,220,0.3)');
+    grad.addColorStop(1, 'rgba(160,190,220,0)');
+    g.fillStyle = grad;
+    g.fillRect(x - r, y - r, r * 2, r * 2);
+  }
+  for (let i = 0; i < 2500; i++) {
+    g.fillStyle = Math.random() < 0.5 ? 'rgba(255,255,255,0.9)' : 'rgba(150,180,215,0.35)';
+    g.fillRect(Math.random() * S, Math.random() * S, 2, 2);
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(half / 14, half / 14);
+  tex.anisotropy = 4;
+  return { tex, roughness: 0.85, metalness: 0 };
+}
+
+const FLOORS = { tiles: tilesFloor, moon: moonFloor, grass: grassFloor, concrete: concreteFloor, pavers: paversFloor, rio: rioFloor, mars: marsFloor, snow: snowFloor };
 
 // Trees all around the playable area, beyond the walls (instanced: two draw calls for the whole forest)
 function addForest(scene, { count, spread }, half) {
@@ -341,6 +429,7 @@ export function buildArena(scene, map) {
   if (map.road) addRoad(scene, map.road, half);
   if (map.town) addTown(scene, map.town, half);
   if (map.sunDisc) addSunDisc(scene, map.sun);
+  BACKDROPS[map.backdrop]?.(scene, half);
 
   // True when a circle of `margin` radius at (x, z) does not touch any cover
   const isFree = (x, z, margin = 1) =>
