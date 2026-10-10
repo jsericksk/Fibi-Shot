@@ -41,9 +41,9 @@ button { font: inherit; cursor: pointer; }
 .touch #btn-fs { display: none; }
 .touch .roster { scrollbar-width: none; }   /* touch devices go fullscreen on the first tap */
 #screen-select { overflow-x: hidden; align-items: stretch; justify-content: safe center; gap: clamp(8px, 1.6vh, 18px); padding: 10px clamp(12px, 3vw, 36px); }
-.home-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-#screen-select .logo { font-size: clamp(26px, 5vw, 48px); letter-spacing: 2px; white-space: nowrap; }
-.home-tools { display: flex; align-items: center; gap: 8px; }
+.home-top { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; }   /* title centered, tools tucked to the right */
+#screen-select .logo { grid-column: 2; font-size: clamp(26px, 5vw, 48px); letter-spacing: 2px; white-space: nowrap; }
+.home-tools { display: flex; align-items: center; gap: 8px; grid-column: 3; justify-self: end; }
 .home-body { display: grid; grid-template-columns: minmax(0, 1fr) clamp(240px, 30vw, 340px); gap: clamp(10px, 2vw, 28px); align-items: start; }
 .home-left, .home-right { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 .home-right { align-self: center; }
@@ -52,12 +52,22 @@ button { font: inherit; cursor: pointer; }
 #pick-for { color: var(--accent); }
 
 .duel { display: grid; grid-template-columns: 1fr auto 1fr; align-items: end; justify-items: center; gap: 4px; }
-.fighter { display: flex; flex-direction: column; align-items: center; padding: 4px 10px 6px; border: 2px solid transparent; border-radius: 18px; cursor: pointer; transition: opacity .2s, background .15s, border-color .15s; }
+.enemies { display: flex; align-items: flex-end; justify-content: center; gap: 6px; }
+.fighter { position: relative; display: flex; flex-direction: column; align-items: center; padding: 4px 10px 6px; border: 2px solid transparent; border-radius: 18px; cursor: pointer; transition: opacity .2s, background .15s, border-color .15s; }
 .fighter.active { border-color: var(--accent); background: rgba(224, 24, 45, .12); box-shadow: 0 0 22px rgba(224, 24, 45, .3); }
 .fighter h2 { margin: 0; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; opacity: .7; }
 .art { height: clamp(110px, 27vh, 250px); filter: drop-shadow(0 8px 10px rgba(224, 24, 45, .3)); }
 #screen-select .fname { font-size: clamp(16px, 2.4vw, 22px); margin: 0; }
-#screen-select .vs { font-size: clamp(22px, 4vw, 44px); padding-bottom: 30px; transition: opacity .2s; }
+/* the second enemy always has its place reserved (an empty card with a plus), so adding one never moves the layout */
+.enemy2-slot { display: grid; }
+.enemy2-slot > * { grid-area: 1 / 1; }
+.fighter.empty { visibility: hidden; }
+.add-enemy { margin: 4px 10px 6px; border: 2px dashed rgba(255, 255, 255, .3); border-radius: 18px; background: rgba(255, 255, 255, .04); color: #fff; font-size: clamp(26px, 4vw, 40px); font-weight: 900; transition: background .15s, border-color .15s; }
+@media (hover: hover) { .add-enemy:hover { background: rgba(224, 24, 45, .2); border-color: var(--accent); } }
+.remove-enemy { position: absolute; top: -8px; right: -6px; z-index: 2; width: 26px; height: 26px; padding: 0; border: 2px solid rgba(255, 255, 255, .3); border-radius: 50%; background: rgba(0, 0, 0, .55); color: #fff; font-size: 12px; font-weight: 900; line-height: 1; }
+.duel.three .art { height: clamp(90px, 21vh, 190px); }
+.duel.three .fighter { padding: 4px 4px 6px; }
+#screen-select .vs { align-self: center; font-size: clamp(22px, 4vw, 44px); transition: opacity .2s; }   /* centered on the character cards */
 
 /* one strip for every character: scrolls sideways, so it keeps working with many fighters */
 .roster { display: flex; justify-content: safe center; gap: 8px; padding: 8px 16px 10px; overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: thin; -webkit-overflow-scrolling: touch; mask-image: linear-gradient(90deg, transparent, #000 14px, #000 calc(100% - 14px), transparent); }
@@ -76,18 +86,13 @@ button { -webkit-tap-highlight-color: transparent; }
 .act:active { transform: translateY(3px); box-shadow: 0 2px 0 #000; }
 .act.play { grid-column: 1 / -1; flex-direction: row; gap: 14px; min-height: 84px; border-color: transparent; background: linear-gradient(#f0293c, #c4111f); box-shadow: 0 6px 0 #7a0c18, 0 0 30px rgba(224, 24, 45, .45); }
 .act.play i { font-size: 38px; }
+.act.play i svg { display: block; width: 1.5em; height: auto; fill: #fff; }
 .act.play span { display: flex; flex-direction: column; align-items: flex-start; }
 .act.play b { font-size: 30px; line-height: 1; }
 .act.play em { font-style: normal; font-size: 12px; font-weight: 700; opacity: .85; }
 .act.play:active { box-shadow: 0 2px 0 #7a0c18; }
 
-/* phones: title centered over the screen with the tools tucked to the right (stacked when there is no room) */
-@media (max-width: 719px), (max-height: 520px) {
-  .home-top { display: grid; grid-template-columns: 1fr auto 1fr; }
-  #screen-select .logo { grid-column: 2; }
-  .home-tools { grid-column: 3; justify-self: end; }
-}
-@media (min-width: 720px) and (max-height: 520px) {   /* wide phone: same columns as .home-body */
+@media (min-width: 720px) {   /* wide screens: same columns as .home-body, so the title is centered over the card panel */
   .home-top { grid-template-columns: minmax(0, 1fr) clamp(240px, 30vw, 340px); column-gap: clamp(10px, 2vw, 28px); }
   #screen-select .logo { grid-column: 1; text-align: center; }
   .home-tools { grid-column: 2; justify-self: stretch; justify-content: flex-end; }
@@ -105,10 +110,10 @@ button { -webkit-tap-highlight-color: transparent; }
 }
 /* phone in landscape: everything must fit in a short screen */
 @media (max-height: 520px) {
+  .duel.three .art { height: clamp(64px, 24vh, 110px); }
   #screen-select { gap: 4px; padding: 6px 12px; }
   #screen-select .logo { font-size: 24px; }
   .art { height: clamp(90px, 34vh, 160px); }
-  #screen-select .vs { padding-bottom: 20px; }
   .fighter h2 { font-size: 11px; }
   #screen-select .section { font-size: 10px; margin: 0; }
   .roster { padding: 4px 14px 6px; }
@@ -136,7 +141,10 @@ button { -webkit-tap-highlight-color: transparent; }
 .plate.right { right: 16px; justify-content: flex-end; text-align: right; }
 .plate img { width: 64px; height: 64px; object-fit: contain; object-position: top; border-radius: 50%; background: rgba(20, 10, 14, .8); border: 3px solid var(--accent); }
 .plate > div { flex: 1; }
-.pname { font-weight: 900; font-size: 18px; text-shadow: 0 2px 0 #000; }
+.pname { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-weight: 900; font-size: 18px; text-shadow: 0 2px 0 #000; }
+.pname b { font-size: 16px; opacity: .85; }
+.plate.right .pname { flex-direction: row-reverse; }
+.plate.second { top: 92px; }   /* same size as the first, right under it */
 .bar { height: 16px; border-radius: 9px; background: rgba(0, 0, 0, .6); border: 2px solid #5a1119; overflow: hidden; }
 .bar > div { height: 100%; width: 100%; background: linear-gradient(#ff5a5a, #c4111f); transition: width .15s; }
 .bar > div.enemy { background: linear-gradient(#b8b8c0, #6a6a74); margin-left: auto; }
@@ -264,6 +272,8 @@ button { -webkit-tap-highlight-color: transparent; }
 /* training ignores the enemy choice: dim it while the Training button is hovered */
 .side, .vs { transition: opacity .2s; }
 #screen-select.training-preview .fighter[data-side="enemy"],
+#screen-select.training-preview .fighter[data-side="enemy2"],
+#screen-select.training-preview .add-enemy,
 #screen-select.training-preview .vs { opacity: .12; pointer-events: none; }
 
 /* sensitivity slider (pause menu) */
@@ -301,6 +311,13 @@ button { -webkit-tap-highlight-color: transparent; }
 .touch #touch { display: block; }
 .touch #screen-game { touch-action: none; -webkit-touch-callout: none; }
 .touch .plate, .touch #score, .touch #toast { pointer-events: none; }
+/* smaller life bars on phones, to leave the screen free */
+.touch .plate { gap: 6px; width: min(30vw, 260px); }
+.touch .plate img { width: 42px; height: 42px; border-width: 2px; }
+.touch .pname { font-size: 14px; }
+.touch .pname b { font-size: 13px; }
+.touch .bar { height: 11px; border-width: 1.5px; }
+.touch .plate.second { top: 62px; }
 .touch #timer, .touch #score { transform: translate(-50%, -50%); }   /* position and font-size come from the layout */
 .touch #weapon-panel { right: auto; bottom: auto; transform: translate(-50%, -50%); text-align: center; }   /* font-size comes from the layout */
 .touch #ammo { font-size: 1em; line-height: 1.1; }

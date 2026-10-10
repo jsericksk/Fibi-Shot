@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { WORLD, THROWN } from '../config.js';
 import { rand } from '../utils.js';
 
+const TAU = Math.PI * 2;
 const UP = new THREE.Vector3(0, 1, 0);
 const tracerGeo = new THREE.CylinderGeometry(1, 1, 1, 6);
 const flashGeo = new THREE.SphereGeometry(1, 8, 6);
@@ -122,6 +123,13 @@ export class Effects {
         mesh.rotation.x += g.spin.x * dt;
         mesh.rotation.y += g.spin.y * dt;
         mesh.rotation.z += g.spin.z * dt;
+        if (!g.bounced) {   // the tumble settles on the way down (spin fades, tilt eases to level), so it never snaps flat at the landing
+          const level = Math.min(1, dt * THROWN.levelRate);
+          for (const axis of ['x', 'z']) {
+            g.spin[axis] *= 1 - level;
+            mesh.rotation[axis] += (Math.round(mesh.rotation[axis] / TAU) * TAU - mesh.rotation[axis]) * level;
+          }
+        }
         // The floor under it right now: the ground, or the top of cover it is above
         const floor = g.floorAt(mesh.position.x, mesh.position.z, mesh.position.y + THROWN.coverReach);
         if (lowestY(mesh) <= floor) {

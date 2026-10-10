@@ -11,6 +11,8 @@ const $ = id => document.getElementById(id);
 const el = {
   pName: $('p-name'), pPortrait: $('p-portrait'), pHp: $('p-hp'),
   eName: $('e-name'), ePortrait: $('e-portrait'), eHp: $('e-hp'),
+  pHpNum: $('p-hpnum'), eHpNum: $('e-hpnum'),
+  plate2: $('plate-e2'), e2Name: $('e2-name'), e2Portrait: $('e2-portrait'), e2Hp: $('e2-hp'), e2HpNum: $('e2-hpnum'),
   scoreP: $('sc-p'), scoreE: $('sc-e'), toast: $('toast'),
   slots: $('slots'), ammo: $('ammo'), reloadNote: $('reload-note'), reloadIcon: $('reload-icon'),
   crosshair: $('crosshair'), scope: $('scope'), hit: $('hitmarker'), hitText: $('hit-text'),
@@ -30,6 +32,7 @@ bindSensitivity('sens', 'sensitivity');
 bindSensitivity('aim-sens', 'aimSensitivity');
 
 let bannerTimer, hitTimer, toastTimer, flashTimer, lastKey = '';
+let hasSecond = false;   // the second enemy plate is in use (1v2)
 
 // Simple white weapon silhouettes (viewBox 0 0 120 44)
 const ICONS = {
@@ -44,11 +47,19 @@ export const weaponIcon = id => `<svg viewBox="0 0 120 44">${ICONS[id]}</svg>`;
 
 // DOM-based HUD for the match screen
 export const hud = {
-  setup(playerDef, enemyDef) {
+  // enemyDefs: one or two opponents (the second one gets its own plate under the first)
+  setup(playerDef, enemyDefs) {
+    const [enemyDef, second] = enemyDefs;
     el.pName.textContent = playerDef.name;
     el.eName.textContent = enemyDef.name;
     el.pPortrait.src = thumbnail(playerDef);
     el.ePortrait.src = thumbnail(enemyDef);
+    hasSecond = !!second;
+    el.plate2.style.display = second ? 'flex' : 'none';
+    if (second) {
+      el.e2Name.textContent = second.name;
+      el.e2Portrait.src = thumbnail(second);
+    }
     el.slots.innerHTML = WEAPON_ORDER.map((id, i) => `<div class="slot" data-id="${id}"><b>${i + 1}</b> ${t('weapon.' + id)}</div>`).join('');
     lastKey = '';
     el.result.style.display = 'none';
@@ -58,9 +69,14 @@ export const hud = {
     el.weaponFlash.style.display = 'none';
   },
 
-  update(player, enemy) {
-    el.pHp.style.width = (player.hp / MATCH.maxHp) * 100 + '%';
-    el.eHp.style.width = (enemy.hp / MATCH.maxHp) * 100 + '%';
+  update(player, enemies) {
+    const bar = (fill, number, fighter) => {
+      fill.style.width = (fighter.hp / MATCH.maxHp) * 100 + '%';
+      number.textContent = Math.ceil(fighter.hp);
+    };
+    bar(el.pHp, el.pHpNum, player);
+    bar(el.eHp, el.eHpNum, enemies[0]);
+    if (hasSecond) bar(el.e2Hp, el.e2HpNum, enemies[1]);
 
     // Reload icon in the middle of the screen with a progress ring
     const w = player.weapon;

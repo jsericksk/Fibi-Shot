@@ -4,6 +4,8 @@ import { createRig, addEyes } from './rig.js';
 
 const C = { skin: 0xffe3d2, hair: 0xf6e7ae, white: 0xfbfbff, black: 0x25222e, purple: 0x7b5fd0, blue: 0x2f9be0 };
 
+const BRIM = 1.02;   // radius of the hat brim (the dome and band keep their size)
+
 // Blonde girl with a wide white hat, blue tie and striped socks
 export function buildFibi() {
   const rig = createRig();
@@ -39,7 +41,7 @@ export function buildFibi() {
     const a = i * 0.2;
     add(head, sphere, M(C.hair), [Math.sin(a) * 0.6, 0.2, Math.cos(a) * 0.54], [0.1, 0.16, 0.07], [0, a, 0]);
   }
-  add(head, new THREE.CylinderGeometry(0.6, 0.5, 0.81, 32), M(C.hair), [0, 0.035, -0.15], [1, 1, 1], [-0.12, 0, 0]);   // tilted like the brim, so its top reaches the underside of the brim without poking through
+  add(head, new THREE.CylinderGeometry(0.6, 0.5, 0.86, 32), M(C.hair), [0, 0.06, -0.15], [1, 1, 1], [-0.12, 0, 0]);   // tilted like the brim, so its top reaches the underside of the brim without poking through
   add(head, sphere, M(C.hair), [0, -0.32, -0.2], [0.5, 0.15, 0.48]);
   // Volume under the hat. Kept narrower than the hat dome so no blonde shows through.
   add(head, sphere, M(C.hair), [0, 0.28, -0.1], [0.52, 0.48, 0.52]);
@@ -64,9 +66,9 @@ export function buildFibi() {
   hat.scale.setScalar(1.05);
   head.add(hat);
   rig.hat = hat;   // pops off when she dies
-  add(hat, cyl, M(C.white), [0, 0, 0], [1.2, 0.04, 1.2]);
-  add(hat, new THREE.TorusGeometry(1.2, 0.04, 10, 48), M(C.black), [0, 0, 0], [1, 1, 1], [Math.PI / 2, 0, 0]);
-  add(hat, new THREE.TorusGeometry(0.95, 0.035, 10, 48), M(C.purple), [0, 0.04, 0], [1, 1, 1], [Math.PI / 2, 0, 0]);
+  add(hat, cyl, M(C.white), [0, 0, 0], [BRIM, 0.04, BRIM]);
+  add(hat, new THREE.TorusGeometry(BRIM, 0.04, 10, 48), M(C.black), [0, 0, 0], [1, 1, 1], [Math.PI / 2, 0, 0]);
+  add(hat, new THREE.TorusGeometry(BRIM * 0.79, 0.035, 10, 48), M(C.purple), [0, 0.04, 0], [1, 1, 1], [Math.PI / 2, 0, 0]);
   add(hat, new THREE.SphereGeometry(1, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2), M(C.white), [0, 0.02, 0], [0.56, 0.5, 0.56]);
   add(hat, cyl, M(C.black), [0, 0.1, 0], [0.565, 0.07, 0.565]);
   add(hat, cyl, M(C.purple), [0, 0.03, 0], [0.57, 0.03, 0.57]);

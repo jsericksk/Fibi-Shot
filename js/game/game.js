@@ -117,7 +117,7 @@ export class Game {
     this.place(this.player, null, undefined, side);
 
     // Duel: one hunting enemy. Training: every other character wanders around as a showcase.
-    const defs = this.training ? CHARACTERS.filter(c => c.id !== playerDef.id) : [enemyDef];
+    const defs = this.training ? CHARACTERS.filter(c => c.id !== playerDef.id) : opts.secondEnemy ? [enemyDef, opts.secondEnemy] : [enemyDef];
     this.bots = defs.map(def => {
       const f = new Fighter(def, false, arena.half);
       f.training = this.training;
@@ -136,7 +136,7 @@ export class Game {
     this.duration = this.training ? 0 : opts.duration ?? 0;   // seconds, 0 = unlimited
     this.timeLeft = this.duration;
 
-    this.hud.setup(playerDef, enemyDef);
+    this.hud.setup(playerDef, this.training ? [enemyDef] : defs);
     this.hud.setScore(0, 0);
     this.hud.setTimer(this.training ? null : this.duration, this.timeLeft);
     this.hud.setDoomFlash(0);
@@ -218,7 +218,7 @@ export class Game {
     });
     this.effects.update(dt);
     this.rockets.update(dt);
-    this.hud.update(this.player, this.enemy);
+    this.hud.update(this.player, this.bots.map(b => b.f));
     if (this.multi) this.sendState(dt);
   }
 

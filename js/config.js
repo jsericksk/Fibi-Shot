@@ -33,7 +33,7 @@ export const WORLD = {
   arenaHalf: 36,              // map is a square of (2 * arenaHalf) meters
   designHalf: 30,             // maps.js positions are drawn for this half size and spread out to fit arenaHalf
   gravity: 10,                // same floaty, moon-like jump on every map
-  fighterRadius: 0.45,        // default collision radius (a character can set its own in characters/index.js)
+  fighterRadius: 0.6,         // default collision radius (a character can set its own in characters/index.js)
   stepUp: 0.35,               // max height difference walked onto without jumping
   deathBodyLength: 1.4,       // how far a fallen body reaches from the feet
 };
@@ -153,6 +153,7 @@ export const THROWN = {
   upSpeed: 3.5,               // m/s thrown upward
   throwSpeed: 1.8,            // m/s thrown forward (a little random sideways too)
   spin: 7,                    // max rad/s of tumbling
+  levelRate: 4,               // how fast the tumble fades and the tilt levels out while falling (per second)
   coverReach: 0.3,            // m above the gun that cover tops still catch it
   bounce: 0.3,                // share of the speed kept on the first landing
   life: 3,                    // seconds before it is gone

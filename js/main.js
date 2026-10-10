@@ -30,10 +30,10 @@ const lobby = initLobby({
 });
 
 initSelect({
-  onStart(playerDef, enemyDef, mode, mapId, duration) {
+  onStart(playerDef, enemyDef, mode, mapId, duration, secondEnemy) {
     show('game');
     game.resize();
-    game.start(playerDef, enemyDef, mode, mapId, { duration });
+    game.start(playerDef, enemyDef, mode, mapId, { duration, secondEnemy });
   },
   onMultiplayer() {
     show('lobby');
