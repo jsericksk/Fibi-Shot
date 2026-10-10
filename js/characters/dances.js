@@ -137,18 +137,94 @@ export const DANCES = {
     }
   },
 
-  // Nono: spinning flail (5 s) - fast spin (6 full turns), arms thrown up, kicking legs, bouncing
-  flail(rig, t) {
+  // Nono: party groove (5 s, 120 BPM) - bouncing roof raises, side shuffle, floss, spinning jump finish
+  groove(rig, t) {
     reset(rig);
     const { model, legs, arms, head } = rig;
-    model.rotation.y = t * PI * 12 / 5;
-    model.rotation.z = s(t * 9) * 0.12;
-    model.position.y = abs(s(t * 9)) * 0.28;
-    arms[0].rotation.set(-2.7 + s(t * 12) * 0.7, 0, -0.5 + c(t * 12) * 0.4);
-    arms[1].rotation.set(-2.7 - s(t * 12) * 0.7, 0, 0.5 - c(t * 12) * 0.4);
-    legs[0].rotation.x = s(t * 12) * 1.1;
-    legs[1].rotation.x = -s(t * 12) * 1.1;
-    head.rotation.set(0, 0, s(t * 6) * 0.35);
+    const beat = t * PI * 2;                                           // one bounce per 0.5 s
+    if (t < 1.5) {
+      model.position.y = abs(s(beat)) * 0.12;
+      model.rotation.z = s(beat / 2) * 0.1;
+      const up = s(beat / 2) > 0;                                      // arms pump up one after the other
+      armsPose(rig, [up ? -2.9 : -1.6, 0.35], [up ? -1.6 : -2.9, 0.35]);
+      legs[0].rotation.x = -0.35 * max(0, s(beat / 2)); legs[1].rotation.x = -0.35 * max(0, -s(beat / 2));
+      head.rotation.set(0, 0, s(beat / 2) * 0.25);
+    } else if (t < 3) {
+      const p = s(beat / 2);                                           // two steps to each side
+      model.position.set(p * 0.3, abs(s(beat)) * 0.1, 0);
+      model.rotation.y = p * 0.4;
+      legs[0].rotation.x = p * 0.7; legs[1].rotation.x = -p * 0.7;
+      armsPose(rig, [-1.3 + p * 0.4, -0.4], [-1.3 - p * 0.4, -0.4]);   // hands pumping in front
+      head.rotation.set(0, -p * 0.3, 0);
+    } else if (t < 4.2) {
+      const p = s(beat);                                               // floss: hips one way, both arms the other
+      model.rotation.z = -p * 0.2;
+      model.position.set(-p * 0.1, abs(p) * 0.04, 0);
+      arms.forEach(a => a.rotation.set(-0.25, 0, p * 0.95));
+      legs[0].rotation.z = -0.1; legs[1].rotation.z = 0.1;
+      head.rotation.set(0, 0, p * 0.15);
+    } else {
+      const u = (t - 4.2) / 0.8;                                       // jump with a full spin, arms up
+      model.rotation.y = ease(u) * PI * 2;
+      model.position.y = s(min(1, u) * PI) * 0.5;
+      legs[0].rotation.x = legs[1].rotation.x = -0.5 * s(min(1, u) * PI);
+      armsPose(rig, [-2.9, 0.3], [-2.9, 0.3]);
+      head.rotation.set(-0.2, 0, 0);
+    }
+  },
+
+  // Doro 1: robot (6 s, 120 BPM) - stiff poses that snap every beat, head ticks, moonwalk, spin and freeze
+  robot(rig, t) {
+    reset(rig);
+    const { model, legs, head } = rig;
+    const POSES = [[[-1.57, 0.05], [-1.57, 0.05]], [[-1.57, 0.05], [0, 0.75]], [[-2.9, 0.2], [0, 0.75]], [[0, 0.75], [-2.9, 0.2]], [[-1.57, 0.9], [-1.57, 0.9]]];
+    const snap = Math.floor(t * 4);                                    // a new pose every 0.25 s, no easing
+    if (t < 3) {
+      armsPose(rig, ...POSES[snap % POSES.length]);
+      const side = snap % 4 < 2 ? 1 : -1;
+      head.rotation.set(0, side * 0.5, 0);
+      model.rotation.y = side * 0.25;
+      model.position.y = snap % 2 ? 0.03 : 0;
+    } else if (t < 5) {
+      const u = (t - 3) / 2;                                           // moonwalk: slides back while the legs shuffle
+      model.position.z = -0.5 * s(u * PI);
+      legs[0].rotation.x = s(t * 9) * 0.5; legs[1].rotation.x = -s(t * 9) * 0.5;
+      armsPose(rig, [-0.9, 0.2], [0.3, 0.2]);
+      head.rotation.set(0, snap % 2 ? 0.4 : -0.4, 0);
+    } else {
+      const u = (t - 5) / 0.5;
+      model.rotation.y = ease(u) * PI * 2;
+      model.position.y = s(min(1, u) * PI) * 0.3;
+      if (t > 5.5) armsPose(rig, [-2.9, 0.2], [0, 0.75]);              // freeze: one arm up, the other down
+      else armsPose(rig, [-1.57, 0.9], [-1.57, 0.9]);
+    }
+  },
+
+  // Doro 2: cancan (6 s, 120 BPM) - high kicks with arms wide, twirl, bow
+  cancan(rig, t) {
+    reset(rig);
+    const { model, legs, head } = rig;
+    if (t < 3.6) {
+      const leg = Math.floor(t / 0.5) % 2, kick = s(((t % 0.5) / 0.5) * PI);
+      legs[leg].rotation.x = -1.6 * kick;
+      model.position.y = kick * 0.1;
+      model.rotation.x = -0.15 * kick;                                 // leans back to throw the leg up
+      const wave = s(t * 12) * 0.2;
+      armsPose(rig, [-0.3, 1.2 + wave], [-0.3, 1.2 - wave]);
+      head.rotation.set(0, 0, (leg ? 1 : -1) * 0.2 * kick);
+    } else if (t < 5) {
+      const u = (t - 3.6) / 1.4;                                       // two twirls with little hops
+      model.rotation.y = ease(u) * PI * 4;
+      model.position.y = abs(s(u * PI * 3)) * 0.2;
+      legs[0].rotation.x = legs[1].rotation.x = -0.3 * abs(s(u * PI * 3));
+      armsPose(rig, [-2.7, 0.5], [-2.7, 0.5]);
+    } else {
+      const w = s(min(1, (t - 5) / 1) * PI);                           // bow with one arm across the chest
+      model.rotation.x = 0.7 * w;
+      model.position.y = -0.08 * w;
+      armsPose(rig, [-1.4 * w, -0.4 * w], [0.5 * w, 0.3]);
+      head.rotation.set(0.3 * w, 0, 0);
+    }
   },
 
   // Mambo 1: backflip show (7.3 s) - sway, crouch, backflip at about 4 s, celebration, final pose
