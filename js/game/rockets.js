@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { M, add, cyl } from '../utils.js';
 import { MATCH } from '../config.js';
 import { sfx } from '../audio.js';
+import { net } from '../net.js';
 
 const FAR = MATCH.bulletRange;
 const tmp = new THREE.Vector3();
@@ -36,8 +37,7 @@ export class Rockets {
     const { game } = this, w = shooter.weapon;
     game.scene.updateMatrixWorld();
     const muzzle = shooter.muzzleWorld();
-    game.effects.flash(muzzle, 0.4);
-    sfx.shot(w.id, shooter.isPlayer ? 1 : Math.max(0.3, 1 - game.player.pos.distanceTo(shooter.pos) / 60));
+    this.muzzleEffects(shooter, w, muzzle);
 
     // Cover between the camera and the muzzle (firing point-blank): it blows up right there
     const toMuzzle = muzzle.clone().sub(origin);
@@ -57,11 +57,31 @@ export class Rockets {
     const angle = aim.angleTo(dir);
     if (angle > p.maxAimAngle) aim = dir.clone().lerp(aim, p.maxAimAngle / angle).normalize();
 
+    this.spawn(shooter, w, muzzle, aim);
+    if (game.multi && shooter.isPlayer) {
+      const r = v => [+v.x.toFixed(2), +v.y.toFixed(2), +v.z.toFixed(2)];
+      net.send({ t: 'shot', w: w.id, mz: r(muzzle), d: r(aim) });
+    }
+  }
+
+  // The friend's rocket: we only draw it, their game decides who it hurts
+  launchRemote(shooter, w, muzzle, aim) {
+    this.muzzleEffects(shooter, w, muzzle);
+    this.spawn(shooter, w, muzzle, aim, true);
+  }
+
+  muzzleEffects(shooter, w, muzzle) {
+    const { game } = this;
+    game.effects.flash(muzzle, 0.4);
+    sfx.shot(w.id, shooter.isPlayer ? 1 : Math.max(0.3, 1 - game.player.pos.distanceTo(shooter.pos) / 60));
+  }
+
+  spawn(shooter, weapon, muzzle, aim, visualOnly = false) {
     const mesh = buildRocket();
     mesh.position.copy(muzzle);
     mesh.lookAt(muzzle.clone().add(aim));
-    game.scene.add(mesh);
-    this.list.push({ mesh, shooter, weapon: w, dir: aim, life: w.projectile.life, trailT: 0 });
+    this.game.scene.add(mesh);
+    this.list.push({ mesh, shooter, weapon, dir: aim, life: weapon.projectile.life, trailT: 0, visualOnly });
   }
 
   update(dt) {
@@ -89,7 +109,7 @@ export class Rockets {
     const { game } = this, { damage, projectile: p } = r.weapon;
     game.effects.explosion(point, p.radius);
     sfx.explosion(Math.max(0.3, 1 - game.player.pos.distanceTo(point) / 60));
-    if (game.state !== 'playing') return;
+    if (r.visualOnly || game.state !== 'playing') return;
     for (const target of game.opponentsOf(r.shooter)) {
       if (target.dead || target.invuln > 0) continue;
       const d = point.distanceTo(target.chestPos(tmp));

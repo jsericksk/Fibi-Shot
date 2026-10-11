@@ -32,6 +32,10 @@ function attach(c) {
   onConnect?.();
 }
 
+// Background tabs (a phone with the screen off or another app on top) throttle timers and network
+// events, so the silence on return is not a real disconnect. Give the friend a fresh window.
+document.addEventListener('visibilitychange', () => { if (!document.hidden) lastRecv = Date.now(); });
+
 function lost(c) {
   if (c !== conn) return;   // already closed on purpose
   net.close();

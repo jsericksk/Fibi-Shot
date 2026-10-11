@@ -95,16 +95,21 @@
     <div class="versus">
       <div class="side">
         <h2 data-i18n="you"></h2>
-        <img id="lobby-big-me" class="big" alt="">
+        <div class="stage art">
+          <button id="btn-lobby-emote" class="tbtn stage-emote"></button>
+          <canvas id="lobby-stage-me" width="480" height="380"></canvas>
+        </div>
         <div id="lobby-name-me" class="fname"></div>
-        <div id="lobby-pick" class="picker"></div>
-        <div id="lobby-skins" class="skins hidden"></div>
       </div>
       <div class="vs">VS</div>
       <div class="side">
         <h2 data-i18n="lobby.friend"></h2>
-        <img id="lobby-big-friend" class="big" alt="">
+        <div class="stage art"><canvas id="lobby-stage-friend" width="480" height="380"></canvas></div>
         <div id="lobby-name-friend" class="fname"></div>
+      </div>
+      <div class="lobby-picks">
+        <div id="lobby-pick" class="picker"></div>
+        <div id="lobby-skins" class="skins hidden"></div>
       </div>
     </div>
     <div class="maps" id="lobby-maps"></div>

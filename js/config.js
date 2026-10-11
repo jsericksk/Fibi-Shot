@@ -167,7 +167,7 @@ export const NET = {
   smoothing: 18,              // how fast the remote player catches up with its latest position (higher = snappier)
   snapDistance: 6,            // teleports instead of sliding when farther than this (respawns)
   pingMs: 2000,
-  timeoutMs: 8000,            // no message for this long = the friend is gone
+  timeoutMs: 20000,           // no message for this long = the friend is gone
   joinTimeoutMs: 10000,
   // Add a TURN server here if some friends cannot connect (strict routers or mobile networks)
   iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }],
