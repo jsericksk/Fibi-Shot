@@ -71,6 +71,11 @@ export class Fighter {
     return out.set(this.pos.x, this.pos.y + 1.5 * MODEL_SCALE, this.pos.z);
   }
 
+  // Upper part of the head hitbox: still visible when cover hides the head center
+  headTopPos(out = new THREE.Vector3()) {
+    return out.set(this.pos.x, this.pos.y + 1.95 * MODEL_SCALE, this.pos.z);
+  }
+
   muzzleWorld(out = new THREE.Vector3()) {
     return this.guns[this.weaponId].muzzle.getWorldPosition(out);
   }
