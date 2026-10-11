@@ -198,7 +198,7 @@ export class Game {
           if (f.respawnT <= 0) this.respawn(f);
         }
       }
-      animateRig(f.rig, { moving: f.moving, t: this.t + (f.isPlayer ? 0 : 1.7), pitch: f.pitch + f.kick, dead: f.dead, deadT: f.deadT, deathPose: f.deathPose, air: !f.onGround, emote: f.emote, unarmed: f.unarmed }, dt);
+      animateRig(f.rig, { moving: f.moving, t: this.t + (f.isPlayer ? 0 : 1.7), pitch: f.pitch + f.kick, dead: f.dead, deadT: f.deadT, deathPose: f.deathPose, air: !f.onGround, sliding: f.sliding, emote: f.emote, unarmed: f.unarmed }, dt);
     }
     // Emote sound follows the dance: starts with it, fades out when it ends or is cancelled
     const emote = this.player.emote;
@@ -232,7 +232,7 @@ export class Game {
     const p = this.player, r = (v, d = 2) => +v.toFixed(d), em = p.emote;
     net.send({
       t: 's', x: r(p.pos.x), y: r(p.pos.y), z: r(p.pos.z), yaw: r(p.yaw, 3), pitch: r(p.pitch + p.kick, 3),
-      mv: p.moving, gr: p.onGround, w: p.weaponId, hp: Math.round(p.hp), dead: p.dead,
+      mv: p.moving, gr: p.onGround, sl: p.sliding, w: p.weaponId, hp: Math.round(p.hp), dead: p.dead,
       st: [p.stats.shots, p.stats.hits, p.stats.headshots, Math.round(p.stats.damage)],   // the friend shows these on the result screen
       em: em ? { dance: em.dance, duration: em.duration, sound: em.sound, id: em.id } : null,
     });

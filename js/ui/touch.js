@@ -12,6 +12,7 @@ const $ = id => document.getElementById(id);
 const BUTTONS = {
   fire: { down: c => c.aimFire(true), up: c => c.aimFire(false), aim: true },
   jump: { down: c => c.jump() },
+  slide: { down: c => c.slide() },
   scope: { down: c => c.toggleScope(), aim: true },
   reload: { down: c => c.reload() },
   emote: { down: c => c.emote() },
@@ -21,6 +22,7 @@ const BUTTONS = {
 export const ICONS = {
   fire: '<svg viewBox="0 0 24 24"><path d="M12 2c2.6 2 3.8 4.6 3.8 7.4V17H8.2V9.4C8.2 6.6 9.4 4 12 2z"/><rect x="7.5" y="18.5" width="9" height="3" rx="1"/></svg>',
   jump: '<svg viewBox="0 0 24 24"><path d="M12 3l8 9h-5v9H9v-9H4z"/></svg>',
+  slide: '<svg viewBox="0 0 24 24"><circle cx="17.8" cy="5.8" r="2.6"/><rect x="2" y="8.8" width="13" height="1.7" rx=".85"/><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path stroke-width="3.2" d="M16.8 9.8l-2.2 5.6"/><path stroke-width="1.9" d="M15.6 11.2l-4.4-1"/><path stroke-width="2.2" d="M14.4 16.2l-4.6-2.4-3.6 4M14.6 17.2l-5.6 2.2"/></g></svg>',
   scope: '<svg viewBox="0 0 24 24"><rect x="10.8" y="1.5" width="2.4" height="7.8" rx="1.2"/><rect x="10.8" y="14.7" width="2.4" height="7.8" rx="1.2"/><rect x="1.5" y="10.8" width="7.8" height="2.4" rx="1.2"/><rect x="14.7" y="10.8" width="7.8" height="2.4" rx="1.2"/><path fill-rule="evenodd" d="M12 9.8a2.2 2.2 0 1 0 0 4.4 2.2 2.2 0 0 0 0-4.4zm0 1.2a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/></svg>',
   reload: '<svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>',
   emote: '<svg viewBox="0 0 24 24"><circle cx="12" cy="4" r="2.7"/><rect x="8.6" y="7.6" width="6.8" height="7.4" rx="2.2"/><g fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3.8 6.4l3.7 3.7M20.2 6.4l-3.7 3.7"/><path d="M10.4 14.5l-2 6.5M13.6 14.5l2 3.2 1.2 3.3"/></g></svg>',

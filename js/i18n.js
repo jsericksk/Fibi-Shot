@@ -2,7 +2,7 @@
 // To add a language, add a new entry below (any missing key falls back to English).
 const STRINGS = {
   en: {
-    'fullscreen': '⛶ Fullscreen (F)',
+    'fullscreen': '⛶ Fullscreen',
     'you': 'You',
     'enemy': 'Enemy',
     'enemy2': 'Enemy 2',
@@ -43,7 +43,7 @@ const STRINGS = {
     'lobby.error': 'Could not connect. Check the code and try again.',
     'lobby.left': 'Your friend left the room.',
     'toast.opponentLeft': 'Your friend left the match',
-    'help': 'WASD move · Mouse aim · Click shoot · 1/2/3/4 weapons · R reload · Right click: aim · H: emote · Hold Alt and move the mouse: see your character',
+    'help': 'WASD move · Mouse aim · Click shoot · 1/2/3/4 weapons · R reload · Right click: aim · H: emote · F: slide · Hold Alt and move the mouse: see your character',
     'map.arena': 'Arena',
     'map.moon': 'Moon',
     'map.forest': 'Forest',
@@ -82,7 +82,7 @@ const STRINGS = {
     'hit.headshot': 'HEADSHOT',
   },
   pt: {
-    'fullscreen': '⛶ Tela cheia (F)',
+    'fullscreen': '⛶ Tela cheia',
     'you': 'Você',
     'enemy': 'Inimigo',
     'enemy2': 'Inimigo 2',
@@ -123,7 +123,7 @@ const STRINGS = {
     'lobby.error': 'Não foi possível conectar. Confira o código e tente de novo.',
     'lobby.left': 'Seu amigo saiu da sala.',
     'toast.opponentLeft': 'Seu amigo saiu da partida',
-    'help': 'WASD mover · Mouse mirar · Clique atirar · 1/2/3/4 armas · R recarregar · Botão direito: mirar · H: emote · Segure Alt e mova o mouse: ver seu personagem',
+    'help': 'WASD mover · Mouse mirar · Clique atirar · 1/2/3/4 armas · R recarregar · Botão direito: mirar · H: emote · F: deslizar · Segure Alt e mova o mouse: ver seu personagem',
     'map.arena': 'Arena',
     'map.moon': 'Lua',
     'map.forest': 'Floresta',
@@ -162,7 +162,7 @@ const STRINGS = {
     'hit.headshot': 'HEADSHOT',
   },
   es: {
-    'fullscreen': '⛶ Pantalla completa (F)',
+    'fullscreen': '⛶ Pantalla completa',
     'you': 'Tú',
     'enemy': 'Enemigo',
     'enemy2': 'Enemigo 2',
@@ -203,7 +203,7 @@ const STRINGS = {
     'lobby.error': 'No se pudo conectar. Revisa el código e inténtalo de nuevo.',
     'lobby.left': 'Tu amigo salió de la sala.',
     'toast.opponentLeft': 'Tu amigo salió de la partida',
-    'help': 'WASD mover · Ratón apuntar · Clic disparar · 1/2/3/4 armas · R recargar · Clic derecho: apuntar · H: emote · Mantén Alt y mueve el ratón: ver a tu personaje',
+    'help': 'WASD mover · Ratón apuntar · Clic disparar · 1/2/3/4 armas · R recargar · Clic derecho: apuntar · H: emote · F: deslizar · Mantén Alt y mueve el ratón: ver a tu personaje',
     'map.arena': 'Arena',
     'map.moon': 'Luna',
     'map.forest': 'Bosque',

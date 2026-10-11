@@ -24,6 +24,7 @@ export class RemotePlayer {
     this.target = s;
     f.moving = s.mv;
     f.onGround = s.gr;
+    f.sliding = s.sl;
     f.hp = s.hp;
     f.pitch = s.pitch;
     [f.stats.shots, f.stats.hits, f.stats.headshots, f.stats.damage] = s.st;   // kills and deaths are counted on both sides

@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { M, add, sphere, box, clamp } from '../utils.js';
 import { DANCES } from './dances.js';
+import { SLIDE } from '../config.js';
 
 export const MODEL_SCALE = 0.85;
 const AIM_ARM_X = -Math.PI / 2 + 0.08;
@@ -97,7 +98,7 @@ export function addEyes(head, o = {}) {
 }
 
 // Poses the rig every frame: aim pitch, run cycle, death fall
-export function animateRig(rig, { moving, t, pitch, dead, deadT, deathPose, air, emote, unarmed }, dt) {
+export function animateRig(rig, { moving, t, pitch, dead, deadT, deathPose, air, sliding, emote, unarmed }, dt) {
   const k = Math.min(1, dt * 15);
   rig.gunMount.visible = !emote && !unarmed && !dead;   // a dead fighter has dropped the weapon
   if (rig.hat) rig.hat.visible = !dead;                 // and lost the hat, if any
@@ -106,7 +107,7 @@ export function animateRig(rig, { moving, t, pitch, dead, deadT, deathPose, air,
   rig.model.rotation.y = rig.model.rotation.z = 0;
   rig.head.rotation.y = rig.head.rotation.z = 0;
   const swing = moving && !dead && !air ? Math.sin(t * 11) * 0.8 : 0;
-  const tuck = air && !dead ? [-0.6, 0.45] : [swing, -swing];
+  const tuck = sliding && !dead ? [-1.2, -1.2] : air && !dead ? [-0.6, 0.45] : [swing, -swing];   // legs out in front when sliding
   rig.legs[0].rotation.x += (tuck[0] - rig.legs[0].rotation.x) * k;
   rig.legs[1].rotation.x += (tuck[1] - rig.legs[1].rotation.x) * k;
   rig.aimPivot.rotation.x = -clamp(pitch, -1, 1);
@@ -123,7 +124,7 @@ export function animateRig(rig, { moving, t, pitch, dead, deadT, deathPose, air,
     });
     keepAboveFloor(rig);
   } else {
-    rig.model.rotation.x = 0;
+    rig.model.rotation.x += ((sliding ? -SLIDE.leanBack : 0) - rig.model.rotation.x) * k;
     rig.model.position.set(0, moving && !air ? Math.abs(Math.sin(t * 11)) * 0.05 : 0, 0);
     // Blend every axis back to the aim pose so dances never leave arms or legs twisted
     // Unarmed (showcase) characters let their arms swing naturally instead of aiming

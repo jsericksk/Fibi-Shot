@@ -62,6 +62,9 @@ export class EnemyAI {
     this.aimPoint = null;
     this.switchT = rand(5, 9);
     this.jumpT = rand(...ENEMY.jumpEvery);
+    this.slideT = rand(...(this.wander ? SHOWCASE.slideEvery : ENEMY.slideEvery));
+    this.slideHeat = 0;       // grows while the player slides a lot, so the bot slides more too
+    this.playerWasSliding = false;
     this.seeCounterT = 0;
     this.emoteT = rand(...SHOWCASE.emoteEvery);
     this.way = null;
@@ -98,6 +101,7 @@ export class EnemyAI {
     this.noLosT = this.los ? 0 : this.noLosT + dt;
 
     this.followPlayerSide(dt, dx, dz, dist);
+    this.watchPlayerSlides(dt);
     this.move(dt, dist);
     if (t.dead) return;   // keeps moving after a kill so it does not look frozen
     this.handleWeapons(dt);
@@ -162,6 +166,10 @@ export class EnemyAI {
     f.root.rotation.y = f.yaw;
     f.moving = true;
 
+    if (f.sliding) return f.slideStep(dt, this.game.arena.colliders);
+    this.slideT -= dt;
+    if (this.slideT <= 0 && f.canSlide()) { f.startSlide(dx / len, dz / len); this.slideT = rand(...SHOWCASE.slideEvery); return; }
+
     this.jumpT -= dt;
     if (this.jumpT <= 0 && f.onGround) { f.jump(PLAYER.jumpSpeed); this.jumpT = rand(...ENEMY.jumpEvery); }
 
@@ -192,6 +200,14 @@ export class EnemyAI {
     }
   }
 
+  // Counts each new player slide; the count fades with time
+  watchPlayerSlides(dt) {
+    const sliding = this.target.sliding;
+    if (sliding && !this.playerWasSliding) this.slideHeat = Math.min(ENEMY.slideCopyMax, this.slideHeat + ENEMY.slideCopyGain);
+    this.playerWasSliding = sliding;
+    this.slideHeat = Math.max(0, this.slideHeat - ENEMY.slideCopyDecay * dt);
+  }
+
   move(dt, dist) {
     const f = this.f;
     this.strafeT -= dt;
@@ -212,7 +228,12 @@ export class EnemyAI {
     const vz = fz * range * 0.8 + fx * strafe;
     const len = Math.hypot(vx, vz);
     f.moving = len > 0;
+    if (f.sliding) return f.slideStep(dt, this.game.arena.colliders);
     if (len === 0) return;
+
+    // Slides now and then in the direction it is heading
+    this.slideT -= dt * (1 + this.slideHeat * ENEMY.slideCopyBoost);
+    if (this.slideT <= 0 && f.canSlide()) { f.startSlide(vx / len, vz / len); this.slideT = rand(...ENEMY.slideEvery); }
 
     // Hops now and then, and tries to hop over low cover that blocks the way
     this.jumpT -= dt;
