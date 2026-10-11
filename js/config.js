@@ -68,7 +68,10 @@ export const SLIDE = {
   cooldown: 1.4,              // seconds from one slide start to the next
   cameraDrop: 0.7,            // how far the camera sinks (m)
   cameraRate: 12,             // how fast it sinks and rises
-  leanBack: 1.0,              // radians the body tilts back
+  leanBack: 1.1,              // radians the body tilts back (around the hips)
+  bodyDrop: 0.22,             // how far the hips sink toward the floor (m)
+  legs: [-0.4, -0.8],         // leg swing in front of the body (one stretched, one bent)
+  plantedArm: 0.9,            // swing of the left arm, back to the floor (the right one holds the gun)
 };
 
 // ---- Emotes (H key) ----------------------------------------------------------

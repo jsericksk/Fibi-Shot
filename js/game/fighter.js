@@ -68,15 +68,18 @@ export class Fighter {
   get ammoNow() { return this.ammo[this.weaponId]; }
 
   chestPos(out = new THREE.Vector3()) {
+    if (this.sliding) return this.hitboxes[1].getWorldPosition(out);   // the body hitbox sinks while sliding
     return out.set(this.pos.x, this.pos.y + 0.9 * MODEL_SCALE + 0.15, this.pos.z);
   }
 
   headPos(out = new THREE.Vector3()) {
+    if (this.sliding) return this.hitboxes[0].getWorldPosition(out);
     return out.set(this.pos.x, this.pos.y + 1.5 * MODEL_SCALE, this.pos.z);
   }
 
   // Upper part of the head hitbox: still visible when cover hides the head center
   headTopPos(out = new THREE.Vector3()) {
+    if (this.sliding) return this.headPos(out).setY(out.y + 0.45 * MODEL_SCALE);
     return out.set(this.pos.x, this.pos.y + 1.95 * MODEL_SCALE, this.pos.z);
   }
 
