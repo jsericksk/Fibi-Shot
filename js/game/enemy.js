@@ -59,6 +59,7 @@ export class EnemyAI {
     this.detourT = 0;
     this.noLosT = 0;
     this.los = false;
+    this.aimPoint = null;
     this.switchT = rand(5, 9);
     this.jumpT = rand(...ENEMY.jumpEvery);
     this.seeCounterT = 0;
@@ -92,7 +93,8 @@ export class EnemyAI {
       else { f.moving = false; return; }
     }
 
-    this.los = this.game.hasLineOfSight(f.chestPos(new THREE.Vector3()), t.chestPos(new THREE.Vector3()));
+    this.aimPoint = this.visibleTargetPoint();
+    this.los = !!this.aimPoint;
     this.noLosT = this.los ? 0 : this.noLosT + dt;
 
     this.followPlayerSide(dt, dx, dz, dist);
@@ -106,6 +108,12 @@ export class EnemyAI {
     const list = EMOTES[this.f.def.id] ?? EMOTES.default;
     this.f.emote = { ...list[randInt(0, list.length - 1)], t: 0 };
     this.emoteHp = this.f.hp;
+  }
+
+  // Chest if visible, else head or its top (low cover can hide the lower body); null when fully hidden
+  visibleTargetPoint() {
+    const from = this.f.chestPos(), t = this.target;
+    return [t.chestPos(), t.headPos(), t.headTopPos()].find(p => this.game.hasLineOfSight(from, p)) ?? null;
   }
 
   // True when the bot got hurt or the player is aiming (scoped) at it in plain sight
@@ -252,12 +260,12 @@ export class EnemyAI {
   }
 
   fire(dt, dist) {
-    const f = this.f, w = f.weapon, t = this.target;
+    const f = this.f, w = f.weapon;
     this.reaction -= dt;
     if (this.reaction > 0 || f.reloading || f.ammoNow <= 0 || !this.los || dist > FIRE_RANGE[w.id]) { this.charge = 0; return; }
 
     const origin = f.chestPos(new THREE.Vector3());
-    const aim = t.chestPos(new THREE.Vector3());
+    const aim = this.aimPoint;
 
     if (w.id === 'awp') {
       this.charge += dt;
