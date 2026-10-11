@@ -1,6 +1,9 @@
 import { CHARACTERS, getCharacter } from '../characters/index.js';
 import { renderSkins } from './skins.js';
 import { thumbnail } from './thumbnails.js';
+import { initHomeStage } from './home-stage.js';
+import { ICONS } from './touch.js';
+import { copyText } from '../utils.js';
 import { MAP_LIST } from '../maps.js';
 import { sfx } from '../audio.js';
 import { net } from '../net.js';
@@ -14,6 +17,15 @@ export function initLobby({ onStart, onBack }) {
   const state = { me: 'fibi', friend: null, map: MAP_LIST[0].id, code: '', statusKey: '' };
 
   const isHost = () => net.role === 'host';
+  $('btn-lobby-emote').innerHTML = ICONS.emote;
+  const stages = { me: initHomeStage($('lobby-stage-me'), $('btn-lobby-emote')), friend: initHomeStage($('lobby-stage-friend')) };
+  const staged = {};
+
+  // Switches a stage only when the look changed, so re-rendering never interrupts a dance
+  function stage(side, def) {
+    if (staged[side] !== def.key) stages[side](def);
+    staged[side] = def.key;
+  }
 
   function setStatus(key) {
     state.statusKey = key;
@@ -27,7 +39,7 @@ export function initLobby({ onStart, onBack }) {
 
   function render() {
     const me = getCharacter(state.me);
-    $('lobby-big-me').src = thumbnail(me);
+    stage('me', me);
     $('lobby-name-me').textContent = me.name;
     const pick = $('lobby-pick');
     pick.innerHTML = CHARACTERS.map(c => `
@@ -51,8 +63,8 @@ export function initLobby({ onStart, onBack }) {
     });
 
     const friend = state.friend && getCharacter(state.friend);
-    $('lobby-big-friend').style.visibility = friend ? 'visible' : 'hidden';
-    if (friend) $('lobby-big-friend').src = thumbnail(friend);
+    $('lobby-stage-friend').style.visibility = friend ? 'visible' : 'hidden';
+    if (friend) stage('friend', friend);
     $('lobby-name-friend').textContent = friend ? friend.name : '…';
 
     const maps = $('lobby-maps');
@@ -149,8 +161,7 @@ export function initLobby({ onStart, onBack }) {
   $('join-code').onkeydown = e => { if (e.key === 'Enter') join($('join-code').value); };
   $('btn-copy').onclick = async () => {
     sfx.click();
-    const link = `${location.origin}${location.pathname}?room=${state.code}`;
-    try { await navigator.clipboard.writeText(link); setStatus('lobby.copied'); } catch { $('lobby-status').textContent = link; }
+    if (await copyText(state.code)) setStatus('lobby.copied');
   };
   $('btn-lobby-start').onclick = () => {
     if (!state.friend) return;

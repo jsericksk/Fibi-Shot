@@ -37,5 +37,17 @@ export function lerpAngle(a, b, k) {
 }
 
 
+// Copies text to the clipboard. The async API only exists on https, so plain-http (LAN) servers use the old way
+export async function copyText(text) {
+  try { await navigator.clipboard.writeText(text); return true; } catch { /* fall back below */ }
+  const box = document.createElement('textarea');
+  box.value = text;
+  box.style.cssText = 'position:fixed;opacity:0';
+  document.body.append(box);
+  box.select();
+  box.setSelectionRange(0, text.length);   // iOS ignores select() alone
+  try { return document.execCommand('copy'); } catch { return false; } finally { box.remove(); }
+}
+
 // Whole seconds as m:ss
 export const formatTime = s => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
