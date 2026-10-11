@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { WEAPONS, WEAPON_ORDER, buildGun } from './weapons.js';
-import { WORLD, MATCH } from '../config.js';
+import { WORLD, MATCH, PLAYER, SLIDE } from '../config.js';
 import { MODEL_SCALE } from '../characters/rig.js';
 import { floorHeight } from './arena.js';
 
@@ -26,6 +26,10 @@ export class Fighter {
     this.dead = false;
     this.deadT = 0;
     this.moving = false;
+    this.sliding = false;
+    this.slideT = 0;         // seconds left of the current slide
+    this.slideCd = 0;
+    this.slideDir = { x: 0, z: 0 };
     this.yaw = 0;
     this.pitch = 0;
     this.kick = 0;
@@ -64,15 +68,18 @@ export class Fighter {
   get ammoNow() { return this.ammo[this.weaponId]; }
 
   chestPos(out = new THREE.Vector3()) {
+    if (this.sliding) return this.hitboxes[1].getWorldPosition(out);   // the body hitbox sinks while sliding
     return out.set(this.pos.x, this.pos.y + 0.9 * MODEL_SCALE + 0.15, this.pos.z);
   }
 
   headPos(out = new THREE.Vector3()) {
+    if (this.sliding) return this.hitboxes[0].getWorldPosition(out);
     return out.set(this.pos.x, this.pos.y + 1.5 * MODEL_SCALE, this.pos.z);
   }
 
   // Upper part of the head hitbox: still visible when cover hides the head center
   headTopPos(out = new THREE.Vector3()) {
+    if (this.sliding) return this.headPos(out).setY(out.y + 0.45 * MODEL_SCALE);
     return out.set(this.pos.x, this.pos.y + 1.95 * MODEL_SCALE, this.pos.z);
   }
 
@@ -126,6 +133,7 @@ export class Fighter {
 
   update(dt) {
     this.cooldown -= dt;
+    this.slideCd -= dt;
     this.invuln = Math.max(0, this.invuln - dt);
     this.bloom = Math.max(0, this.bloom - dt * 0.05);
     this.kick *= Math.exp(-dt * 5);
@@ -150,6 +158,7 @@ export class Fighter {
     this.deadT = 0;
     this.emote = null;
     this.moving = false;
+    this.sliding = false;
     for (const id of WEAPON_ORDER) this.ammo[id] = WEAPONS[id].mag;
     this.reloading = false;
     this.cooldown = 0.6;
@@ -185,12 +194,33 @@ export class Fighter {
     return true;
   }
 
+  canSlide() {
+    return this.onGround && !this.sliding && !this.dead && this.slideCd <= 0;
+  }
+
+  // A burst of speed in the given direction that fades to walking pace; no steering while it lasts
+  startSlide(x, z) {
+    this.sliding = true;
+    this.slideT = SLIDE.duration;
+    this.slideCd = SLIDE.cooldown;
+    this.slideDir.x = x;
+    this.slideDir.z = z;
+  }
+
+  slideStep(dt, colliders) {
+    const speed = PLAYER.walkSpeed + (SLIDE.speed - PLAYER.walkSpeed) * (this.slideT / SLIDE.duration);
+    this.moving = true;
+    this.move(this.slideDir.x * speed * dt, this.slideDir.z * speed * dt, colliders);
+    this.slideT -= dt;
+    if (this.slideT <= 0) this.sliding = false;
+  }
+
   // Moves with circle-vs-box collision against cover and the arena bounds
   move(dx, dz, colliders) {
     this.pos.x += dx;
     this.pos.z += dz;
     for (const c of colliders) {
-      if (this.pos.y >= c.h - 0.1) continue;   // above this cover: nothing to push against
+      if (this.pos.y >= c.h - 0.1 && !c.unclimbable) continue;   // above this cover: nothing to push against
       const cx = Math.max(c.minX, Math.min(this.pos.x, c.maxX));
       const cz = Math.max(c.minZ, Math.min(this.pos.z, c.maxZ));
       let ox = this.pos.x - cx, oz = this.pos.z - cz;

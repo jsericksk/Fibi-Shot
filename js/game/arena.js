@@ -341,7 +341,7 @@ export function floorHeight(colliders, x, z, maxY, margin = 0) {
   let floor = 0;
   for (const c of colliders) {
     const inside = x > c.minX - margin && x < c.maxX + margin && z > c.minZ - margin && z < c.maxZ + margin;
-    if (inside && c.h <= maxY && c.h > floor) floor = c.h;
+    if (inside && !c.unclimbable && c.h <= maxY && c.h > floor) floor = c.h;
   }
   return floor;
 }
@@ -412,7 +412,7 @@ export function buildArena(scene, map) {
       }
     }
     blockers.push(mesh);
-    colliders.push({ minX: x - w / 2, maxX: x + w / 2, minZ: z - d / 2, maxZ: z + d / 2, h: ch });
+    colliders.push({ minX: x - w / 2, maxX: x + w / 2, minZ: z - d / 2, maxZ: z + d / 2, h: ch, unclimbable: !!crown });   // nobody stands in the leaves
   }
 
   if (map.lights) {

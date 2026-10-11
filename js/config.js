@@ -61,6 +61,19 @@ export const PLAYER = {
   airSpread: 0.03,            // any shot while jumping
 };
 
+// ---- Slide (F key) ----------------------------------------------------------
+export const SLIDE = {
+  speed: 15,                  // m/s at the start, fades to the walking speed
+  duration: 0.8,              // seconds
+  cooldown: 1.4,              // seconds from one slide start to the next
+  cameraDrop: 0.7,            // how far the camera sinks (m)
+  cameraRate: 12,             // how fast it sinks and rises
+  leanBack: 1.1,              // radians the body tilts back (around the hips)
+  bodyDrop: 0.22,             // how far the hips sink toward the floor (m)
+  legs: [-0.4, -0.8],         // leg swing in front of the body (one stretched, one bent)
+  plantedArm: 0.9,            // swing of the left arm, back to the floor (the right one holds the gun)
+};
+
 // ---- Emotes (H key) ----------------------------------------------------------
 // Each character has its own emotes; one is picked at random when pressing H.
 // dance: animation name from js/characters/dances.js (ballet, idol, penguin, groove, robot, cancan, hops, backflip, gallop) | duration: seconds | sound: mp3 in audio/emotes
@@ -115,6 +128,7 @@ export const TOUCH = {
     joystick: { x: 15.5, y: 79, size: 110 },
     fire: { x: 86.5, y: 62, size: 100 },
     jump: { x: 87, y: 90, size: 68 },
+    slide: { x: 78.5, y: 90, size: 52 },
     scope: { x: 96, y: 47.5, size: 60 },
     weapon: { x: 70.5, y: 90.5, size: 56 },
     reload: { x: 96.3, y: 75, size: 56 },
@@ -135,6 +149,11 @@ export const ENEMY = {
   noticeAimDot: 0.99,         // a dancing bot stops when the player scopes within this (cosine) of it
   tauntChance: 0.35,          // odds of dancing to taunt after killing the player
   jumpEvery: [2.5, 6],        // seconds between random hops while moving
+  slideEvery: [3, 7],         // seconds between random slides while moving
+  slideCopyGain: 1,           // "slide heat" added each time the player slides
+  slideCopyDecay: 0.12,       // heat lost per second
+  slideCopyMax: 5,
+  slideCopyBoost: 0.8,        // slide timer runs (1 + heat * this) times faster
   counterWeapons: ['awp', 'sword'],   // when the player holds one of these, the bot answers with the same weapon
   counterChance: 0.8,         // odds of answering
   mirrorChance: 0.7,          // odds of strafing the other way when the player changes its sliding side
@@ -179,6 +198,7 @@ export const SHOWCASE = {
   walkSpeed: 3.2,
   emoteEvery: [10, 22],       // seconds between emotes of each character
   waypointTime: [4, 9],       // seconds before picking a new place to walk to
+  slideEvery: [8, 16],        // seconds between slides while walking
   spawnDistance: 7,           // minimum distance between characters when they appear
 };
 

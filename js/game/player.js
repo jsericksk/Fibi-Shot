@@ -1,10 +1,9 @@
 import * as THREE from 'three';
 import { clamp, isTouch } from '../utils.js';
 import { sfx } from '../audio.js';
-import { toggleFullscreen } from '../fullscreen.js';
 import { settings } from '../settings.js';
 import { WEAPON_ORDER } from './weapons.js';
-import { CAMERA, PLAYER, EMOTES } from '../config.js';
+import { CAMERA, PLAYER, SLIDE, EMOTES } from '../config.js';
 
 const BASE_FOV = CAMERA.fov;
 const JUMP_SPEED = PLAYER.jumpSpeed;
@@ -29,6 +28,8 @@ export class PlayerControls {
     this.unscopeAfterShot = false;
     this.fov = BASE_FOV;
     this.tmp = new THREE.Vector3();
+    this.slideQueued = false;
+    this.crouch = 0;         // 0..1, how low the camera sits
     this.orbit = false;      // Alt held: free camera around the character
     this.orbitYaw = 0;
     this.orbitPitch = 0.15;
@@ -43,7 +44,7 @@ export class PlayerControls {
       const idx = ['Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6'].indexOf(e.code);
       if (e.code === 'Space') e.preventDefault();
       if (this.f.emote && ['KeyW', 'KeyA', 'KeyS', 'KeyD'].includes(e.code)) this.f.emote = null;   // a fresh move key ends the dance
-      if (e.code === 'KeyF') toggleFullscreen();
+      if (e.code === 'KeyF') this.slide();
       if (e.code === 'KeyH') this.emote();
       if (idx >= 0) this.pickWeapon(WEAPON_ORDER[idx]);
       if (e.code === 'Space') this.jump();
@@ -137,7 +138,12 @@ export class PlayerControls {
   jump() {
     if (!this.game.canAct) return;
     this.f.emote = null;
-    if (this.f.jump(JUMP_SPEED)) sfx.jump();
+    if (this.f.jump(JUMP_SPEED)) { sfx.jump(); this.f.sliding = false; }
+  }
+
+  // Takes effect on the next update, where the move direction is known
+  slide() {
+    this.slideQueued = true;
   }
 
   reload() {
@@ -198,13 +204,18 @@ export class PlayerControls {
       let vx = fx * fa - fz * ra, vz = fz * fa + fx * ra;
       const len = Math.hypot(vx, vz);
       f.moving = len > 0;
-      if (len > 0) {
+      if (this.slideQueued && len > 0 && f.canSlide()) { f.startSlide(vx / len, vz / len); this.setScope(false); }
+      if (f.sliding) {
+        f.slideStep(dt, this.game.arena.colliders);
+      } else if (len > 0) {
         const speed = (this.scoped ? f.weapon.scoped.speed : WALK_SPEED) * Math.min(1, len);   // a half-pushed stick walks slower
         f.move((vx / len) * speed * dt, (vz / len) * speed * dt, this.game.arena.colliders);
       }
     } else {
       f.moving = false;
+      f.sliding = false;
     }
+    this.slideQueued = false;
 
     f.root.rotation.y = f.yaw;
     this.updateCamera(dt);
@@ -244,7 +255,8 @@ export class PlayerControls {
     const f = this.f, cam = this.camera;
     const dir = this.aimDir();
     const right = new THREE.Vector3(-dir.z, 0, dir.x).normalize();
-    const pivot = new THREE.Vector3(f.pos.x, CAM_HEIGHT + f.pos.y, f.pos.z);
+    this.crouch += ((f.sliding ? 1 : 0) - this.crouch) * Math.min(1, dt * SLIDE.cameraRate);
+    const pivot = new THREE.Vector3(f.pos.x, CAM_HEIGHT + f.pos.y - this.crouch * SLIDE.cameraDrop, f.pos.z);
 
     // Smooth zoom toward the target field of view
     const targetFov = this.scoped ? f.weapon.scoped.fov : BASE_FOV;

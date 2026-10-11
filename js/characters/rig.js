@@ -1,9 +1,13 @@
 import * as THREE from 'three';
 import { M, add, sphere, box, clamp } from '../utils.js';
 import { DANCES } from './dances.js';
+import { SLIDE } from '../config.js';
 
 export const MODEL_SCALE = 0.85;
 const AIM_ARM_X = -Math.PI / 2 + 0.08;
+const HIP_LOCAL = 0.52;                  // where the legs hang from, in model space
+const HIP_HEIGHT = HIP_LOCAL * MODEL_SCALE;
+const HEAD_LOCAL = 1.5, BODY_LOCAL = 0.58;   // hitbox centers in model space
 const hitMaterial = new THREE.MeshBasicMaterial({ visible: false });
 
 // Creates an empty chibi skeleton. Character files fill it with visuals.
@@ -47,10 +51,10 @@ export function createRig() {
 
   // Invisible hitboxes in root space, so they ignore animation
   const headBox = new THREE.Mesh(new THREE.SphereGeometry(0.62 * MODEL_SCALE, 12, 8), hitMaterial);
-  headBox.position.y = 1.5 * MODEL_SCALE;
+  headBox.position.y = HEAD_LOCAL * MODEL_SCALE;
   headBox.userData.zone = 'head';
   const bodyBox = new THREE.Mesh(new THREE.CylinderGeometry(0.42 * MODEL_SCALE, 0.42 * MODEL_SCALE, 1.15 * MODEL_SCALE, 12), hitMaterial);
-  bodyBox.position.y = 0.58 * MODEL_SCALE;
+  bodyBox.position.y = BODY_LOCAL * MODEL_SCALE;
   bodyBox.userData.zone = 'body';
   root.add(headBox, bodyBox);
 
@@ -97,7 +101,7 @@ export function addEyes(head, o = {}) {
 }
 
 // Poses the rig every frame: aim pitch, run cycle, death fall
-export function animateRig(rig, { moving, t, pitch, dead, deadT, deathPose, air, emote, unarmed }, dt) {
+export function animateRig(rig, { moving, t, pitch, dead, deadT, deathPose, air, sliding, emote, unarmed }, dt) {
   const k = Math.min(1, dt * 15);
   rig.gunMount.visible = !emote && !unarmed && !dead;   // a dead fighter has dropped the weapon
   if (rig.hat) rig.hat.visible = !dead;                 // and lost the hat, if any
@@ -106,7 +110,7 @@ export function animateRig(rig, { moving, t, pitch, dead, deadT, deathPose, air,
   rig.model.rotation.y = rig.model.rotation.z = 0;
   rig.head.rotation.y = rig.head.rotation.z = 0;
   const swing = moving && !dead && !air ? Math.sin(t * 11) * 0.8 : 0;
-  const tuck = air && !dead ? [-0.6, 0.45] : [swing, -swing];
+  const tuck = sliding && !dead ? SLIDE.legs : air && !dead ? [-0.6, 0.45] : [swing, -swing];   // legs out in front when sliding
   rig.legs[0].rotation.x += (tuck[0] - rig.legs[0].rotation.x) * k;
   rig.legs[1].rotation.x += (tuck[1] - rig.legs[1].rotation.x) * k;
   rig.aimPivot.rotation.x = -clamp(pitch, -1, 1);
@@ -123,19 +127,36 @@ export function animateRig(rig, { moving, t, pitch, dead, deadT, deathPose, air,
     });
     keepAboveFloor(rig);
   } else {
-    rig.model.rotation.x = 0;
-    rig.model.position.set(0, moving && !air ? Math.abs(Math.sin(t * 11)) * 0.05 : 0, 0);
+    // Sliding: the body tilts back around the hips, which sink, and the aim stays level
+    rig.model.rotation.x += ((sliding ? -SLIDE.leanBack : 0) - rig.model.rotation.x) * k;
+    const lean = -rig.model.rotation.x;
+    const bob = moving && !air ? Math.abs(Math.sin(t * 11)) * 0.05 : 0;
+    rig.model.position.set(0, bob + HIP_HEIGHT * (1 - Math.cos(lean)) - SLIDE.bodyDrop * lean / SLIDE.leanBack, HIP_HEIGHT * Math.sin(lean));
+    rig.aimPivot.rotation.x += lean;
+    poseHitboxes(rig, clamp(lean, 0, SLIDE.leanBack));
     // Blend every axis back to the aim pose so dances never leave arms or legs twisted
     // Unarmed (showcase) characters let their arms swing naturally instead of aiming
     rig.arms.forEach(a => {
-      const tx = unarmed ? (a.userData.side < 0 ? -swing : swing) * 0.7 : AIM_ARM_X;
-      const tz = unarmed ? a.userData.side * 0.2 : a.userData.side * -0.35;
+      const planted = sliding && a.userData.side < 0;   // one hand on the floor, like a slide on gravel
+      const tx = unarmed ? (a.userData.side < 0 ? -swing : swing) * 0.7 : planted ? SLIDE.plantedArm : AIM_ARM_X;
+      const tz = unarmed ? a.userData.side * 0.2 : planted ? a.userData.side * 0.3 : a.userData.side * -0.35;
       a.rotation.x += (tx - a.rotation.x) * k;
       a.rotation.y += (0 - a.rotation.y) * k;
       a.rotation.z += (tz - a.rotation.z) * k;
     });
     rig.legs.forEach(l => { l.rotation.y += (0 - l.rotation.y) * k; l.rotation.z += (0 - l.rotation.z) * k; });
   }
+}
+
+// The hitboxes live in root space, so they follow the slide by hand: lowered and tilted back with the body
+function poseHitboxes(rig, lean) {
+  const [head, body] = rig.hitboxes;
+  const hipY = HIP_HEIGHT - SLIDE.bodyDrop * lean / SLIDE.leanBack;
+  for (const [box, local] of [[head, HEAD_LOCAL], [body, BODY_LOCAL]]) {
+    const along = (local - HIP_LOCAL) * MODEL_SCALE;   // distance from the hips up the body
+    box.position.set(0, hipY + along * Math.cos(lean), -along * Math.sin(lean));
+  }
+  body.rotation.x = -lean;
 }
 
 // Plays the emote dance (see dances.js)
