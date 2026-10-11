@@ -217,7 +217,7 @@ export class Fighter {
     this.pos.x += dx;
     this.pos.z += dz;
     for (const c of colliders) {
-      if (this.pos.y >= c.h - 0.1) continue;   // above this cover: nothing to push against
+      if (this.pos.y >= c.h - 0.1 && !c.unclimbable) continue;   // above this cover: nothing to push against
       const cx = Math.max(c.minX, Math.min(this.pos.x, c.maxX));
       const cz = Math.max(c.minZ, Math.min(this.pos.z, c.maxZ));
       let ox = this.pos.x - cx, oz = this.pos.z - cz;
