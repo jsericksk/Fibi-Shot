@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { WEAPON_ORDER } from './weapons.js';
 import { rand, randInt, lerpAngle, clamp } from '../utils.js';
-import { ENEMY, PLAYER, EMOTES } from '../config.js';
+import { ENEMY, PLAYER, SHOWCASE, EMOTES } from '../config.js';
 
 const SPEED = PLAYER.walkSpeed;   // bots move as fast as the player
 const MIN_RANGE = ENEMY.minRange, MAX_RANGE = ENEMY.maxRange;
@@ -35,7 +35,7 @@ function makeGlint() {
 
 // Simple enemy brain: hunts the player, strafes, switches weapons and fires in bursts
 export class EnemyAI {
-  // wander = showcase mode (training): stands still, never hunts or shoots
+  // wander = showcase mode (training): roams, jumps and dances, never hunts or shoots
   constructor(game, fighter, target, wander = false) {
     this.wander = wander;
     this.game = game;
@@ -62,10 +62,13 @@ export class EnemyAI {
     this.aimPoint = null;
     this.switchT = rand(5, 9);
     this.jumpT = rand(...ENEMY.jumpEvery);
-    this.slideT = rand(...ENEMY.slideEvery);
+    this.slideT = rand(...(this.wander ? SHOWCASE.slideEvery : ENEMY.slideEvery));
     this.slideHeat = 0;       // grows while the player slides a lot, so the bot slides more too
     this.playerWasSliding = false;
     this.seeCounterT = 0;
+    this.emoteT = rand(...SHOWCASE.emoteEvery);
+    this.way = null;
+    this.wayT = 0;
     this.reaction = ENEMY.firstShotDelay;     // delay before the first shot
     this.burstLeft = 0;
     this.burstWait = 0.3;
@@ -132,10 +135,51 @@ export class EnemyAI {
     if (Math.random() < ENEMY.tauntChance) this.startEmote();
   }
 
-  // Showcase behaviour: the characters just stand still so the skins can be looked at
-  updateWander() {
-    this.f.pitch = 0;
-    this.f.moving = false;
+  // Showcase behaviour: walk to random spots, hop around and now and then dance
+  updateWander(dt, canAct) {
+    const f = this.f;
+    f.pitch = 0;
+    if (!canAct) { f.moving = false; return; }
+    if (f.emote) { f.moving = false; return; }          // stands still while dancing
+
+    this.emoteT -= dt;
+    if (this.emoteT <= 0) {
+      this.startEmote();
+      this.emoteT = rand(...SHOWCASE.emoteEvery);
+      f.moving = false;
+      return;
+    }
+
+    this.wayT -= dt;
+    if (!this.way || this.wayT <= 0 || Math.hypot(this.way.x - f.pos.x, this.way.z - f.pos.z) < 1) {
+      const lim = this.game.arena.half - 3;
+      for (let i = 0; i < 30; i++) {
+        const x = rand(-lim, lim), z = rand(-lim, lim);
+        if (this.game.arena.isFree(x, z, 1.2)) { this.way = { x, z }; break; }
+      }
+      this.wayT = rand(...SHOWCASE.waypointTime);
+    }
+    if (!this.way) return;
+
+    const dx = this.way.x - f.pos.x, dz = this.way.z - f.pos.z, len = Math.hypot(dx, dz) || 1;
+    f.yaw = lerpAngle(f.yaw, Math.atan2(dx, dz), Math.min(1, dt * 6));
+    f.root.rotation.y = f.yaw;
+    f.moving = true;
+
+    if (f.sliding) return f.slideStep(dt, this.game.arena.colliders);
+    this.slideT -= dt;
+    if (this.slideT <= 0 && f.canSlide()) { f.startSlide(dx / len, dz / len); this.slideT = rand(...SHOWCASE.slideEvery); return; }
+
+    this.jumpT -= dt;
+    if (this.jumpT <= 0 && f.onGround) { f.jump(PLAYER.jumpSpeed); this.jumpT = rand(...ENEMY.jumpEvery); }
+
+    const before = f.pos.clone();
+    f.move((dx / len) * SHOWCASE.walkSpeed * dt, (dz / len) * SHOWCASE.walkSpeed * dt, this.game.arena.colliders);
+    // Stuck behind cover: hop and choose somewhere else
+    if (f.pos.distanceTo(before) < SHOWCASE.walkSpeed * dt * 0.3) {
+      if (f.onGround) f.jump(PLAYER.jumpSpeed);
+      this.wayT = 0;
+    }
   }
 
   // When the player starts sliding to the other side, the bot turns around too (after a short reaction)
