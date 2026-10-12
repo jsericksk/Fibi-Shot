@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { WEAPONS, WEAPON_ORDER, buildGun } from './weapons.js';
 import { WORLD, MATCH, PLAYER, SLIDE } from '../config.js';
-import { MODEL_SCALE } from '../characters/rig.js';
+import { MODEL_SCALE, HEAD_LOCAL } from '../characters/rig.js';
 import { floorHeight } from './arena.js';
 
 const STEP_UP = WORLD.stepUp;
@@ -74,13 +74,13 @@ export class Fighter {
 
   headPos(out = new THREE.Vector3()) {
     if (this.sliding) return this.hitboxes[0].getWorldPosition(out);
-    return out.set(this.pos.x, this.pos.y + 1.5 * MODEL_SCALE, this.pos.z);
+    return out.set(this.pos.x, this.pos.y + HEAD_LOCAL * MODEL_SCALE, this.pos.z);
   }
 
   // Upper part of the head hitbox: still visible when cover hides the head center
   headTopPos(out = new THREE.Vector3()) {
     if (this.sliding) return this.headPos(out).setY(out.y + 0.45 * MODEL_SCALE);
-    return out.set(this.pos.x, this.pos.y + 1.95 * MODEL_SCALE, this.pos.z);
+    return out.set(this.pos.x, this.pos.y + (HEAD_LOCAL + 0.45) * MODEL_SCALE, this.pos.z);
   }
 
   muzzleWorld(out = new THREE.Vector3()) {
