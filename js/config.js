@@ -193,12 +193,8 @@ export const NET = {
 };
 
 // ---- Training showcase -----------------------------------------------------------
-// In training every other character walks around the map as a living showcase.
+// In training every other character stands still as a showcase.
 export const SHOWCASE = {
-  walkSpeed: 3.2,
-  emoteEvery: [10, 22],       // seconds between emotes of each character
-  waypointTime: [4, 9],       // seconds before picking a new place to walk to
-  slideEvery: [8, 16],        // seconds between slides while walking
   spawnDistance: 7,           // minimum distance between characters when they appear
 };
 
