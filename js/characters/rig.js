@@ -7,7 +7,8 @@ export const MODEL_SCALE = 0.85;
 const AIM_ARM_X = -Math.PI / 2 + 0.08;
 const HIP_LOCAL = 0.52;                  // where the legs hang from, in model space
 const HIP_HEIGHT = HIP_LOCAL * MODEL_SCALE;
-const HEAD_LOCAL = 1.5, BODY_LOCAL = 0.58;   // hitbox centers in model space
+export const HEAD_LOCAL = 1.75;           // hitbox centers in model space (the head box is lifted to also cover hats, hair and ears)
+const BODY_LOCAL = 0.58;
 const hitMaterial = new THREE.MeshBasicMaterial({ visible: false });
 
 // Creates an empty chibi skeleton. Character files fill it with visuals.
@@ -50,15 +51,21 @@ export function createRig() {
   model.add(head);
 
   // Invisible hitboxes in root space, so they ignore animation
-  const headBox = new THREE.Mesh(new THREE.SphereGeometry(0.62 * MODEL_SCALE, 12, 8), hitMaterial);
+  const headBox = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 12), hitMaterial);
+  headBox.scale.set(0.7, 0.75, 0.7).multiplyScalar(MODEL_SCALE);   // an egg: wide enough for the hair, tall enough for hats and ears
   headBox.position.y = HEAD_LOCAL * MODEL_SCALE;
   headBox.userData.zone = 'head';
   const bodyBox = new THREE.Mesh(new THREE.CylinderGeometry(0.42 * MODEL_SCALE, 0.42 * MODEL_SCALE, 1.15 * MODEL_SCALE, 12), hitMaterial);
   bodyBox.position.y = BODY_LOCAL * MODEL_SCALE;
   bodyBox.userData.zone = 'body';
+  // Arms and hands, which hang at the sides or reach forward while aiming. A child of the body box, so it follows the slide
+  const armsBox = new THREE.Mesh(new THREE.BoxGeometry(1.1 * MODEL_SCALE, 0.8 * MODEL_SCALE, 1.1 * MODEL_SCALE), hitMaterial);
+  armsBox.position.set(0, (0.72 - BODY_LOCAL) * MODEL_SCALE, 0.1 * MODEL_SCALE);
+  armsBox.userData.zone = 'body';
+  bodyBox.add(armsBox);
   root.add(headBox, bodyBox);
 
-  const rig = { root, model, legs, body, aimPivot, arms, gunMount, head, hitboxes: [headBox, bodyBox] };
+  const rig = { root, model, legs, body, aimPivot, arms, gunMount, head, hitboxes: [headBox, bodyBox, armsBox] };
   setAimPose(rig);
   return rig;
 }

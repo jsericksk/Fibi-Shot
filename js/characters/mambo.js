@@ -46,8 +46,8 @@ export function buildMambo({ fibiHat = false } = {}) {
   add(body, box, M(C.tie), [0, 1.0, 0.28], [0.16, 0.09, 0.06]);
   add(body, new THREE.ConeGeometry(0.06, 0.2, 4), M(C.tie), [0, 0.88, 0.3], [1, 1, 0.3], [Math.PI, 0, 0]);
 
-  // Tail with a wine ribbon
-  add(body, new THREE.CapsuleGeometry(0.07, 0.4, 8, 12), M(C.hair), [0, 0.38, -0.45], [1, 1, 1], [-0.35, 0, 0]);
+  // Tail with a wine ribbon: starts at the waist and flares out, so the skirt does not swallow it
+  add(body, new THREE.CapsuleGeometry(0.07, 0.4, 8, 12), M(C.hair), [0, 0.41, -0.52], [1, 1, 1], [0.5, 0, 0]);
   add(body, sphere, M(C.wine), [0, 0.56, -0.4], [0.09, 0.07, 0.06]);
 
   // White puffy sleeves and bare hands
