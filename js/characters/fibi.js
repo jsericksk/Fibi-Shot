@@ -10,7 +10,12 @@ const LOOKS = {
   noir: { coat: 0x24202a, trim: 0xe0182d, gloves: 0x15121a, shoes: 0x15121a, stripe: 0xe0182d, pom: 0xe0182d, tie: 0xe0182d, clip: 0xa01020, band: 0xe0182d, bowTie: 0xff6a78 },
 };
 
-const BOB_PROFILE = new THREE.SplineCurve([[0.001, -0.42], [0.5, -0.4], [0.64, -0.28], [0.68, -0.05], [0.66, 0.2], [0.58, 0.4], [0.42, 0.54], [0.2, 0.62], [0.001, 0.65]].map(([r, y]) => new THREE.Vector2(r, y))).getPoints(60).map(p => p.setX(Math.max(0.001, p.x)));   // radius and height of the back hair without the hat, from the bottom up so the faces point outward; sampled finely so it looks smooth
+const HAIR_PROFILE = new THREE.SplineCurve([[0.001, -0.6], [0.3, -0.58], [0.46, -0.48], [0.56, -0.3], [0.63, -0.1], [0.67, 0.15], [0.6, 0.4], [0.46, 0.55], [0.2, 0.66], [0.001, 0.68]].map(([r, y]) => new THREE.Vector2(r, y))).getPoints(60).map(p => p.setX(Math.max(0.001, p.x)));   // radius and height of the whole hair, from the bottom up so the faces point outward; sampled finely so it looks smooth
+const HAT_TILT = 0.12;   // the hat leans back by this angle
+const HAT_HAIR_TOP = 0.5;   // under a hat the hair ends inside the brim (its height at the head's center), so there is no gap and none pokes through the crown
+const HAIR_Z = -0.1;   // the hair sits a bit behind the head's center and is flattened front to back
+const HAIR_DEPTH = 0.95;
+const HAIR_SWEEP = 0.6;   // how far back the hair below the ears leans per unit of height, so the long ends stay behind the neck
 
 const BRIM = 1.02;   // radius of the hat brim (the dome and band keep their size)
 
@@ -27,24 +32,14 @@ export function buildFibi({ hat: withHat = true, look = 'default' } = {}) {
   add(head, sphere, M(C.skin), [0, 0, 0], [0.62, 0.56, 0.58]);
   addEyes(head, { outer: 0x5a3fb5, inner: 0x9a84f0, mouth: 'smile' });
 
-  // Hair: top cap, bangs, back hair and side locks
-  add(head, new THREE.SphereGeometry(1, 32, 24, 0, Math.PI * 2, 0, 1.15), M(C.hair), [0, 0.02, 0], [0.655, 0.6, 0.62]);
+  // Hair: one smooth mass, wide at the back and ending above the chin so none shows under the face (the same in every skin), plus bangs and temples
+  add(head, createHairGeometry(withHat), M(C.hair), [0, 0, HAIR_Z], [1, 1, HAIR_DEPTH]);
   for (let i = -3; i <= 3; i++) {
     const a = i * 0.2;
     add(head, sphere, M(C.hair), [Math.sin(a) * 0.6, 0.2, Math.cos(a) * 0.54], [0.1, 0.16, 0.07], [0, a, 0]);
   }
-  if (withHat) add(head, new THREE.CylinderGeometry(0.6, 0.5, 0.86, 32), M(C.hair), [0, 0.06, -0.15], [1, 1, 1], [-0.12, 0, 0]);   // tilted like the brim, so its top reaches the underside of the brim without poking through
-  else {
-    add(head, new THREE.LatheGeometry(BOB_PROFILE, 64), M(C.hair), [0, 0.04, -0.14], [1.05, 1.2, 0.95]);   // without the hat the hair is a tall, smooth bob
-    addAhoge(head);
-  }
-  add(head, sphere, M(C.hair), [0, -0.32, -0.2], [0.5, 0.15, 0.48]);
-  // Volume under the hat. Kept narrower than the hat dome so no blonde shows through.
-  if (withHat) add(head, sphere, M(C.hair), [0, 0.28, -0.1], [0.52, 0.48, 0.52]);
-  for (const s of [-1, 1]) {
-    add(head, sphere, M(C.hair), [s * 0.5, 0.14, 0.08], [0.17, 0.37, 0.34]);   // temples, so the sides are not bald, up to the brim
-    add(head, new THREE.CapsuleGeometry(0.15, 0.5, 8, 16), M(C.hair), [s * 0.58, -0.22, 0.1], [1, 1, 1], [0, 0, s * -0.08]);
-  }
+  for (const s of [-1, 1]) add(head, sphere, M(C.hair), [s * 0.5, 0.14, 0.08], [0.17, 0.37, 0.34]);   // temples, so the sides are not bald, up to the brim
+  if (!withHat) addAhoge(head);
 
   // X hairclip and ribbon
   const clip = new THREE.Group();
@@ -58,6 +53,18 @@ export function buildFibi({ hat: withHat = true, look = 'default' } = {}) {
   if (withHat) addFibiHat(rig, { look, y: 0.5, crown: 1, back: 0 });
 
   return rig;
+}
+
+// The hair lathe with its lower half swept backwards (and its top cut off under a hat), so it flows down behind the head and never shows under the chin
+function createHairGeometry(withHat) {
+  const geo = new THREE.LatheGeometry(HAIR_PROFILE, 64);
+  const pos = geo.attributes.position;
+  for (let i = 0; i < pos.count; i++) {
+    pos.setZ(i, pos.getZ(i) - Math.max(0, -pos.getY(i) - 0.1) * HAIR_SWEEP);
+    if (withHat) pos.setY(i, Math.min(pos.getY(i), HAT_HAIR_TOP + HAT_TILT * (HAIR_Z + pos.getZ(i) * HAIR_DEPTH)));   // follows the tilted brim: lower at the back
+  }
+  geo.computeVertexNormals();
+  return geo;
 }
 
 // Fibi's outfit: striped socks and shoes with pom-poms, coat with trim and tie, sleeves and gloves.
@@ -95,7 +102,7 @@ const AHOGE_PATH = new THREE.CatmullRomCurve3([[0, -0.02], [0.005, 0.08], [0.04,
 
 function addAhoge(head) {
   const ahoge = new THREE.Group();
-  ahoge.position.set(-0.1, 0.76, 0.04);
+  ahoge.position.set(-0.1, 0.66, 0.04);
   ahoge.rotation.z = 0.2;
   head.add(ahoge);
   add(ahoge, new THREE.TubeGeometry(AHOGE_PATH, 32, 0.036, 8), M(C.hair));
@@ -109,7 +116,7 @@ export function addFibiHat(rig, { look = 'default', y = 0.38, crown = 1.25, back
   const { head } = rig;
   const hat = new THREE.Group();
   hat.position.set(0, y, -0.02);
-  hat.rotation.x = -0.12;
+  hat.rotation.x = -HAT_TILT;
   hat.scale.setScalar(1.05);
   head.add(hat);
   rig.hat = hat;

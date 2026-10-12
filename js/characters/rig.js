@@ -132,6 +132,7 @@ export function animateRig(rig, { moving, t, pitch, dead, deadT, deathPose, air,
     const lean = -rig.model.rotation.x;
     const bob = moving && !air ? Math.abs(Math.sin(t * 11)) * 0.05 : 0;
     rig.model.position.set(0, bob + HIP_HEIGHT * (1 - Math.cos(lean)) - SLIDE.bodyDrop * lean / SLIDE.leanBack, HIP_HEIGHT * Math.sin(lean));
+    if (sliding) keepAboveFloor(rig);   // leaning back sinks the hat into the floor
     rig.aimPivot.rotation.x += lean;
     poseHitboxes(rig, clamp(lean, 0, SLIDE.leanBack));
     // Blend every axis back to the aim pose so dances never leave arms or legs twisted
