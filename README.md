@@ -121,3 +121,15 @@ See `CLAUDE.md` for the coding rules used in this project.
 ## Credits
 
 Made with plain JavaScript, [three.js](https://threejs.org/) and [PeerJS](https://peerjs.com/).
+
+## Contributing
+
+Ideas and bug reports are welcome: please open an issue. Pull requests are not accepted, because I want to keep the direction of the game and the code in one place.
+
+## License
+
+The code is released under the [MIT License](LICENSE).
+
+The characters and the emote sounds are viral, AI-generated content from the community. I do not claim them, and
+they are included as they are, outside the MIT License. If you own rights to any of them and want it removed, open
+an issue and I will take it down.
