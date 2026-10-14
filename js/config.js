@@ -55,10 +55,9 @@ export const PLAYER = {
   sensitivity: 0.0022,
   walkSpeed: 7.5,
   jumpSpeed: 8.2,
-  // Extra spread (radians) when moving
-  moveSpread: 0.002,          // normal weapons
-  moveSpreadAwp: 0.008,       // AWP (sniper) when not aiming
-  airSpread: 0.03,            // any shot while jumping
+  // Extra spread (radians) of the AWP (sniper) when it is not aiming; the other weapons are pinpoint
+  moveSpreadAwp: 0.008,       // when moving
+  airSpread: 0.03,            // when jumping
 };
 
 // ---- Slide (F key) ----------------------------------------------------------
@@ -219,6 +218,6 @@ export const WEAPON_STATS = {
   shotgun: { id: 'shotgun', name: 'Escopeta', damage: 12, headMult: 1.5, interval: 0.9, auto: false, mag: 6, reload: 2.4, spread: 0.004, bloom: 0, bloomMax: 0, recoil: 0.06, pellets: 8, pelletSpread: 0.055, falloff: { start: 5, end: 20, min: 0.08 }, scoped: LIGHT_AIM },
   awp: { id: 'awp', name: 'AWP', damage: 70, headMult: 10 / 7, interval: 0.8, auto: false, mag: 5, reload: 2.4, spread: 0.06, bloom: 0, bloomMax: 0, recoil: 0.07, scoped: { fov: 18, spread: 0, speed: 3.2, sniper: true } },
   // Rocket: flies visibly (dodge it!) and explodes on impact; damage falls off linearly from the blast center down to `edge` (fraction) at `radius`
-  bazooka: { id: 'bazooka', name: 'Bazuca', damage: 100, headMult: 1, interval: 1, auto: false, mag: 3, reload: 5.5, spread: 0.002, bloom: 0, bloomMax: 0, recoil: 0.09, scoped: LIGHT_AIM, projectile: { speed: 22, radius: 4.5, edge: 0.3, life: 8, trailInterval: 0.025, maxAimAngle: 0.14 } },
+  bazooka: { id: 'bazooka', name: 'Bazuca', damage: 100, headMult: 1, interval: 1, auto: false, mag: 3, reload: 5.5, spread: 0.002, bloom: 0, bloomMax: 0, recoil: 0.09, scoped: LIGHT_AIM, projectile: { speed: 22, radius: 4.5, edge: 0.3, life: 8, trailInterval: 0.025, blendDistance: 8 } },
   sword: { id: 'sword', name: 'Espada', damage: 50, headMult: 1, interval: 0.6, auto: false, mag: Infinity, reload: 0, spread: 0, bloom: 0, bloomMax: 0, recoil: 0.03, scoped: {}, melee: { range: 3, arc: 0.5, swingSeconds: 0.25, swingAngle: 1.1 } },   // arc: cosine of the half-angle in front of the fighter that can be hit; swingAngle: radians the blade tilts up and then down
 };

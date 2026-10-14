@@ -1,10 +1,8 @@
 import * as THREE from 'three';
 import { M, add, cyl } from '../utils.js';
-import { MATCH } from '../config.js';
 import { sfx } from '../audio.js';
 import { net } from '../net.js';
 
-const FAR = MATCH.bulletRange;
 const tmp = new THREE.Vector3();
 
 const finGeo = new THREE.BoxGeometry(0.02, 0.12, 0.14);
@@ -32,7 +30,8 @@ export class Rockets {
     this.list = [];
   }
 
-  // Leaves the muzzle but heads for the point under the crosshair
+  // Flies along the crosshair line, so it hits exactly what the crosshair saw (the muzzle sits below the camera and a
+  // straight shot from it would clip cover the crosshair clears). It is only drawn at the muzzle and eases onto the line.
   launch(shooter, origin, dir) {
     const { game } = this, w = shooter.weapon;
     game.scene.updateMatrixWorld();
@@ -46,28 +45,19 @@ export class Rockets {
     const wall = game.raycaster.intersectObjects(game.arena.blockers, false)[0];
     if (wall) return this.explode({ shooter, weapon: w }, wall.point);
 
-    game.raycaster.set(origin, dir);
-    game.raycaster.far = FAR;
-    const hit = game.raycaster.intersectObjects(game.hittables(shooter), false)[0];
-    const target = hit ? hit.point : origin.clone().addScaledVector(dir, FAR);
-    // The rocket bends toward the crosshair point, but never by more than `maxAimAngle`: a target close in front of the
-    // muzzle (or behind it) would otherwise send it sharply up, down or backwards
-    const p = w.projectile, ahead = target.sub(muzzle);
-    let aim = ahead.dot(dir) > 0 ? ahead.normalize() : dir.clone();
-    const angle = aim.angleTo(dir);
-    if (angle > p.maxAimAngle) aim = dir.clone().lerp(aim, p.maxAimAngle / angle).normalize();
-
-    this.spawn(shooter, w, muzzle, aim);
+    const start = origin.clone().addScaledVector(dir, toMuzzle.dot(dir));   // the line point level with the muzzle
+    const offset = muzzle.sub(start);
+    this.spawn(shooter, w, start, dir, offset);
     if (game.multi && shooter.isPlayer) {
       const r = v => [+v.x.toFixed(2), +v.y.toFixed(2), +v.z.toFixed(2)];
-      net.send({ t: 'shot', w: w.id, mz: r(muzzle), d: r(aim) });
+      net.send({ t: 'shot', w: w.id, mz: r(start), d: r(dir), off: r(offset) });
     }
   }
 
   // The friend's rocket: we only draw it, their game decides who it hurts
-  launchRemote(shooter, w, muzzle, aim) {
-    this.muzzleEffects(shooter, w, muzzle);
-    this.spawn(shooter, w, muzzle, aim, true);
+  launchRemote(shooter, w, start, dir, offset) {
+    this.muzzleEffects(shooter, w, start.clone().add(offset));
+    this.spawn(shooter, w, start, dir, offset, true);
   }
 
   muzzleEffects(shooter, w, muzzle) {
@@ -76,19 +66,26 @@ export class Rockets {
     sfx.shot(w.id, shooter.isPlayer ? 1 : Math.max(0.3, 1 - game.player.pos.distanceTo(shooter.pos) / 60));
   }
 
-  spawn(shooter, weapon, muzzle, aim, visualOnly = false) {
+  // pos is where it really flies; the mesh is drawn `offset` away from it at first
+  spawn(shooter, weapon, start, dir, offset, visualOnly = false) {
     const mesh = buildRocket();
-    mesh.position.copy(muzzle);
-    mesh.lookAt(muzzle.clone().add(aim));
+    mesh.lookAt(dir);
     this.game.scene.add(mesh);
-    this.list.push({ mesh, shooter, weapon, dir: aim, life: weapon.projectile.life, trailT: 0, visualOnly });
+    const r = { mesh, shooter, weapon, dir, pos: start.clone(), offset, flown: 0, life: weapon.projectile.life, trailT: 0, visualOnly };
+    this.drawAt(r);
+    this.list.push(r);
+  }
+
+  drawAt(r) {
+    const fade = Math.max(0, 1 - r.flown / r.weapon.projectile.blendDistance);
+    r.mesh.position.copy(r.pos).addScaledVector(r.offset, fade);
   }
 
   update(dt) {
     const { game } = this;
     for (let i = this.list.length - 1; i >= 0; i--) {
       const r = this.list[i], p = r.weapon.projectile, step = p.speed * dt;
-      game.raycaster.set(r.mesh.position, r.dir);
+      game.raycaster.set(r.pos, r.dir);
       game.raycaster.far = step;
       const hit = game.raycaster.intersectObjects(game.hittables(r.shooter), false)[0];
       r.life -= dt;
@@ -98,7 +95,9 @@ export class Rockets {
         this.list.splice(i, 1);
         continue;
       }
-      r.mesh.position.addScaledVector(r.dir, step);
+      r.pos.addScaledVector(r.dir, step);
+      r.flown += step;
+      this.drawAt(r);
       r.trailT -= dt;
       if (r.trailT <= 0) { r.trailT = p.trailInterval; game.effects.puff(r.mesh.position); }
     }

@@ -243,7 +243,7 @@ export class Game {
       case 's': this.bots[0].applyState(m); break;
       case 'shot': {
         const v = a => new THREE.Vector3(...a);
-        if (WEAPONS[m.w].projectile) { this.rockets.launchRemote(this.enemy, WEAPONS[m.w], v(m.mz), v(m.d)); break; }
+        if (WEAPONS[m.w].projectile) { this.rockets.launchRemote(this.enemy, WEAPONS[m.w], v(m.mz), v(m.d), v(m.off)); break; }
         this.shotEffects(this.enemy, WEAPONS[m.w], v(m.mz), m.e.map(v));
         break;
       }

@@ -112,6 +112,7 @@ export function animateRig(rig, { moving, t, pitch, dead, deadT, deathPose, air,
   const k = Math.min(1, dt * 15);
   rig.gunMount.visible = !emote && !unarmed && !dead;   // a dead fighter has dropped the weapon
   if (rig.hat) rig.hat.visible = !dead;                 // and lost the hat, if any
+  rig.hatOff?.forEach(o => { o.visible = dead; });      // what shows on the bare head
   rig.emoteOnly?.forEach(o => { o.visible = !!emote && !dead; });   // e.g. the finger guns
   if (emote && !dead) return danceRig(rig, emote);
   rig.model.rotation.y = rig.model.rotation.z = 0;

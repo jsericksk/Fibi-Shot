@@ -40,6 +40,11 @@ export function buildFibi({ hat: withHat = true, look = 'default' } = {}) {
   }
   for (const s of [-1, 1]) add(head, sphere, M(C.hair), [s * 0.5, 0.14, 0.08], [0.17, 0.37, 0.34]);   // temples, so the sides are not bald, up to the brim
   if (!withHat) addAhoge(head);
+  else {
+    // The hair under the hat is cut off, so once the hat is thrown she shows the full top instead of a bald spot
+    rig.hatOff = [add(head, createHairGeometry(false), M(C.hair), [0, 0, HAIR_Z], [1, 1, HAIR_DEPTH]), addAhoge(head)];
+    rig.hatOff.forEach(o => { o.visible = false; });
+  }
 
   // X hairclip and ribbon
   const clip = new THREE.Group();
@@ -107,6 +112,7 @@ function addAhoge(head) {
   head.add(ahoge);
   add(ahoge, new THREE.TubeGeometry(AHOGE_PATH, 32, 0.036, 8), M(C.hair));
   add(ahoge, sphere, M(C.hair), AHOGE_PATH.getPoint(1).toArray(), [0.036, 0.036, 0.036]);   // rounded tip
+  return ahoge;
 }
 
 // Wide-brim hat with band and trim, and a bow on the band. `rig.hat` lets it pop off when the wearer dies.
