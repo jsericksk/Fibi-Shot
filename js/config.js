@@ -55,10 +55,9 @@ export const PLAYER = {
   sensitivity: 0.0022,
   walkSpeed: 7.5,
   jumpSpeed: 8.2,
-  // Extra spread (radians) when moving
-  moveSpread: 0.002,          // normal weapons
-  moveSpreadAwp: 0.008,       // AWP (sniper) when not aiming
-  airSpread: 0.03,            // any shot while jumping
+  // Extra spread (radians) of the AWP (sniper) when it is not aiming; the other weapons are pinpoint
+  moveSpreadAwp: 0.008,       // when moving
+  airSpread: 0.03,            // when jumping
 };
 
 // ---- Slide (F key) ----------------------------------------------------------
@@ -111,6 +110,7 @@ export const HOME_STAGE = {
 export const HUD = {
   weaponIconSeconds: 0.3,     // weapon icon shown in the center after switching
   hitMarkerMs: 350,
+  killFeedMs: 2500,           // how long a kill stays in the kill feed
   timerWarnSeconds: 30,       // the timer turns red in the last seconds
   fullscreenSwitchMs: 600,    // the browser drops the mouse lock during a fullscreen change; unlocks in this window are not a pause
 };
@@ -122,7 +122,7 @@ export const TOUCH = {
   joystickDeadZone: 0.15,     // fraction of the stick radius that is ignored
   joystickZone: 42,           // % of the screen width (from the left) where a touch starts the stick
   sizeRange: { min: 40, max: 180, step: 2 },   // px, for the layout editor
-  sizeRanges: { ammo: { min: 14, max: 48, step: 1 }, timer: { min: 14, max: 48, step: 1 }, score: { min: 10, max: 40, step: 1 } },   // controls that need their own range
+  sizeRanges: { ammo: { min: 14, max: 48, step: 1 }, timer: { min: 14, max: 48, step: 1 }, score: { min: 10, max: 40, step: 1 }, killfeed: { min: 8, max: 24, step: 1 } },   // controls that need their own range
   // Center of each control in % of the screen, and its size in px
   layout: {
     joystick: { x: 15.5, y: 79, size: 110 },
@@ -137,6 +137,7 @@ export const TOUCH = {
     ammo: { x: 70.5, y: 78.5, size: 20 },   // size is the font size in px
     timer: { x: 50, y: 5, size: 22 },   // font size in px too
     score: { x: 50, y: 14, size: 16 },  // kills, font size in px too
+    killfeed: { x: 50, y: 25, size: 12 },   // font size in px too
   },
 };
 
@@ -215,10 +216,10 @@ const LIGHT_AIM = { fov: 50, spread: 0, speed: 5 };   // a small zoom, shots lan
 
 export const WEAPON_STATS = {
   pistol: { id: 'pistol', name: 'Pistola', damage: 24, headMult: 2, interval: 0.3, auto: false, mag: 12, reload: 1.1, spread: 0.004, bloom: 0.006, bloomMax: 0.03, recoil: 0.016, falloff: { start: 10, end: 35, min: 0.5 }, scoped: LIGHT_AIM },
-  ak47: { id: 'ak47', name: 'AK-47', damage: 14, headMult: 2.2, interval: 0.1, auto: true, mag: 30, reload: 1.9, spread: 0.0008, bloom: 0.0015, bloomMax: 0.01, recoil: 0.014, touchAim: true, falloff: { start: 15, end: 50, min: 0.5 }, scoped: LIGHT_AIM },
+  ak47: { id: 'ak47', name: 'AK-47', damage: 10, headMult: 2.2, interval: 0.1, auto: true, mag: 30, reload: 1.9, spread: 0.0008, bloom: 0.0015, bloomMax: 0.01, recoil: 0.014, touchAim: true, falloff: { start: 15, end: 50, min: 0.5 }, scoped: LIGHT_AIM },
   shotgun: { id: 'shotgun', name: 'Escopeta', damage: 12, headMult: 1.5, interval: 0.9, auto: false, mag: 6, reload: 2.4, spread: 0.004, bloom: 0, bloomMax: 0, recoil: 0.06, pellets: 8, pelletSpread: 0.055, falloff: { start: 5, end: 20, min: 0.08 }, scoped: LIGHT_AIM },
   awp: { id: 'awp', name: 'AWP', damage: 70, headMult: 10 / 7, interval: 0.8, auto: false, mag: 5, reload: 2.4, spread: 0.06, bloom: 0, bloomMax: 0, recoil: 0.07, scoped: { fov: 18, spread: 0, speed: 3.2, sniper: true } },
   // Rocket: flies visibly (dodge it!) and explodes on impact; damage falls off linearly from the blast center down to `edge` (fraction) at `radius`
-  bazooka: { id: 'bazooka', name: 'Bazuca', damage: 100, headMult: 1, interval: 1, auto: false, mag: 3, reload: 5.5, spread: 0.002, bloom: 0, bloomMax: 0, recoil: 0.09, scoped: LIGHT_AIM, projectile: { speed: 22, radius: 4.5, edge: 0.3, life: 8, trailInterval: 0.025, maxAimAngle: 0.14 } },
+  bazooka: { id: 'bazooka', name: 'Bazuca', damage: 100, headMult: 1, interval: 1, auto: false, mag: 3, reload: 5.5, spread: 0.002, bloom: 0, bloomMax: 0, recoil: 0.09, scoped: LIGHT_AIM, projectile: { speed: 22, radius: 4.5, edge: 0.3, life: 8, trailInterval: 0.025, blendDistance: 8 } },
   sword: { id: 'sword', name: 'Espada', damage: 50, headMult: 1, interval: 0.6, auto: false, mag: Infinity, reload: 0, spread: 0, bloom: 0, bloomMax: 0, recoil: 0.03, scoped: {}, melee: { range: 3, arc: 0.5, swingSeconds: 0.25, swingAngle: 1.1 } },   // arc: cosine of the half-angle in front of the fighter that can be hit; swingAngle: radians the blade tilts up and then down
 };

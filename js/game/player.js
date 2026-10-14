@@ -235,11 +235,10 @@ export class PlayerControls {
   shoot() {
     const f = this.f, w = f.weapon;
     let spread = this.scoped ? w.scoped.spread : w.spread + f.bloom;
-    // Aiming is pinpoint (the AWP quick scope too), even in the air; otherwise moving costs a hair of accuracy,
-    // the AWP more, and jump shots are inaccurate.
-    // Neither move nor jump spread on touch: walking, jumping and shooting already take all the fingers there
-    if (!this.scoped && !isTouch) {
-      if (f.moving) spread += w.scoped.sniper ? PLAYER.moveSpreadAwp : PLAYER.moveSpread;
+    // Aiming is pinpoint (the AWP quick scope too), even in the air. Unscoped, only the AWP is inaccurate: a bit more
+    // when moving and jumping. Neither on touch: walking, jumping and shooting already take all the fingers there
+    if (!this.scoped && !isTouch && w.scoped.sniper) {
+      if (f.moving) spread += PLAYER.moveSpreadAwp;
       if (!f.onGround) spread += PLAYER.airSpread;
     }
 

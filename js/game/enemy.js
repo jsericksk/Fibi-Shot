@@ -316,7 +316,7 @@ export class EnemyAI {
     const f = this.f, t = this.target;
     const dir = aim.clone().sub(origin).normalize();
     // Random aim error, worse when the player is moving
-    const err = ERROR[f.weapon.id] * (t.moving ? 1.3 : 1) + f.bloom * 0.6 + (f.onGround ? 0 : PLAYER.airSpread);
+    const err = ERROR[f.weapon.id] * (t.moving ? 1.3 : 1) + f.bloom * 0.6 + (f.onGround || f.weapon.id !== 'awp' ? 0 : PLAYER.airSpread);
     const right = new THREE.Vector3(-dir.z, 0, dir.x).normalize();
     const up = new THREE.Vector3().crossVectors(dir, right).normalize();
     const a = Math.random() * Math.PI * 2, r = Math.sqrt(Math.random()) * err;

@@ -121,11 +121,13 @@ export function initHudEditor(game) {
     select(null);
     game.hud.showPause(false);   // the game stays paused behind the editor
     document.body.classList.add('hud-editing');
+    game.hud.killFeedSample(true);
     placeBar();
   };
   $('hud-done').onclick = () => {
     select(null);
     document.body.classList.remove('hud-editing');
+    game.hud.killFeedSample(false);
     game.hud.showPause(true);
   };
 }

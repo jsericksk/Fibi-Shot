@@ -243,7 +243,7 @@ export class Game {
       case 's': this.bots[0].applyState(m); break;
       case 'shot': {
         const v = a => new THREE.Vector3(...a);
-        if (WEAPONS[m.w].projectile) { this.rockets.launchRemote(this.enemy, WEAPONS[m.w], v(m.mz), v(m.d)); break; }
+        if (WEAPONS[m.w].projectile) { this.rockets.launchRemote(this.enemy, WEAPONS[m.w], v(m.mz), v(m.d), v(m.off)); break; }
         this.shotEffects(this.enemy, WEAPONS[m.w], v(m.mz), m.e.map(v));
         break;
       }
@@ -503,6 +503,7 @@ export class Game {
     const floorAt = (x, z, y) => floorHeight(this.arena.colliders, x, z, y);
     this.effects.throwOff(victim.guns[victim.weaponId].group, victim.yaw, floorAt);
     if (victim.rig.hat) this.effects.throwOff(victim.rig.hat, victim.yaw, floorAt);
+    this.hud.killFeed(killer.def, killer.weaponId, victim.def);
     if (killer.isPlayer) this.scores.player++; else this.scores.enemy++;
     this.hud.setScore(this.scores.player, this.scores.enemy);
 
