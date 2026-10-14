@@ -214,7 +214,7 @@ const LIGHT_AIM = { fov: 50, spread: 0, speed: 5 };   // a small zoom, shots lan
 
 export const WEAPON_STATS = {
   pistol: { id: 'pistol', name: 'Pistola', damage: 24, headMult: 2, interval: 0.3, auto: false, mag: 12, reload: 1.1, spread: 0.004, bloom: 0.006, bloomMax: 0.03, recoil: 0.016, falloff: { start: 10, end: 35, min: 0.5 }, scoped: LIGHT_AIM },
-  ak47: { id: 'ak47', name: 'AK-47', damage: 14, headMult: 2.2, interval: 0.1, auto: true, mag: 30, reload: 1.9, spread: 0.0008, bloom: 0.0015, bloomMax: 0.01, recoil: 0.014, touchAim: true, falloff: { start: 15, end: 50, min: 0.5 }, scoped: LIGHT_AIM },
+  ak47: { id: 'ak47', name: 'AK-47', damage: 10, headMult: 2.2, interval: 0.1, auto: true, mag: 30, reload: 1.9, spread: 0.0008, bloom: 0.0015, bloomMax: 0.01, recoil: 0.014, touchAim: true, falloff: { start: 15, end: 50, min: 0.5 }, scoped: LIGHT_AIM },
   shotgun: { id: 'shotgun', name: 'Escopeta', damage: 12, headMult: 1.5, interval: 0.9, auto: false, mag: 6, reload: 2.4, spread: 0.004, bloom: 0, bloomMax: 0, recoil: 0.06, pellets: 8, pelletSpread: 0.055, falloff: { start: 5, end: 20, min: 0.08 }, scoped: LIGHT_AIM },
   awp: { id: 'awp', name: 'AWP', damage: 70, headMult: 10 / 7, interval: 0.8, auto: false, mag: 5, reload: 2.4, spread: 0.06, bloom: 0, bloomMax: 0, recoil: 0.07, scoped: { fov: 18, spread: 0, speed: 3.2, sniper: true } },
   // Rocket: flies visibly (dodge it!) and explodes on impact; damage falls off linearly from the blast center down to `edge` (fraction) at `radius`
