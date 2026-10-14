@@ -503,6 +503,7 @@ export class Game {
     const floorAt = (x, z, y) => floorHeight(this.arena.colliders, x, z, y);
     this.effects.throwOff(victim.guns[victim.weaponId].group, victim.yaw, floorAt);
     if (victim.rig.hat) this.effects.throwOff(victim.rig.hat, victim.yaw, floorAt);
+    this.hud.killFeed(killer.def, killer.weaponId, victim.def);
     if (killer.isPlayer) this.scores.player++; else this.scores.enemy++;
     this.hud.setScore(this.scores.player, this.scores.enemy);
 

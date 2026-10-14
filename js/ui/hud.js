@@ -4,7 +4,7 @@ import { t } from '../i18n.js';
 import { formatTime } from '../utils.js';
 import { toggleFullscreen } from '../fullscreen.js';
 import { settings, setSetting, SENSITIVITY_RANGE } from '../settings.js';
-import { CHARACTERS } from '../characters/index.js';
+import { CHARACTERS, getCharacter } from '../characters/index.js';
 import { thumbnail } from './thumbnails.js';
 
 const $ = id => document.getElementById(id);
@@ -14,7 +14,7 @@ const el = {
   pHpNum: $('p-hpnum'), eHpNum: $('e-hpnum'),
   plate2: $('plate-e2'), e2Name: $('e2-name'), e2Portrait: $('e2-portrait'), e2Hp: $('e2-hp'), e2HpNum: $('e2-hpnum'),
   scoreP: $('sc-p'), scoreE: $('sc-e'), toast: $('toast'),
-  slots: $('slots'), ammo: $('ammo'), reloadNote: $('reload-note'), reloadIcon: $('reload-icon'),
+  killFeed: $('killfeed'), slots: $('slots'), ammo: $('ammo'), reloadNote: $('reload-note'), reloadIcon: $('reload-icon'),
   crosshair: $('crosshair'), scope: $('scope'), hit: $('hitmarker'), hitText: $('hit-text'),
   banner: $('banner'), changePanel: $('change-panel'), changePickers: $('change-pickers'), weaponFlash: $('weapon-flash'), score: $('score'), timer: $('timer'), result: $('result'), resultTitle: $('result-title'), resultScore: $('result-score'), resultStats: $('result-stats'), pause: $('pause'), vignette: $('vignette'), doomFlash: $('doom-flash'),
 };
@@ -62,6 +62,13 @@ function statsTable(fighters) {
   return `<table><thead><tr><th></th>${head}</tr></thead><tbody>${body}</tbody></table>`;
 }
 
+function killRow(killerDef, weaponId, victimDef) {
+  const row = document.createElement('div');
+  row.className = 'kill';
+  row.innerHTML = `<img src="${thumbnail(killerDef)}" alt="">${weaponIcon(weaponId)}<img src="${thumbnail(victimDef)}" alt="">`;
+  return row;
+}
+
 // DOM-based HUD for the match screen
 export const hud = {
   // enemyDefs: one or two opponents (the second one gets its own plate under the first)
@@ -79,6 +86,7 @@ export const hud = {
     }
     el.slots.innerHTML = WEAPON_ORDER.map((id, i) => `<div class="slot" data-id="${id}"><b>${i + 1}</b> ${t('weapon.' + id)}</div>`).join('');
     lastKey = '';
+    el.killFeed.innerHTML = '';
     el.result.style.display = 'none';
     this.banner('', 0);
     this.toast('', 0);
@@ -176,6 +184,22 @@ export const hud = {
     el.toast.textContent = text;
     el.toast.style.display = text ? 'block' : 'none';
     if (ms) toastTimer = setTimeout(() => { el.toast.style.display = 'none'; }, ms);
+  },
+
+  // Killer's head, the weapon and the victim's head, for a few seconds
+  killFeed(killerDef, weaponId, victimDef) {
+    const row = killRow(killerDef, weaponId, victimDef);
+    el.killFeed.append(row);
+    setTimeout(() => row.remove(), HUD.killFeedMs);
+  },
+
+  // A sample kill to grab while the layout editor is open
+  killFeedSample(on) {
+    el.killFeed.querySelector('.sample')?.remove();
+    if (!on) return;
+    const row = killRow(getCharacter('fibi'), 'awp', getCharacter('guga'));
+    row.classList.add('sample');
+    el.killFeed.append(row);
   },
 
   // Training hides the score and the crosshair is a plain dot for the AWP

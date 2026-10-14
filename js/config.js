@@ -110,6 +110,7 @@ export const HOME_STAGE = {
 export const HUD = {
   weaponIconSeconds: 0.3,     // weapon icon shown in the center after switching
   hitMarkerMs: 350,
+  killFeedMs: 2500,           // how long a kill stays in the kill feed
   timerWarnSeconds: 30,       // the timer turns red in the last seconds
   fullscreenSwitchMs: 600,    // the browser drops the mouse lock during a fullscreen change; unlocks in this window are not a pause
 };
@@ -121,7 +122,7 @@ export const TOUCH = {
   joystickDeadZone: 0.15,     // fraction of the stick radius that is ignored
   joystickZone: 42,           // % of the screen width (from the left) where a touch starts the stick
   sizeRange: { min: 40, max: 180, step: 2 },   // px, for the layout editor
-  sizeRanges: { ammo: { min: 14, max: 48, step: 1 }, timer: { min: 14, max: 48, step: 1 }, score: { min: 10, max: 40, step: 1 } },   // controls that need their own range
+  sizeRanges: { ammo: { min: 14, max: 48, step: 1 }, timer: { min: 14, max: 48, step: 1 }, score: { min: 10, max: 40, step: 1 }, killfeed: { min: 8, max: 24, step: 1 } },   // controls that need their own range
   // Center of each control in % of the screen, and its size in px
   layout: {
     joystick: { x: 15.5, y: 79, size: 110 },
@@ -136,6 +137,7 @@ export const TOUCH = {
     ammo: { x: 70.5, y: 78.5, size: 20 },   // size is the font size in px
     timer: { x: 50, y: 5, size: 22 },   // font size in px too
     score: { x: 50, y: 14, size: 16 },  // kills, font size in px too
+    killfeed: { x: 50, y: 25, size: 12 },   // font size in px too
   },
 };
 

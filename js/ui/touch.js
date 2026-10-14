@@ -31,7 +31,7 @@ export const ICONS = {
 };
 
 export const CONTROL_IDS = Object.keys(TOUCH.layout);
-const ELEMENT_IDS = { joystick: 'joystick', ammo: 'weapon-panel', timer: 'timer', score: 'score' };   // every other control is #t-<id>
+const ELEMENT_IDS = { joystick: 'joystick', ammo: 'weapon-panel', timer: 'timer', score: 'score', killfeed: 'killfeed' };   // every other control is #t-<id>
 export const controlEl = id => $(ELEMENT_IDS[id] ?? 't-' + id);
 export const sizeRangeOf = id => TOUCH.sizeRanges[id] ?? TOUCH.sizeRange;
 
@@ -40,7 +40,7 @@ const isSpot = s => s && [s.x, s.y, s.size].every(Number.isFinite);
 // Where a control is: the player's own layout, or the default one
 export const layoutOf = id => (isSpot(settings.touchLayout[id]) ? settings.touchLayout[id] : TOUCH.layout[id]);
 
-const TEXT_CONTROLS = ['weapon-panel', 'timer', 'score'];
+const TEXT_CONTROLS = ['weapon-panel', 'timer', 'score', 'killfeed'];
 
 function place(el, { x, y, size }) {
   Object.assign(el.style, { left: x + '%', top: y + '%' });
@@ -51,7 +51,7 @@ function place(el, { x, y, size }) {
 // Puts every control where the layout says and applies the saved opacity
 export function placeAll() {
   for (const id of CONTROL_IDS) place(controlEl(id), layoutOf(id));
-  $('touch').style.setProperty('--touch-opacity', settings.touchOpacity);
+  document.documentElement.style.setProperty('--touch-opacity', settings.touchOpacity);
 }
 
 // Runs the callbacks for the finger that started on `el` (multi-touch safe)
