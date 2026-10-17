@@ -95,7 +95,7 @@ export function initSelect({ onStart, onMultiplayer }) {
     const second = mode === 'duel' && state.enemy2 ? getCharacter(state.enemy2) : null;   // only duels have a second enemy
     onStart(getCharacter(state.player), getCharacter(state.enemy), mode, mapId, duration, second, gungame);
   };
-  $('btn-start').onclick = () => { sfx.unlock(); sfx.click(); askMatchDuration((seconds, gungame) => begin('duel', seconds, gungame)); };
+  $('btn-start').onclick = () => { sfx.unlock(); sfx.click(); askMatchDuration((seconds, gungame) => begin('duel', seconds, gungame), { gungame: true }); };
   $('btn-train').onclick = () => { sfx.unlock(); sfx.click(); begin('training'); };
   $('btn-multi').onclick = () => { sfx.unlock(); sfx.click(); onMultiplayer(); };
   document.querySelectorAll('.fighter').forEach(f => {
