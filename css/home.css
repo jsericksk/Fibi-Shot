@@ -18,7 +18,7 @@
 .fighter.active { border-color: var(--accent); background: rgba(224, 24, 45, .12); box-shadow: 0 0 22px rgba(224, 24, 45, .3); }
 .fighter h2 { margin: 0; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; opacity: .7; }
 .art { height: clamp(110px, 27vh, 250px); filter: drop-shadow(0 8px 10px rgba(224, 24, 45, .3)); }
-#screen-select .fname { font-size: clamp(16px, 2.4vw, 22px); margin: 0; }
+#screen-select .fname { min-height: 1lh; font-size: clamp(16px, 2.4vw, 22px); margin: 0; }   /* the empty second slot keeps a name line, so it is as tall as a filled card */
 
 /* the second enemy always has its place reserved (an empty card with a plus), so adding one never moves the layout */
 .enemy2-slot { display: grid; }
