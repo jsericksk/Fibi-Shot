@@ -1,7 +1,9 @@
 import * as THREE from 'three';
 import { WEAPON_ORDER } from './weapons.js';
+import { MAX_HP } from './fighter.js';
 import { rand, randInt, lerpAngle, clamp } from '../utils.js';
 import { ENEMY, PLAYER, SHOWCASE, EMOTES } from '../config.js';
+import { settings } from '../settings.js';
 
 const SPEED = PLAYER.walkSpeed;   // bots move as fast as the player
 const MIN_RANGE = ENEMY.minRange, MAX_RANGE = ENEMY.maxRange;
@@ -116,8 +118,9 @@ export class EnemyAI {
 
   // Chest if visible, else head or its top (low cover can hide the lower body); null when fully hidden
   visibleTargetPoint() {
-    const from = this.f.chestPos(), t = this.target;
-    return [t.chestPos(), t.headPos(), t.headTopPos()].find(p => this.game.hasLineOfSight(from, p)) ?? null;
+    const from = this.f.chestPos(), t = this.target, chest = t.chestPos();
+    if (this.game.hasLineOfSight(from, chest)) return chest.setY(chest.y - ENEMY.aimLower);   // aims for the middle of the body
+    return [t.headPos(), t.headTopPos()].find(p => this.game.hasLineOfSight(from, p)) ?? null;
   }
 
   // True when the bot got hurt or the player is aiming (scoped) at it in plain sight
@@ -140,15 +143,19 @@ export class EnemyAI {
     const f = this.f;
     f.pitch = 0;
     if (!canAct) { f.moving = false; return; }
+    if (f.emote && !settings.botEmotes) f.emote = null;   // switched off in the pause menu mid-dance
     if (f.emote) { f.moving = false; return; }          // stands still while dancing
 
     this.emoteT -= dt;
     if (this.emoteT <= 0) {
-      this.startEmote();
       this.emoteT = rand(...SHOWCASE.emoteEvery);
-      f.moving = false;
-      return;
+      if (settings.botEmotes) {
+        this.startEmote();
+        f.moving = false;
+        return;
+      }
     }
+    if (!settings.botsMove && !f.sliding) { f.moving = false; return; }   // a slide in progress still finishes
 
     this.wayT -= dt;
     if (!this.way || this.wayT <= 0 || Math.hypot(this.way.x - f.pos.x, this.way.z - f.pos.z) < 1) {
@@ -224,8 +231,10 @@ export class EnemyAI {
     if (this.detourT > 0) { range = 0; strafe = this.strafeDir || 1; }
 
     const fx = Math.sin(f.yaw), fz = Math.cos(f.yaw);
-    const vx = fx * range * 0.8 + -fz * strafe;
-    const vz = fz * range * 0.8 + fx * strafe;
+    let vx = fx * range * 0.8 + -fz * strafe;
+    let vz = fz * range * 0.8 + fx * strafe;
+    const flask = this.detourT > 0 ? null : this.hurtFlask();
+    if (flask) { vx = flask.x - f.pos.x; vz = flask.z - f.pos.z; }   // hurt: runs for a health flask while still facing the player
     const len = Math.hypot(vx, vz);
     f.moving = len > 0;
     if (f.sliding) return f.slideStep(dt, this.game.arena.colliders);
@@ -250,8 +259,16 @@ export class EnemyAI {
     }
   }
 
+  // The health flask this bot wants to run to, if it is hurt enough and one is near
+  hurtFlask() {
+    const f = this.f;
+    if (f.hp >= MAX_HP * ENEMY.healBelow) return null;
+    return this.game.flasks.nearest(f.pos, ENEMY.healSeekRange);
+  }
+
   // Random weapon, but when the player holds the AWP or the sword the bot likes to answer with the same
   pickWeapon() {
+    if (this.game.gungame) return this.game.levelWeapon(this.f);
     if (this.countersTarget() && Math.random() < ENEMY.counterChance) return this.target.weaponId;
     return WEAPON_ORDER[randInt(0, WEAPON_ORDER.length - 1)];
   }
@@ -259,6 +276,12 @@ export class EnemyAI {
   countersTarget() { return ENEMY.counterWeapons.includes(this.target.weaponId); }
 
   handleWeapons(dt) {
+    if (!this.game.gungame) this.chooseWeapon(dt);
+    if (this.f.ammoNow <= 0 && !this.f.reloading) this.f.startReload();
+  }
+
+  // Switches weapons now and then and answers the player's AWP or sword
+  chooseWeapon(dt) {
     const f = this.f;
     this.switchT -= dt;
     if (this.switchT <= 0 && !f.reloading) {
@@ -277,7 +300,6 @@ export class EnemyAI {
       this.burstLeft = 0;
       this.seeCounterT = 0;
     } else if (this.seeCounterT > 1.2) this.seeCounterT = 0;
-    if (f.ammoNow <= 0 && !f.reloading) f.startReload();
   }
 
   fire(dt, dist) {

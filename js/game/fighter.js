@@ -60,6 +60,7 @@ export class Fighter {
     this.emote = null;       // { dance, duration, sound, t } while dancing
     this.deathPose = { faceUp: true, armsUp: false };   // how the body lies once dead (see randomDeathPose)
     this.training = false;   // training: infinite ammo, cannot die
+    this.level = 0;          // Gun Game: index of the current weapon in GUNGAME.order
     this.stats = emptyStats();   // for the end-of-match screen
     this.swingT = 0;         // seconds left of the sword swing animation
   }
@@ -165,6 +166,8 @@ export class Fighter {
     this.bloom = 0;
     this.invuln = MATCH.spawnProtection;
   }
+
+  heal() { this.hp = MAX_HP; }
 
   takeDamage(amount) {
     if (this.invuln > 0 || this.dead || this.training) return false;

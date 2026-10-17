@@ -108,6 +108,78 @@ export const DANCES = {
     }
   },
 
+  // Fibi: moonwalk (7 s) - hat tip, glide backwards with shuffling feet, spin back to the start, pose
+  moonwalk(rig, t) {
+    reset(rig);
+    const { model, legs, head } = rig;
+    const GLIDE = 0.9;                                                 // meters slid backwards
+    if (t < 1.2) {
+      const w = ease(t / 0.3) * (1 - ease((t - 0.9) / 0.3));          // one hand tips an imaginary hat, hips pop
+      armsPose(rig, [-2.4 * w, 0.2 + 0.2 * w], [0, 0.7 * w + 0.2]);
+      model.rotation.z = s(t * 14) * 0.08 * w;
+      head.rotation.set(0.15 * w, 0, 0);
+    } else if (t < 4.5) {
+      const u = (t - 1.2) / 3.3, ph = t * 7;
+      model.position.z = -GLIDE * ease(u);
+      model.rotation.x = -0.1;                                         // leans back a little
+      legs[0].rotation.x = max(0, s(ph)) * -0.7; legs[1].rotation.x = max(0, -s(ph)) * -0.7;   // the lifted foot lands on the toes while the other slides
+      model.position.y = abs(s(ph)) * 0.03;
+      armsPose(rig, [-0.5 + s(ph) * 0.3, 0.3], [-0.5 - s(ph) * 0.3, 0.3]);
+      head.rotation.set(0, s(ph / 2) * 0.25, 0);
+    } else if (t < 6) {
+      const u = (t - 4.5) / 1.5;                                       // double spin that slides back to the start
+      model.position.z = -GLIDE * (1 - ease(u));
+      model.rotation.y = ease(u) * PI * 4;
+      model.position.y = 0.1 * s(u * PI);
+      legs[1].rotation.set(-0.9, 0, 0.4);
+      armsPose(rig, [-2.9, 0.25], [-2.9, 0.25]);
+    } else {
+      const w = ease((t - 6) / 0.25);                                  // final pose: one arm points up, the other grabs the hip, on tiptoe
+      model.position.y = 0.08 * w;
+      model.rotation.z = 0.12 * w;
+      armsPose(rig, [-2.9 * w, 0.4 * w + 0.2], [0, 0.7 * w + 0.2]);
+      legs[1].rotation.x = -0.4 * w;
+      head.rotation.set(-0.1 * w, 0, -0.2 * w);
+    }
+  },
+
+  // Fibi: disco (7.3 s) - disco points, low twist, kick spin, final point
+  disco(rig, t) {
+    reset(rig);
+    const { model, legs, head } = rig;
+    if (t < 3) {
+      const ph = t * 6, p = s(ph), up = p > 0;                         // the raised arm points to the sky and back down across the body
+      model.rotation.z = p * 0.14;
+      model.rotation.y = p * 0.3;
+      model.position.y = abs(s(ph * 2)) * 0.04;
+      armsPose(rig, up ? [-2.8, 0.55] : [-0.4, -0.3], up ? [-0.4, -0.3] : [-2.8, 0.55]);
+      legs[up ? 1 : 0].rotation.x = -0.35 * abs(p);
+      head.rotation.set(0, -p * 0.3, -p * 0.2);
+    } else if (t < 5.2) {
+      const u = (t - 3) / 2.2, p = s(t * 9);                           // knees bent, twisting down and back up
+      const squat = s(u * PI);
+      model.position.y = -0.2 * squat;
+      model.rotation.y = p * 0.5;
+      legs[0].rotation.z = -0.2 * squat; legs[1].rotation.z = 0.2 * squat;
+      armsPose(rig, [-1.1, 0.35 + 0.2 * p], [-1.1, 0.35 - 0.2 * p]);   // arms swing like a twist
+      head.rotation.set(0.1, -p * 0.35, 0);
+    } else if (t < 6.4) {
+      const u = (t - 5.2) / 1.2, air = s(min(1, u * 1.2) * PI);        // jump with a full spin, one leg kicked out
+      model.rotation.y = ease(u) * PI * 2;
+      model.position.y = air * 0.45;
+      legs[0].rotation.x = -1.4 * air; legs[1].rotation.x = 0.3 * air;
+      armsPose(rig, [-2.9, 0.5], [-1.2 * air, 0.9]);
+      head.rotation.set(-0.15, 0, 0);
+    } else {
+      const w = ease((t - 6.4) / 0.25);                                // final disco point, held
+      model.rotation.z = 0.12 * w;
+      model.rotation.y = 0.3 * w;
+      armsPose(rig, [-2.8 * w, 0.2 + 0.35 * w], [0, 0.7 * w + 0.2]);
+      legs[1].rotation.x = -0.35 * w;
+      head.rotation.set(0, -0.3 * w, -0.2 * w);
+    }
+  },
+
   // Guga: penguin routine (5 s) - waddle, belly slide, flapping hops
   penguin(rig, t) {
     reset(rig);

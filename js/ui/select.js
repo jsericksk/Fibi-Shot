@@ -6,13 +6,17 @@ import { ICONS } from './touch.js';
 import { weaponIcon } from './hud.js';
 import { sfx } from '../audio.js';
 import { MAP_LIST } from '../maps.js';
+import { randInt } from '../utils.js';
 import { toggleFullscreen } from '../fullscreen.js';
+import { bindSourceLink } from './source-link.js';
 import { askMatchDuration } from './match-dialog.js';
 import { t, applyI18n, setLang, getLang, LANGS, onLangChange } from '../i18n.js';
 
+const RANDOM_MAP = { id: 'random', preview: 'linear-gradient(135deg, #3a2a5a, #e0182d)' };   // first option: the match picks a map when it starts
+
 // Character select screen: pick your fighter and your enemy, then start
 export function initSelect({ onStart, onMultiplayer }) {
-  const state = { player: 'fibi', enemy: 'guga', enemy2: null, map: MAP_LIST[0].id, picking: 'player' };
+  const state = { player: 'fibi', enemy: 'guga', enemy2: null, map: RANDOM_MAP.id, picking: 'player' };
   const $ = id => document.getElementById(id);
   $('btn-stage-emote').innerHTML = ICONS.emote;
   $('play-icon').innerHTML = weaponIcon('ak47');
@@ -38,9 +42,9 @@ export function initSelect({ onStart, onMultiplayer }) {
 
   function renderMaps() {
     const box = $('pick-map');
-    box.innerHTML = MAP_LIST.map(m => `
-      <button class="map ${state.map === m.id ? 'selected' : ''}" data-id="${m.id}" title="${t('map.' + m.id)}">
-        <i style="background:${m.preview}"></i><span>${t('map.' + m.id)}</span>
+    box.innerHTML = [RANDOM_MAP, ...MAP_LIST].map(m => `
+      <button class="map ${m === RANDOM_MAP ? 'random' : ''} ${state.map === m.id ? 'selected' : ''}" data-id="${m.id}" title="${t('map.' + m.id)}">
+        <i style="background:${m.preview}">${m === RANDOM_MAP ? '?' : ''}</i><span>${t('map.' + m.id)}</span>
       </button>`).join('');
     box.querySelectorAll('.map').forEach(btn => {
       btn.onclick = () => { state.map = btn.dataset.id; sfx.click(); renderMaps(); };
@@ -87,11 +91,12 @@ export function initSelect({ onStart, onMultiplayer }) {
     refresh();
   };
 
-  const begin = (mode, duration = 0) => {
+  const begin = (mode, duration = 0, gungame = false) => {
+    const mapId = state.map === RANDOM_MAP.id ? MAP_LIST[randInt(0, MAP_LIST.length - 1)].id : state.map;
     const second = mode === 'duel' && state.enemy2 ? getCharacter(state.enemy2) : null;   // only duels have a second enemy
-    onStart(getCharacter(state.player), getCharacter(state.enemy), mode, state.map, duration, second);
+    onStart(getCharacter(state.player), getCharacter(state.enemy), mode, mapId, duration, second, gungame);
   };
-  $('btn-start').onclick = () => { sfx.unlock(); sfx.click(); askMatchDuration(seconds => begin('duel', seconds)); };
+  $('btn-start').onclick = () => { sfx.unlock(); sfx.click(); askMatchDuration((seconds, gungame) => begin('duel', seconds, gungame), { gungame: true }); };
   $('btn-train').onclick = () => { sfx.unlock(); sfx.click(); begin('training'); };
   $('btn-multi').onclick = () => { sfx.unlock(); sfx.click(); onMultiplayer(); };
   document.querySelectorAll('.fighter').forEach(f => {
@@ -111,6 +116,7 @@ export function initSelect({ onStart, onMultiplayer }) {
   onLangChange(() => { renderMaps(); renderLangs(); markRoster(); updateDuel(); });
 
   $('btn-fs').onclick = () => { sfx.click(); toggleFullscreen(); };
+  bindSourceLink($('btn-github'));
 
   applyI18n();
   renderLangs();

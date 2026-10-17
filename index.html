@@ -24,6 +24,7 @@
     <h1 class="logo">Fibi Shot</h1>
     <div class="home-tools">
       <button id="btn-fs" class="tool" data-i18n="fullscreen"></button>
+      <button id="btn-github" class="tool icon"></button>
       <div class="langs" id="lang-pick"></div>
     </div>
   </header>
@@ -175,6 +176,8 @@
     <button id="btn-edit-hud" class="touch-only" data-i18n="pause.editHud"></button>
     <button id="btn-fs-pause" data-i18n="fullscreen"></button>
     <div id="change-panel">
+      <button id="btn-bot-emotes" class="toggle"></button>
+      <button id="btn-bot-move" class="toggle"></button>
       <button id="btn-change" data-i18n="pause.change"></button>
       <div id="change-pickers"></div>
     </div>
@@ -186,7 +189,7 @@
 <!-- Match type dialog: asked before a 1v1 or an online match -->
 <div id="match-dialog" class="hidden">
   <div class="dialog-box">
-    <h2 data-i18n="matchDialog.title"></h2>
+    <h2 id="match-title"></h2>
     <div id="match-options"></div>
   </div>
 </div>
@@ -194,7 +197,9 @@
 <!-- Yes/no dialog -->
 <div id="confirm-dialog" class="hidden">
   <div class="dialog-box">
+    <h2 id="confirm-title" class="hidden"></h2>
     <h2 id="confirm-text"></h2>
+    <p id="confirm-detail" class="hidden"></p>
     <div id="confirm-buttons">
       <button id="confirm-no" class="primary alt" data-i18n="confirm.no"></button>
       <button id="confirm-yes" class="primary" data-i18n="confirm.yes"></button>

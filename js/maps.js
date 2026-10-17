@@ -9,6 +9,7 @@
 // road { z, width, color } (a flat strip of asphalt across the map, centered on z, with a dashed center line)
 // backdrop: 'rio' | 'mars' | 'snow' (far scenery beyond the walls, see game/backdrops.js)
 // doomsday: true (needs `space`) ends timed matches with the Earth being nuked
+// health: [x, z] (drawn for the same size as `quarter`) puts a health flask there and another one mirrored on the opposite side
 // Gravity is the same on every map (WORLD.gravity): fighters can jump onto cover up to ~3 m high.
 
 export const MAPS = {
@@ -31,6 +32,7 @@ export const MAPS = {
       wall: { color: 0x66666f, trim: null },
     },
     lights: null,
+    health: [12, -12],
     quarter: [
       [9, 9, 3, 3, 2.2, 'rock'],
       [19, 5, 4, 2.6, 2.6, 'module'],
@@ -66,6 +68,7 @@ export const MAPS = {
     },
     // Dim colored lights for mood: color, intensity, distance, positions
     lights: { color: 0xff2a3a, intensity: 25, distance: 26, at: [[-24, -24], [24, -24], [-24, 24], [24, 24], [0, 0]] },
+    health: [14, 0],
     quarter: [
       [10, 8, 3, 3, 2.4, 'crate'],
       [20, 8, 6, 2.4, 2.6, 'container'],
@@ -108,6 +111,7 @@ export const MAPS = {
       crate: { color: 0xb88a4a, trim: null },
     },
     lights: null,
+    health: [10, -20],
     quarter: [
       [9, 8, 4, 4, 2.4, 'rock'],
       [20, 6, 7, 2, 2.2, 'log'],
@@ -145,6 +149,7 @@ export const MAPS = {
       pillar: { color: 0x77797a, trim: null },
     },
     lights: { color: 0xfff2dd, intensity: 45, distance: 42, y: 7, at: [[-15, -15], [15, -15], [-15, 15], [15, 15], [0, 0]] },
+    health: [0, 14],
     quarter: [
       [8, 7, 6, 2.4, 5.2, 'stack_rb'],
       [19, 8, 6, 2.4, 2.6, 'container_red'],
@@ -190,6 +195,7 @@ export const MAPS = {
       curb: { color: 0x9a9a98, trim: null },
     },
     lights: null,
+    health: [14, 0],
     quarter: [
       [8, 5, 3, 0.8, 0.5, 'bench'],
       [10, 12, 5, 5, 2.6, 'block'],
@@ -233,6 +239,7 @@ export const MAPS = {
       bench: { color: 0xb08a5a, trim: null },
     },
     lights: null,
+    health: [12, 12],
     quarter: [
       [9, 8, 4, 3, 2.6, 'kiosk'],
       [20, 6, 6, 2.2, 2.4, 'block'],
@@ -270,6 +277,7 @@ export const MAPS = {
       mast: { color: 0xcfd2d8, trim: 0xff3030 },
     },
     lights: null,
+    health: [22, -8],
     quarter: [
       [9, 9, 3.4, 3, 2.4, 'rock'],
       [20, 5, 5, 3, 2.6, 'module'],
@@ -307,6 +315,7 @@ export const MAPS = {
       rock: { color: 0x7b8591, trim: null },
     },
     lights: null,
+    health: [-10, 20],
     quarter: [
       [9, 8, 3.6, 3.6, 2.6, 'ice'],
       [20, 5, 5, 2.4, 2.4, 'hut'],

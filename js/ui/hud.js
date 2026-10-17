@@ -1,5 +1,5 @@
 import { WEAPONS, WEAPON_ORDER } from '../game/weapons.js';
-import { MATCH, HUD } from '../config.js';
+import { MATCH, HUD, GUNGAME } from '../config.js';
 import { t } from '../i18n.js';
 import { formatTime } from '../utils.js';
 import { toggleFullscreen } from '../fullscreen.js';
@@ -31,8 +31,15 @@ function bindSensitivity(id, key) {
 bindSensitivity('sens', 'sensitivity');
 bindSensitivity('aim-sens', 'aimSensitivity');
 
+// Training toggles in the pause menu: [button id, setting, label key]
+const TOGGLES = [['btn-bot-emotes', 'botEmotes', 'pause.botEmotes'], ['btn-bot-move', 'botsMove', 'pause.botsMove']];
+const showToggles = () => TOGGLES.forEach(([id, key, label]) => { $(id).textContent = t(label, { state: t(settings[key] ? 'toggle.on' : 'toggle.off') }); });
+TOGGLES.forEach(([id, key]) => { $(id).onclick = () => { setSetting(key, !settings[key]); showToggles(); }; });
+
 let bannerTimer, hitTimer, toastTimer, flashTimer, lastKey = '';
 let hasSecond = false;   // the second enemy plate is in use (1v2)
+let names = [];          // player and enemy names, which get the Gun Game level added
+let gungame = false;
 
 // Simple white weapon silhouettes (viewBox 0 0 120 44)
 const ICONS = {
@@ -69,10 +76,19 @@ function killRow(killerDef, weaponId, victimDef) {
   return row;
 }
 
+// Gun Game: each name shows how far its fighter has got, like "Fibi 3/6"
+function showLevels(fighters) {
+  [el.pName, el.eName, el.e2Name].forEach((nameEl, i) => {
+    if (!fighters[i]) return;
+    const text = `${names[i]} ${fighters[i].level + 1}/${GUNGAME.order.length}`;
+    if (nameEl.textContent !== text) nameEl.textContent = text;
+  });
+}
+
 // DOM-based HUD for the match screen
 export const hud = {
   // enemyDefs: one or two opponents (the second one gets its own plate under the first)
-  setup(playerDef, enemyDefs) {
+  setup(playerDef, enemyDefs, isGungame = false) {
     const [enemyDef, second] = enemyDefs;
     el.pName.textContent = playerDef.name;
     el.eName.textContent = enemyDef.name;
@@ -84,7 +100,10 @@ export const hud = {
       el.e2Name.textContent = second.name;
       el.e2Portrait.src = thumbnail(second);
     }
-    el.slots.innerHTML = WEAPON_ORDER.map((id, i) => `<div class="slot" data-id="${id}"><b>${i + 1}</b> ${t('weapon.' + id)}</div>`).join('');
+    names = [playerDef.name, enemyDef.name, second?.name];
+    gungame = isGungame;
+    document.body.classList.toggle('gungame', gungame);   // no weapon button on touch: the weapon comes from the level
+    el.slots.innerHTML = (gungame ? GUNGAME.order : WEAPON_ORDER).map((id, i) => `<div class="slot" data-id="${id}"><b>${i + 1}</b> ${t('weapon.' + id)}</div>`).join('');
     lastKey = '';
     el.killFeed.innerHTML = '';
     el.result.style.display = 'none';
@@ -99,6 +118,7 @@ export const hud = {
       fill.style.width = (fighter.hp / MATCH.maxHp) * 100 + '%';
       number.textContent = Math.ceil(fighter.hp);
     };
+    if (gungame) showLevels([player, ...enemies]);
     bar(el.pHp, el.pHpNum, player);
     bar(el.eHp, el.eHpNum, enemies[0]);
     if (hasSecond) bar(el.e2Hp, el.e2HpNum, enemies[1]);
@@ -208,6 +228,7 @@ export const hud = {
     document.querySelector('.plate.right').style.display = on ? 'none' : '';
     el.changePanel.style.display = on ? 'flex' : 'none';
     el.changePickers.classList.remove('open');
+    showToggles();   // the language may have changed since the last match
   },
 
   // Character pickers of the training pause menu. fn(side, id) is called on a pick.

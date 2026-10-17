@@ -13,6 +13,26 @@ export const MATCH = {
   timedSeconds: [180, 300],   // lengths of the timed matches (the other option is unlimited)
 };
 
+// ---- Links ----------------------------------------------------------------------
+export const LINKS = {
+  source: 'https://github.com/jsericksk/Fibi-Shot',
+};
+
+// ---- Gun Game (a duel mode picked in the match length dialog) --------------------
+export const GUNGAME = {
+  order: ['pistol', 'ak47', 'shotgun', 'awp', 'bazooka', 'sword'],   // each kill moves to the next weapon; a kill with the last one wins
+};
+
+// ---- Health flasks (two per map, see `health` in maps.js) --------------------------
+export const HEALTH_FLASK = {
+  respawnSeconds: 25,         // a taken flask comes back after this long
+  pickupRadius: 1.2,          // meters from the flask that count as grabbing it
+  pickupHeight: 1.6,          // a fighter standing on top of tall cover cannot grab it
+  float: 0.9,                 // height of the flask above the floor
+  bob: 0.1,                   // meters it moves up and down
+  spinSpeed: 1.6,             // radians per second
+};
+
 // ---- Moon easter egg: a nuke hits the Earth at the end of timed matches ----------
 export const DOOMSDAY = {
   warnSeconds: 15,            // the bomb goes off when the timer reaches this
@@ -53,7 +73,7 @@ export const CAMERA = {
 // ---- Player ----------------------------------------------------------------
 export const PLAYER = {
   sensitivity: 0.0022,
-  walkSpeed: 7.5,
+  walkSpeed: 9,
   jumpSpeed: 8.2,
   // Extra spread (radians) of the AWP (sniper) when it is not aiming; the other weapons are pinpoint
   moveSpreadAwp: 0.008,       // when moving
@@ -75,11 +95,13 @@ export const SLIDE = {
 
 // ---- Emotes (H key) ----------------------------------------------------------
 // Each character has its own emotes; one is picked at random when pressing H.
-// dance: animation name from js/characters/dances.js (ballet, idol, penguin, groove, robot, cancan, hops, backflip, gallop) | duration: seconds | sound: mp3 in audio/emotes
+// dance: animation name from js/characters/dances.js (ballet, idol, moonwalk, disco, penguin, groove, robot, cancan, hops, backflip, gallop) | duration: seconds | sound: mp3 in audio/emotes
 export const EMOTES = {
   fibi: [
     { dance: 'ballet', duration: 7, sound: 'audio/emotes/fibi-emote-1.mp3' },
     { dance: 'idol', duration: 5, sound: 'audio/emotes/fibi-emote-2.mp3' },
+    { dance: 'moonwalk', duration: 7, sound: 'audio/emotes/fibi-emote-3.mp3' },
+    { dance: 'disco', duration: 7.3, sound: 'audio/emotes/fibi-emote-4.mp3' },
   ],
   guga: [{ dance: 'penguin', duration: 5, sound: 'audio/emotes/guga-emote-1.mp3' }],
   nono: [{ dance: 'groove', duration: 5, sound: 'audio/emotes/nono-emote-1.mp3' }],
@@ -159,7 +181,10 @@ export const ENEMY = {
   counterChance: 0.8,         // odds of answering
   mirrorChance: 0.7,          // odds of strafing the other way when the player changes its sliding side
   mirrorDelay: [0.15, 0.45],  // seconds of reaction before it does
+  healBelow: 0.5,             // goes for a health flask when its health drops under this share
+  healSeekRange: 35,          // ...if one is within this many meters
   mirrorMinSpeed: 1.2,        // m/s the player must slide across the bot's line of sight to count as a side
+  aimLower: 0.2,              // meters below the chest the bot aims, so its scatter does not turn into headshots (the head box starts just above the chest)
   aimError: { pistol: 0.04, ak47: 0.055, awp: 0.04, shotgun: 0.032, bazooka: 0.03, sword: 0.02 },     // radians, lower is more accurate
   fireRange: { pistol: 26, ak47: 34, awp: 70, shotgun: 14, bazooka: 45, sword: 2.6 },          // meters
   closeRange: { shotgun: [3, 9], sword: [0.5, 2.2] },   // weapons the bot wants to use up close: backs off under the first number, chases past the second
@@ -220,6 +245,6 @@ export const WEAPON_STATS = {
   shotgun: { id: 'shotgun', name: 'Escopeta', damage: 12, headMult: 1.5, interval: 0.9, auto: false, mag: 6, reload: 2.4, spread: 0.004, bloom: 0, bloomMax: 0, recoil: 0.06, pellets: 8, pelletSpread: 0.055, falloff: { start: 5, end: 20, min: 0.08 }, scoped: LIGHT_AIM },
   awp: { id: 'awp', name: 'AWP', damage: 70, headMult: 10 / 7, interval: 0.8, auto: false, mag: 5, reload: 2.4, spread: 0.06, bloom: 0, bloomMax: 0, recoil: 0.07, scoped: { fov: 18, spread: 0, speed: 3.2, sniper: true } },
   // Rocket: flies visibly (dodge it!) and explodes on impact; damage falls off linearly from the blast center down to `edge` (fraction) at `radius`
-  bazooka: { id: 'bazooka', name: 'Bazuca', damage: 100, headMult: 1, interval: 1, auto: false, mag: 3, reload: 5.5, spread: 0.002, bloom: 0, bloomMax: 0, recoil: 0.09, scoped: LIGHT_AIM, projectile: { speed: 22, radius: 4.5, edge: 0.3, life: 8, trailInterval: 0.025, blendDistance: 8 } },
+  bazooka: { id: 'bazooka', name: 'Bazuca', damage: 100, headMult: 1, interval: 1, auto: false, mag: 3, reload: 2.4, spread: 0.002, bloom: 0, bloomMax: 0, recoil: 0.09, scoped: LIGHT_AIM, projectile: { speed: 22, radius: 4.5, edge: 0.3, life: 8, trailInterval: 0.025, blendDistance: 8 } },
   sword: { id: 'sword', name: 'Espada', damage: 50, headMult: 1, interval: 0.6, auto: false, mag: Infinity, reload: 0, spread: 0, bloom: 0, bloomMax: 0, recoil: 0.03, scoped: {}, melee: { range: 3, arc: 0.5, swingSeconds: 0.25, swingAngle: 1.1 } },   // arc: cosine of the half-angle in front of the fighter that can be hit; swingAngle: radians the blade tilts up and then down
 };
