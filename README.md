@@ -33,6 +33,7 @@ An internet connection is needed (three.js and PeerJS are loaded from a CDN).
   does not cost a level, and weapons cannot be switched by hand.
 - **Training:** every character walks around the map, jumps and dances. Infinite ammo and no deaths, and every
   hit shows its damage as a floating number, so it is a good place to try things out.
+  The pause menu can turn the bots' emotes off and make them stand still.
 - **Multiplayer:** a 1v1 against a friend over the network.
 
 ### Controls

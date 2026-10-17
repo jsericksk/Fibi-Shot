@@ -3,6 +3,7 @@ import { WEAPON_ORDER } from './weapons.js';
 import { MAX_HP } from './fighter.js';
 import { rand, randInt, lerpAngle, clamp } from '../utils.js';
 import { ENEMY, PLAYER, SHOWCASE, EMOTES } from '../config.js';
+import { settings } from '../settings.js';
 
 const SPEED = PLAYER.walkSpeed;   // bots move as fast as the player
 const MIN_RANGE = ENEMY.minRange, MAX_RANGE = ENEMY.maxRange;
@@ -142,15 +143,19 @@ export class EnemyAI {
     const f = this.f;
     f.pitch = 0;
     if (!canAct) { f.moving = false; return; }
+    if (f.emote && !settings.botEmotes) f.emote = null;   // switched off in the pause menu mid-dance
     if (f.emote) { f.moving = false; return; }          // stands still while dancing
 
     this.emoteT -= dt;
     if (this.emoteT <= 0) {
-      this.startEmote();
       this.emoteT = rand(...SHOWCASE.emoteEvery);
-      f.moving = false;
-      return;
+      if (settings.botEmotes) {
+        this.startEmote();
+        f.moving = false;
+        return;
+      }
     }
+    if (!settings.botsMove && !f.sliding) { f.moving = false; return; }   // a slide in progress still finishes
 
     this.wayT -= dt;
     if (!this.way || this.wayT <= 0 || Math.hypot(this.way.x - f.pos.x, this.way.z - f.pos.z) < 1) {

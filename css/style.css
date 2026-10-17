@@ -294,7 +294,7 @@ button { -webkit-tap-highlight-color: transparent; }
 .tool { white-space: nowrap; }
 .tool:hover { border-color: var(--accent); }
 .lang.selected { border-color: var(--accent); background: rgba(224, 24, 45, .3); }
-#btn-fs-pause { border: 2px solid #fff; border-radius: 12px; background: transparent; color: #fff; font-weight: 800; padding: 8px 22px; }
+#btn-fs-pause, #pause .toggle { border: 2px solid #fff; border-radius: 12px; background: transparent; color: #fff; font-weight: 800; padding: 8px 22px; }
 
 /* training ignores the enemy choice: dim it while the Training button is hovered */
 .side, .vs { transition: opacity .2s; }

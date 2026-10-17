@@ -31,6 +31,11 @@ function bindSensitivity(id, key) {
 bindSensitivity('sens', 'sensitivity');
 bindSensitivity('aim-sens', 'aimSensitivity');
 
+// Training toggles in the pause menu: [button id, setting, label key]
+const TOGGLES = [['btn-bot-emotes', 'botEmotes', 'pause.botEmotes'], ['btn-bot-move', 'botsMove', 'pause.botsMove']];
+const showToggles = () => TOGGLES.forEach(([id, key, label]) => { $(id).textContent = t(label, { state: t(settings[key] ? 'toggle.on' : 'toggle.off') }); });
+TOGGLES.forEach(([id, key]) => { $(id).onclick = () => { setSetting(key, !settings[key]); showToggles(); }; });
+
 let bannerTimer, hitTimer, toastTimer, flashTimer, lastKey = '';
 let hasSecond = false;   // the second enemy plate is in use (1v2)
 let names = [];          // player and enemy names, which get the Gun Game level added
@@ -223,6 +228,7 @@ export const hud = {
     document.querySelector('.plate.right').style.display = on ? 'none' : '';
     el.changePanel.style.display = on ? 'flex' : 'none';
     el.changePickers.classList.remove('open');
+    showToggles();   // the language may have changed since the last match
   },
 
   // Character pickers of the training pause menu. fn(side, id) is called on a pick.
