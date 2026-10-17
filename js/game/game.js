@@ -5,6 +5,7 @@ import { getCharacter, CHARACTERS } from '../characters/index.js';
 import { MATCH, WORLD, CAMERA, EMOTE, EMOTES, SHOWCASE, TRAINING, NET, DOOMSDAY } from '../config.js';
 import { Effects } from './effects.js';
 import { Rockets } from './rockets.js';
+import { HealthFlasks } from './pickups.js';
 import { Doomsday } from './doomsday.js';
 import { Fighter, randomDeathPose } from './fighter.js';
 import { PlayerControls } from './player.js';
@@ -108,6 +109,7 @@ export class Game {
     Object.assign(sun.shadow.camera, { left: -R, right: R, top: R, bottom: -R, near: 1, far: 120 });
     this.effects = new Effects(scene);
     this.rockets = new Rockets(this);
+    this.flasks = this.training ? null : new HealthFlasks(this, scene, map, arena.half);   // nobody gets hurt in training
 
     this.player = new Fighter(playerDef, true, arena.half);
     this.player.training = this.training;
@@ -218,6 +220,7 @@ export class Game {
     });
     this.effects.update(dt);
     this.rockets.update(dt);
+    if (canAct) this.flasks?.update(dt, fighters);
     this.hud.update(this.player, this.bots.map(b => b.f));
     if (this.multi) this.sendState(dt);
   }
@@ -255,6 +258,7 @@ export class Game {
         if (died) { net.send({ t: 'died' }); this.onKill(this.enemy, this.player); }
         break;
       }
+      case 'flask': this.flasks.take(m.i); break;
       case 'restart': this.restart(false); break;
       case 'died':   // our shot killed the friend
         this.hud.hitMarker(this.lastHitHead, true);

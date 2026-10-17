@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { WEAPON_ORDER } from './weapons.js';
+import { MAX_HP } from './fighter.js';
 import { rand, randInt, lerpAngle, clamp } from '../utils.js';
 import { ENEMY, PLAYER, SHOWCASE, EMOTES } from '../config.js';
 
@@ -224,8 +225,10 @@ export class EnemyAI {
     if (this.detourT > 0) { range = 0; strafe = this.strafeDir || 1; }
 
     const fx = Math.sin(f.yaw), fz = Math.cos(f.yaw);
-    const vx = fx * range * 0.8 + -fz * strafe;
-    const vz = fz * range * 0.8 + fx * strafe;
+    let vx = fx * range * 0.8 + -fz * strafe;
+    let vz = fz * range * 0.8 + fx * strafe;
+    const flask = this.detourT > 0 ? null : this.hurtFlask();
+    if (flask) { vx = flask.x - f.pos.x; vz = flask.z - f.pos.z; }   // hurt: runs for a health flask while still facing the player
     const len = Math.hypot(vx, vz);
     f.moving = len > 0;
     if (f.sliding) return f.slideStep(dt, this.game.arena.colliders);
@@ -248,6 +251,13 @@ export class EnemyAI {
       this.detourT = rand(0.6, 1.2);
       if (f.onGround) f.jump(PLAYER.jumpSpeed);
     }
+  }
+
+  // The health flask this bot wants to run to, if it is hurt enough and one is near
+  hurtFlask() {
+    const f = this.f;
+    if (f.hp >= MAX_HP * ENEMY.healBelow) return null;
+    return this.game.flasks.nearest(f.pos, ENEMY.healSeekRange);
   }
 
   // Random weapon, but when the player holds the AWP or the sword the bot likes to answer with the same

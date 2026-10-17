@@ -166,6 +166,8 @@ export class Fighter {
     this.invuln = MATCH.spawnProtection;
   }
 
+  heal() { this.hp = MAX_HP; }
+
   takeDamage(amount) {
     if (this.invuln > 0 || this.dead || this.training) return false;
     this.hp = Math.max(0, this.hp - amount);

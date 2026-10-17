@@ -67,12 +67,17 @@ Characters can have skins: pick one of the round portraits under the character l
 
 Pistol, AK-47, AWP (sniper), Shotgun, Bazooka and Sword. Each one has its own feel: the shotgun is strong up close,
 the AWP is a sniper with a full scope (70 to the body, 100 to the head) and the AK-47 is a reliable automatic.
-The pistol, AK-47 and shotgun lose damage with distance. The bazooka holds 3 rockets and takes a long time to
-reload; its rocket flies slowly, so it can be dodged, and explodes on impact with area damage (a direct hit does
-full damage).
+The pistol, AK-47 and shotgun lose damage with distance. The bazooka holds 3 rockets; its rocket flies slowly, so it
+can be dodged, and explodes on impact with area damage (a direct hit does full damage).
 The sword only works up close (3 meters), has no ammo and deals 50 damage, so two hits take a fighter down.
 Every weapon except the sword can aim for a small zoom, and shots fired while aiming are exact.
 All the numbers can be tweaked in `js/config.js`.
+
+## Health flasks
+
+Every map has two red health flasks on opposite sides. Walk over one to get
+all your health back; it returns 25 seconds later. Bots go for them too when they are badly hurt. There are no flasks
+in Training.
 
 ## Maps
 

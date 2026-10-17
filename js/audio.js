@@ -140,6 +140,7 @@ export const sfx = {
     noise(5, { type: 'lowpass', freq: 380, vol: 1 * vol });
     noise(3, { type: 'lowpass', freq: 160, vol: 0.9 * vol, delay: 0.8 });
   }),
+  heal: safe(() => [660, 880, 1320].forEach((f, i) => tone(f, f, 0.16, { type: 'sine', vol: 0.18, delay: i * 0.09 }))),
   hurt: safe(() => { tone(180, 70, 0.2, { type: 'sawtooth', vol: 0.3 }); noise(0.1, { type: 'lowpass', freq: 600, vol: 0.3 }); }),
   beep: safe(high => tone(high ? 880 : 520, high ? 880 : 520, 0.14, { type: 'square', vol: 0.12 })),
   click: safe(() => tone(700, 900, 0.05, { type: 'triangle', vol: 0.12 })),
