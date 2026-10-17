@@ -24,3 +24,9 @@ export function toggleFullscreen() {
   if (!document.fullscreenElement) return enterFullscreen();
   try { document.exitFullscreen()?.catch?.(() => {}); } catch { /* optional */ }
 }
+
+// Chrome and Edge: while in fullscreen Esc reaches the game instead of leaving it (holding it still does). The lock
+// only works once fullscreen is really on, so it is asked for here and not right after the request.
+document.addEventListener('fullscreenchange', () => {
+  if (document.fullscreenElement) Promise.resolve(navigator.keyboard?.lock?.(['Escape'])).catch(() => {});
+});

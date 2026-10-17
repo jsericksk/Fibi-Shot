@@ -24,6 +24,7 @@
     <h1 class="logo">Fibi Shot</h1>
     <div class="home-tools">
       <button id="btn-fs" class="tool" data-i18n="fullscreen"></button>
+      <button id="btn-github" class="tool icon"></button>
       <div class="langs" id="lang-pick"></div>
     </div>
   </header>
@@ -196,7 +197,9 @@
 <!-- Yes/no dialog -->
 <div id="confirm-dialog" class="hidden">
   <div class="dialog-box">
+    <h2 id="confirm-title" class="hidden"></h2>
     <h2 id="confirm-text"></h2>
+    <p id="confirm-detail" class="hidden"></p>
     <div id="confirm-buttons">
       <button id="confirm-no" class="primary alt" data-i18n="confirm.no"></button>
       <button id="confirm-yes" class="primary" data-i18n="confirm.yes"></button>

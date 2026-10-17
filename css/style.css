@@ -239,6 +239,10 @@ button { -webkit-tap-highlight-color: transparent; }
 #match-dialog, #confirm-dialog { position: fixed; inset: 0; z-index: 10; display: flex; align-items: center; justify-content: center; background: rgba(10, 0, 3, .75); }
 #match-dialog.hidden, #confirm-dialog.hidden { display: none; }
 #confirm-dialog { z-index: 20; }
+#confirm-title.hidden { display: none; }
+#confirm-title + #confirm-text { font-size: 16px; font-weight: 600; opacity: .85; }
+#confirm-detail { margin: -8px 0 0; max-width: 320px; text-align: center; font-size: 14px; font-weight: 800; text-decoration: underline; word-break: break-all; }
+#confirm-detail.hidden { display: none; }
 #confirm-text { max-width: 320px; text-align: center; font-size: 20px; }
 #confirm-buttons { display: flex; gap: 14px; }
 .dialog-box { display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 24px 32px 28px; border-radius: 22px; background: #1a1115; border: 2px solid var(--accent); box-shadow: 0 0 40px rgba(224, 24, 45, .4); }
@@ -292,6 +296,8 @@ button { -webkit-tap-highlight-color: transparent; }
 /* fullscreen button */
 .tool, .lang { border: 2px solid #5a1119; border-radius: 8px; background: rgba(0, 0, 0, .4); color: var(--ink); font-weight: 800; font-size: 13px; padding: 3px 10px; }
 .tool { white-space: nowrap; }
+.tool.icon { display: grid; place-items: center; padding: 3px 7px; }
+.tool svg { width: 16px; height: 16px; display: block; }
 .tool:hover { border-color: var(--accent); }
 .lang.selected { border-color: var(--accent); background: rgba(224, 24, 45, .3); }
 #btn-fs-pause, #pause .toggle { border: 2px solid #fff; border-radius: 12px; background: transparent; color: #fff; font-weight: 800; padding: 8px 22px; }

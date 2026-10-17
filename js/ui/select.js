@@ -8,6 +8,7 @@ import { sfx } from '../audio.js';
 import { MAP_LIST } from '../maps.js';
 import { randInt } from '../utils.js';
 import { toggleFullscreen } from '../fullscreen.js';
+import { bindSourceLink } from './source-link.js';
 import { askMatchDuration } from './match-dialog.js';
 import { t, applyI18n, setLang, getLang, LANGS, onLangChange } from '../i18n.js';
 
@@ -115,6 +116,7 @@ export function initSelect({ onStart, onMultiplayer }) {
   onLangChange(() => { renderMaps(); renderLangs(); markRoster(); updateDuel(); });
 
   $('btn-fs').onclick = () => { sfx.click(); toggleFullscreen(); };
+  bindSourceLink($('btn-github'));
 
   applyI18n();
   renderLangs();

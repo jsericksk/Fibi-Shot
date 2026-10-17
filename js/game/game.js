@@ -47,6 +47,10 @@ export class Game {
       if (!locked && !this.paused && isSwitchingFullscreen()) return this.lock();
       this.setPaused(!locked);
     });
+    // With the keyboard lock (see fullscreen.js) Esc no longer frees the mouse by itself, so do it here to open the pause menu
+    addEventListener('keydown', e => {
+      if (e.code === 'Escape' && this.active && document.pointerLockElement === this.canvas) document.exitPointerLock();
+    });
     this.hud.onResume(() => this.lock());
     this.hud.onQuit(() => this.quit());
     this.hud.onRestart(() => this.restart(true));

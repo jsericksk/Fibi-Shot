@@ -13,6 +13,11 @@ export const MATCH = {
   timedSeconds: [180, 300],   // lengths of the timed matches (the other option is unlimited)
 };
 
+// ---- Links ----------------------------------------------------------------------
+export const LINKS = {
+  source: 'https://github.com/jsericksk/Fibi-Shot',
+};
+
 // ---- Gun Game (a duel mode picked in the match length dialog) --------------------
 export const GUNGAME = {
   order: ['pistol', 'ak47', 'shotgun', 'awp', 'bazooka', 'sword'],   // each kill moves to the next weapon; a kill with the last one wins
