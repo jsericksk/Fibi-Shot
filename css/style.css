@@ -80,6 +80,8 @@ button { font: inherit; cursor: pointer; }
 
 #screen-select .maps { display: grid; grid-template-columns: repeat(auto-fit, minmax(62px, 1fr)); gap: 8px; margin: 0; }
 #screen-select .map { width: 100%; }
+#screen-select .map.random { grid-column: 1 / -1; display: flex; align-items: center; justify-content: center; gap: 8px; }   /* a slim bar so the grid keeps its two rows */
+.map.random i { display: grid; place-items: center; width: 24px; aspect-ratio: 1; margin: 0; font-style: normal; font-size: 16px; font-weight: 900; }
 
 .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
 button { -webkit-tap-highlight-color: transparent; }
@@ -252,6 +254,9 @@ button { -webkit-tap-highlight-color: transparent; }
 #reload-icon::before { content: ""; position: absolute; inset: 6px; border-radius: 50%; background: rgba(10, 0, 3, .85); }
 #reload-icon svg { position: relative; width: 32px; height: 32px; fill: #fff; animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(-360deg); } }
+
+/* Gun Game hands the weapons out (no weapon button) and is won by levels, so the kill score is hidden */
+.gungame #t-weapon, .gungame #weapon-menu, .gungame #score { display: none; }
 
 /* map picker (menu) */
 .maps { display: flex; gap: 14px; margin-top: 12px; justify-content: center; }

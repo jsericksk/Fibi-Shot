@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { buildArena, floorHeight } from './arena.js';
 import { MAPS, MAP_LIST } from '../maps.js';
 import { getCharacter, CHARACTERS } from '../characters/index.js';
-import { MATCH, WORLD, CAMERA, EMOTE, EMOTES, SHOWCASE, TRAINING, NET, DOOMSDAY } from '../config.js';
+import { MATCH, GUNGAME, WORLD, CAMERA, EMOTE, EMOTES, SHOWCASE, TRAINING, NET, DOOMSDAY } from '../config.js';
 import { Effects } from './effects.js';
 import { Rockets } from './rockets.js';
 import { HealthFlasks } from './pickups.js';
@@ -89,6 +89,7 @@ export class Game {
     this.setup = { mode, mapId, opts };   // to play the same match again
     this.training = mode === 'training';
     this.multi = mode === 'multi';
+    this.gungame = mode === 'duel' && !!opts.gungame;
     const map = this.map = MAPS[mapId] ?? MAP_LIST[0];
     this.playerDef = playerDef;
     this.enemyDef = enemyDef;
@@ -129,6 +130,7 @@ export class Game {
       this.place(f, this.player, this.training ? SHOWCASE.spawnDistance : undefined);
       return new EnemyAI(this, f, this.player, this.training);
     });
+    if (this.gungame) this.player.setWeapon(this.levelWeapon(this.player));   // the bots already took theirs when they spawned
     this.enemy = this.bots[0].f;
     const look = this.multi ? { x: 0, z: 0 } : this.enemy.pos;   // online: face the middle of the map
     this.player.yaw = Math.atan2(look.x - this.player.pos.x, look.z - this.player.pos.z);
@@ -138,7 +140,7 @@ export class Game {
     this.duration = this.training ? 0 : opts.duration ?? 0;   // seconds, 0 = unlimited
     this.timeLeft = this.duration;
 
-    this.hud.setup(playerDef, this.training ? [enemyDef] : defs);
+    this.hud.setup(playerDef, this.training ? [enemyDef] : defs, this.gungame);
     this.hud.setScore(0, 0);
     this.hud.setTimer(this.training ? null : this.duration, this.timeLeft);
     this.hud.setDoomFlash(0);
@@ -306,15 +308,27 @@ export class Game {
     if (this.doom.done) this.finish();
   }
 
-  // Time is up: freeze the match and show who won
-  finish() {
+  // Gun Game: the weapon a fighter holds at its current level
+  levelWeapon(f) { return GUNGAME.order[f.level]; }
+
+  // Gun Game: a kill gives the next weapon, and a kill with the last one wins the match
+  levelUp(killer) {
+    if (killer.level === GUNGAME.order.length - 1) return this.finish(killer);
+    killer.level++;
+    const id = this.levelWeapon(killer);
+    if (killer.isPlayer) this.controls.switchWeapon(id);
+    else killer.setWeapon(id);
+  }
+
+  // Time is up or Gun Game was won: freeze the match and show who won
+  finish(winner = null) {
     this.state = 'over';
     this.controls.setScope(false);
     this.controls.mouseDown = false;
     this.hud.toast('', 0);
     this.doom?.fadeOut();
     const { player, enemy } = this.scores;
-    const result = player > enemy ? 'win' : player < enemy ? 'lose' : 'draw';
+    const result = winner ? (winner.isPlayer ? 'win' : 'lose') : player > enemy ? 'win' : player < enemy ? 'lose' : 'draw';
     this.hud.showResult(result, player, enemy, [this.player, ...this.bots.map(b => b.f)]);
     if (result === 'win') sfx.win(); else if (result === 'lose') sfx.lose(); else sfx.beep(true);
     document.exitPointerLock?.();
@@ -351,6 +365,7 @@ export class Game {
     const other = f.isPlayer ? this.enemy : this.player;
     this.place(f, other);
     f.invuln = MATCH.spawnProtection;
+    if (this.gungame) f.setWeapon(this.levelWeapon(f));   // a kill made while dead only changes the weapon now
     if (!f.isPlayer) this.bots.find(b => b.f === f)?.onRespawn();
   }
 
@@ -377,13 +392,17 @@ export class Game {
     const pellets = w.pellets ?? 1;
     const side = new THREE.Vector3(-dir.z, 0, dir.x).normalize();
     const up = new THREE.Vector3().crossVectors(dir, side).normalize();
+    // The player's camera sits behind the character, so a ray measures from farther than a bot's does: shrink the
+    // pellet cone and the range counted for falloff by that gap, so both aim and hurt the same at the same distance
+    const back = muzzle.clone().sub(origin).dot(dir);
+    const spreadK = pellets > 1 ? this.coneScale(objects, origin, dir, back) : 1;
 
     const hits = new Map();   // target -> { damage, headshot }
     const ends = [];
     for (let i = 0; i < pellets; i++) {
       const d = dir.clone();
       if (pellets > 1) {
-        const a = Math.random() * Math.PI * 2, r = Math.sqrt(Math.random()) * w.pelletSpread;
+        const a = Math.random() * Math.PI * 2, r = Math.sqrt(Math.random()) * w.pelletSpread * spreadK;
         d.addScaledVector(side, Math.cos(a) * r).addScaledVector(up, Math.sin(a) * r).normalize();
       }
       this.raycaster.set(origin, d);
@@ -401,13 +420,21 @@ export class Game {
       this.effects.impact(hit.point, head ? 0xff6a8a : 0xffffff);
       const rec = hits.get(target) ?? { damage: 0, headshot: false };
       rec.headshot ||= head;
-      rec.damage += w.damage * (head ? w.headMult : 1) * this.falloff(w, hit.distance);
+      rec.damage += w.damage * (head ? w.headMult : 1) * this.falloff(w, hit.distance - back);
       hits.set(target, rec);
     }
 
     this.shotEffects(shooter, w, muzzle, ends);
     this.sendShot(shooter, w, muzzle, ends);
     for (const [target, { damage, headshot }] of hits) this.damage(shooter, target, damage, headshot);
+  }
+
+  // Share of the pellet cone that is left when it starts `back` meters ahead of the ray origin instead of at it
+  coneScale(objects, origin, dir, back) {
+    this.raycaster.set(origin, dir);
+    this.raycaster.far = FAR;
+    const reach = this.raycaster.intersectObjects(objects, false)[0]?.distance ?? FAR;
+    return Math.max(0, reach - back) / reach;
   }
 
   // Melee: hits every opponent in front of the fighter (a wide cone, not the crosshair: the camera is behind the
@@ -510,6 +537,8 @@ export class Game {
     this.hud.killFeed(killer.def, killer.weaponId, victim.def);
     if (killer.isPlayer) this.scores.player++; else this.scores.enemy++;
     this.hud.setScore(this.scores.player, this.scores.enemy);
+    if (this.gungame) this.levelUp(killer);
+    if (this.state === 'over') return;   // that kill won the match: the result screen plays its own sound
 
     if (victim.isPlayer) {
       this.controls.setScope(false);

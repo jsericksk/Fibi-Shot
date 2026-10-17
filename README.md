@@ -28,6 +28,9 @@ An internet connection is needed (three.js and PeerJS are loaded from a CDN).
   every player's kills, deaths, accuracy, headshots and damage dealt.
 - **1v2:** the same, against two bots at once. Tap the **+** slot next to the enemy to add a second one
   and pick who it is (the **✕** removes it).
+- **Gun Game:** pick it in the match length dialog of a 1v1 or 1v2 (no timer). Everyone starts with the pistol and each
+  kill gives the next weapon (pistol, AK-47, shotgun, AWP, bazooka, sword). Whoever kills with the sword wins. Dying
+  does not cost a level, and weapons cannot be switched by hand.
 - **Training:** every character walks around the map, jumps and dances. Infinite ammo and no deaths, and every
   hit shows its damage as a floating number, so it is a good place to try things out.
 - **Multiplayer:** a 1v1 against a friend over the network.

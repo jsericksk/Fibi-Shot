@@ -117,8 +117,9 @@ export class EnemyAI {
 
   // Chest if visible, else head or its top (low cover can hide the lower body); null when fully hidden
   visibleTargetPoint() {
-    const from = this.f.chestPos(), t = this.target;
-    return [t.chestPos(), t.headPos(), t.headTopPos()].find(p => this.game.hasLineOfSight(from, p)) ?? null;
+    const from = this.f.chestPos(), t = this.target, chest = t.chestPos();
+    if (this.game.hasLineOfSight(from, chest)) return chest.setY(chest.y - ENEMY.aimLower);   // aims for the middle of the body
+    return [t.headPos(), t.headTopPos()].find(p => this.game.hasLineOfSight(from, p)) ?? null;
   }
 
   // True when the bot got hurt or the player is aiming (scoped) at it in plain sight
@@ -262,6 +263,7 @@ export class EnemyAI {
 
   // Random weapon, but when the player holds the AWP or the sword the bot likes to answer with the same
   pickWeapon() {
+    if (this.game.gungame) return this.game.levelWeapon(this.f);
     if (this.countersTarget() && Math.random() < ENEMY.counterChance) return this.target.weaponId;
     return WEAPON_ORDER[randInt(0, WEAPON_ORDER.length - 1)];
   }
@@ -269,6 +271,12 @@ export class EnemyAI {
   countersTarget() { return ENEMY.counterWeapons.includes(this.target.weaponId); }
 
   handleWeapons(dt) {
+    if (!this.game.gungame) this.chooseWeapon(dt);
+    if (this.f.ammoNow <= 0 && !this.f.reloading) this.f.startReload();
+  }
+
+  // Switches weapons now and then and answers the player's AWP or sword
+  chooseWeapon(dt) {
     const f = this.f;
     this.switchT -= dt;
     if (this.switchT <= 0 && !f.reloading) {
@@ -287,7 +295,6 @@ export class EnemyAI {
       this.burstLeft = 0;
       this.seeCounterT = 0;
     } else if (this.seeCounterT > 1.2) this.seeCounterT = 0;
-    if (f.ammoNow <= 0 && !f.reloading) f.startReload();
   }
 
   fire(dt, dist) {

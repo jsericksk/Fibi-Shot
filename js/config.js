@@ -13,6 +13,11 @@ export const MATCH = {
   timedSeconds: [180, 300],   // lengths of the timed matches (the other option is unlimited)
 };
 
+// ---- Gun Game (a duel mode picked in the match length dialog) --------------------
+export const GUNGAME = {
+  order: ['pistol', 'ak47', 'shotgun', 'awp', 'bazooka', 'sword'],   // each kill moves to the next weapon; a kill with the last one wins
+};
+
 // ---- Health flasks (two per map, see `health` in maps.js) --------------------------
 export const HEALTH_FLASK = {
   respawnSeconds: 25,         // a taken flask comes back after this long
@@ -174,6 +179,7 @@ export const ENEMY = {
   healBelow: 0.5,             // goes for a health flask when its health drops under this share
   healSeekRange: 35,          // ...if one is within this many meters
   mirrorMinSpeed: 1.2,        // m/s the player must slide across the bot's line of sight to count as a side
+  aimLower: 0.2,              // meters below the chest the bot aims, so its scatter does not turn into headshots (the head box starts just above the chest)
   aimError: { pistol: 0.04, ak47: 0.055, awp: 0.04, shotgun: 0.032, bazooka: 0.03, sword: 0.02 },     // radians, lower is more accurate
   fireRange: { pistol: 26, ak47: 34, awp: 70, shotgun: 14, bazooka: 45, sword: 2.6 },          // meters
   closeRange: { shotgun: [3, 9], sword: [0.5, 2.2] },   // weapons the bot wants to use up close: backs off under the first number, chases past the second

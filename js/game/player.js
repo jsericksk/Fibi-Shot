@@ -154,9 +154,9 @@ export class PlayerControls {
     if (this.game.canAct && !this.f.dead && !this.f.emote) this.startEmote();
   }
 
-  // Weapons can be changed freely during the countdown too
+  // Weapons can be changed freely during the countdown too (not in Gun Game)
   pickWeapon(id) {
-    if (this.game.canSwitch && !this.f.dead) this.switchWeapon(id);
+    if (this.game.canSwitch && !this.f.dead && !this.game.gungame) this.switchWeapon(id);   // Gun Game hands the weapons out
   }
 
   // Moves to the weapon on the right (step 1) or on the left (-1) in the weapon order; nothing at the ends

@@ -6,11 +6,12 @@ import { formatTime } from '../utils.js';
 const $ = id => document.getElementById(id);
 
 // Asks for the match length in a dialog with one square per option: unlimited or timed.
-// Calls onPick(seconds) with 0 for unlimited. A click outside the box cancels.
+// Calls onPick(seconds, gungame) with 0 seconds for unlimited; the last square is Gun Game (never timed). A click outside the box cancels.
 export function askMatchDuration(onPick) {
   const options = [
     { seconds: 0, big: '∞', label: t('matchDialog.unlimited') },
     ...MATCH.timedSeconds.map(seconds => ({ seconds, big: formatTime(seconds), label: t('matchDialog.timed', { min: seconds / 60 }) })),
+    { seconds: 0, gungame: true, big: 'GG', label: t('matchDialog.gungame') },
   ];
   const dialog = $('match-dialog');
   $('match-options').innerHTML = options.map((o, i) => `
@@ -23,6 +24,6 @@ export function askMatchDuration(onPick) {
     if (!btn && e.target !== dialog) return;
     dialog.classList.add('hidden');
     sfx.click();
-    if (btn) onPick(options[btn.dataset.i].seconds);
+    if (btn) onPick(options[btn.dataset.i].seconds, !!options[btn.dataset.i].gungame);
   };
 }
