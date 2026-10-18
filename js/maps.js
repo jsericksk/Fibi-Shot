@@ -562,7 +562,7 @@ export const MAPS = {
       tree: { color: 0x6b4a2b, trim: null, crown: 0x3f9a3a },
     },
     lights: null,
-    health: [14, 14],
+    health: [17, 11],
     quarter: [
       [9, 8, 6, 6, 5, 'building'],
       [22, 7, 4.4, 2, 1.5, 'car'],

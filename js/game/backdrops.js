@@ -149,6 +149,12 @@ function addPalm(scene, x, z, k = 1) {
   add(scene, sphere, M(0x3f9a45), [x, 7.5 * k, z], [3 * k, 1.2 * k, 3 * k]);
 }
 
+// Round-crowned tree, k scales it
+function addTree(scene, x, z, k) {
+  add(scene, cyl, M(0x6b4a2b), [x, 1.5 * k, z], [0.6 * k, 3 * k, 0.6 * k]);
+  add(scene, sphere, M(0x2f8a3a), [x, 5 * k, z], [2.6 * k, 2.8 * k, 2.6 * k]);
+}
+
 // Sandstone pyramids and low dunes around the oasis, with a few palms beyond the walls
 function addDesert(scene, half) {
   addGround(scene, 0xdcb878);
@@ -231,9 +237,8 @@ function addCastle(scene, half) {
     addHill(scene, [x, z, rand(45, 80), rand(14, 34), rand(40, 70)], 0x3f8a3a);
   }
   for (let i = 0; i < 26; i++) {
-    const [x, z] = ringPoint(half + 8, half + 70), k = rand(0.9, 1.5);
-    add(scene, cyl, M(0x6b4a2b), [x, 1.5 * k, z], [0.6 * k, 3 * k, 0.6 * k]);
-    add(scene, sphere, M(0x2f8a3a), [x, 5 * k, z], [2.6 * k, 2.8 * k, 2.6 * k]);
+    const [x, z] = ringPoint(half + 8, half + 70);
+    addTree(scene, x, z, rand(0.9, 1.5));
   }
 }
 
@@ -279,23 +284,29 @@ function windowTexture(base, lit) {
   return tex;
 }
 
-// A ring of towers around the map
-function addTowers(scene, half, { count, hMin, hMax, tint, tex }) {
+// Boxes with a window grid scattered in a ring around the map (instanced: one draw call)
+function addBuildings(scene, half, { count, near, far, wMin, wMax, hMin, hMax, tint, tex }) {
   const material = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.9 });
-  const towers = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), material, count);
+  const buildings = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), material, count);
   const m = new THREE.Matrix4(), color = new THREE.Color();
   for (let i = 0; i < count; i++) {
-    const [x, z] = ringPoint(half + 40, half + 170), w = rand(14, 28), d = rand(14, 28), h = rand(hMin, hMax);
-    towers.setMatrixAt(i, m.makeScale(w, h, d).setPosition(x, h / 2, z));
-    towers.setColorAt(i, color.set(tint[Math.floor(rand(0, tint.length))]));
+    const [x, z] = ringPoint(half + near, half + far), w = rand(wMin, wMax), d = rand(wMin, wMax), h = rand(hMin, hMax);
+    buildings.setMatrixAt(i, m.makeScale(w, h, d).setPosition(x, h / 2, z));
+    buildings.setColorAt(i, color.set(tint[Math.floor(rand(0, tint.length))]));
   }
-  scene.add(towers);
+  scene.add(buildings);
 }
 
-// Daytime downtown: glass and concrete towers all around
+// Daytime city: a few far towers, small shops and houses closer in, and trees along the street
 function addCity(scene, half) {
   addGround(scene, 0x56595e);
-  addTowers(scene, half, { count: 70, hMin: 30, hMax: 110, tint: [0xffffff, 0xe9e4d8, 0xcfd8e0, 0xe6d3c0], tex: windowTexture('#8aa4bd', ['#cfe4f5', '#e8f2fa']) });
+  const tex = windowTexture('#8aa4bd', ['#cfe4f5', '#e8f2fa']);
+  addBuildings(scene, half, { count: 22, near: 70, far: 170, wMin: 14, wMax: 28, hMin: 30, hMax: 100, tint: [0xffffff, 0xe9e4d8, 0xcfd8e0, 0xe6d3c0], tex });
+  addBuildings(scene, half, { count: 12, near: 14, far: 60, wMin: 8, wMax: 14, hMin: 5, hMax: 12, tint: [0xf0e4cc, 0xe8c9a8, 0xd9d4c8, 0xc9d8c4], tex });
+  for (let i = 0; i < 24; i++) {
+    const [x, z] = ringPoint(half + 6, half + 40);
+    addTree(scene, x, z, rand(0.9, 1.4));
+  }
 }
 
 // Amusement park: a ferris wheel and a row of coaster arches far ahead (-Z), striped circus tents around
