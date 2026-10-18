@@ -70,6 +70,22 @@ export const CAMERA = {
   orbitDistance: 3.4,         // Alt-look camera distance
 };
 
+// ---- CPU vs CPU spectator camera ---------------------------------------------
+export const SPECTATOR = {
+  startHeight: 38,            // meters above the ground
+  heightRange: [6, 90],
+  startPitch: -0.95,          // radians, looking down
+  pitchRange: [-1.5, -0.1],
+  moveSpeed: 1.4,             // meters per second for each meter of height, so the pan feels the same zoomed in or out
+  riseSpeed: 20,              // Space / Shift or Q / E
+  wheelStep: 0.002,           // height change per wheel unit, for each meter of height
+  pinchStep: 0.005,           // height change per pixel of finger distance
+  dragStep: 0.004,            // meters the map moves per pixel dragged, for each meter of height
+  gestureLockPx: 14,          // two fingers must move this far before the app decides if it is a zoom, turn or tilt
+  tiltStep: 0.005,            // radians the view tilts per pixel two fingers slide
+  fogScale: 2.5,              // the map fog would hide the arena from up here
+};
+
 // ---- Player ----------------------------------------------------------------
 export const PLAYER = {
   sensitivity: 0.0022,

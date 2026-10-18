@@ -63,7 +63,7 @@ export class Rockets {
   muzzleEffects(shooter, w, muzzle) {
     const { game } = this;
     game.effects.flash(muzzle, 0.4);
-    sfx.shot(w.id, shooter.isPlayer ? 1 : Math.max(0.3, 1 - game.player.pos.distanceTo(shooter.pos) / 60));
+    sfx.shot(w.id, game.isViewer(shooter) ? 1 : Math.max(0.3, 1 - game.listener.distanceTo(shooter.pos) / 60));
   }
 
   // pos is where it really flies; the mesh is drawn `offset` away from it at first

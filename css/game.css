@@ -101,6 +101,9 @@
 /* Gun Game hands the weapons out (no weapon button) and is won by levels, so the kill score is hidden */
 .gungame #t-weapon, .gungame #weapon-menu, .gungame #score { display: none; }
 
+/* CPU vs CPU: no weapons or crosshair, just the camera */
+.spectating #crosshair, .spectating #weapon-panel, .spectating #weapon-flash { display: none; }
+
 /* weapon icon shown after switching */
 #weapon-flash { display: none; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); flex-direction: column; align-items: center; gap: 2px; pointer-events: none; font-weight: 900; text-shadow: 0 2px 0 #000; animation: flash-in .15s ease-out; }
 #weapon-flash svg { width: 130px; fill: #fff; filter: drop-shadow(0 0 6px rgba(224, 24, 45, .8)); }

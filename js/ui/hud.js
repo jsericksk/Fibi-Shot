@@ -40,6 +40,7 @@ let bannerTimer, hitTimer, toastTimer, flashTimer, lastKey = '';
 let hasSecond = false;   // the second enemy plate is in use (1v2)
 let names = [];          // player and enemy names, which get the Gun Game level added
 let gungame = false;
+let spectating = false;   // CPU vs CPU: no player to show ammo for
 
 // Simple white weapon silhouettes (viewBox 0 0 120 44)
 const ICONS = {
@@ -122,6 +123,7 @@ export const hud = {
     bar(el.pHp, el.pHpNum, player);
     bar(el.eHp, el.eHpNum, enemies[0]);
     if (hasSecond) bar(el.e2Hp, el.e2HpNum, enemies[1]);
+    if (spectating) return;   // the first fighter is a bot here: its ammo and reload are not for the screen
 
     // Reload icon in the middle of the screen with a progress ring
     const w = player.weapon;
@@ -156,8 +158,8 @@ export const hud = {
   },
 
   // fighters: the player first, then every opponent. Shows each one's stats side by side.
-  showResult(result, player, enemy, fighters) {
-    el.resultTitle.textContent = t('result.' + result);
+  showResult(title, player, enemy, fighters) {
+    el.resultTitle.textContent = title;
     el.resultScore.textContent = `${player} × ${enemy}`;
     el.resultStats.innerHTML = statsTable(fighters);
     el.result.style.display = 'flex';
@@ -229,6 +231,13 @@ export const hud = {
     el.changePanel.style.display = on ? 'flex' : 'none';
     el.changePickers.classList.remove('open');
     showToggles();   // the language may have changed since the last match
+  },
+
+  // CPU vs CPU: nobody plays, so everything about aiming and weapons goes away
+  setSpectating(on) {
+    spectating = on;
+    document.body.classList.toggle('spectating', on);
+    if (on) el.reloadIcon.style.display = 'none';   // an inline style, so CSS cannot hide it
   },
 
   // Character pickers of the training pause menu. fn(side, id) is called on a pick.

@@ -71,7 +71,6 @@ export function initSelect({ onStart, onMultiplayer }) {
     $('btn-add-enemy').classList.toggle('hidden', two);
     $('btn-add-enemy').title = t('addEnemy');
     $('play-title').textContent = t(two ? 'mode.duel2' : 'mode.duel');
-    $('play-desc').textContent = t(two ? 'mode.duel2.desc' : 'mode.duel.desc');
   }
 
   // The second enemy starts as the first character that is neither you nor the first enemy
@@ -98,6 +97,7 @@ export function initSelect({ onStart, onMultiplayer }) {
   };
   $('btn-start').onclick = () => { sfx.unlock(); sfx.click(); askMatchDuration((seconds, gungame) => begin('duel', seconds, gungame), { gungame: true }); };
   $('btn-train').onclick = () => { sfx.unlock(); sfx.click(); begin('training'); };
+  $('btn-cpu').onclick = () => { sfx.unlock(); sfx.click(); askMatchDuration((seconds, gungame) => begin('cpu', seconds, gungame), { gungame: true, unlimited: false }); };
   $('btn-multi').onclick = () => { sfx.unlock(); sfx.click(); onMultiplayer(); };
   document.querySelectorAll('.fighter').forEach(f => {
     f.onclick = () => { if (state.picking !== f.dataset.side) { state.picking = f.dataset.side; sfx.click(); markRoster(); } };

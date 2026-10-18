@@ -2,13 +2,14 @@ import * as THREE from 'three';
 import { buildArena, floorHeight } from './arena.js';
 import { MAPS, MAP_LIST } from '../maps.js';
 import { getCharacter, CHARACTERS } from '../characters/index.js';
-import { MATCH, GUNGAME, WORLD, CAMERA, EMOTE, EMOTES, SHOWCASE, TRAINING, NET, DOOMSDAY } from '../config.js';
+import { MATCH, GUNGAME, WORLD, CAMERA, EMOTE, EMOTES, SHOWCASE, TRAINING, NET, DOOMSDAY, SPECTATOR } from '../config.js';
 import { Effects } from './effects.js';
 import { Rockets } from './rockets.js';
 import { HealthFlasks } from './pickups.js';
 import { Doomsday } from './doomsday.js';
 import { Fighter, randomDeathPose } from './fighter.js';
 import { PlayerControls } from './player.js';
+import { SpectatorControls } from './spectator.js';
 import { EnemyAI } from './enemy.js';
 import { RemotePlayer } from './remote.js';
 import { WEAPONS } from './weapons.js';
@@ -58,6 +59,12 @@ export class Game {
 
   get canAct() { return this.state === 'playing' && !this.paused; }
   get canSwitch() { return this.active && this.state !== 'idle' && this.state !== 'over' && !this.paused; }
+  // Everything with a bot brain; in CPU vs CPU that includes the first fighter
+  get brains() { return this.playerBrain ? [this.playerBrain, ...this.bots] : this.bots; }
+  // Where sounds are heard from: the free camera when watching, else the player
+  get listener() { return this.cpu ? this.camera.position : this.player.pos; }
+  // True for the fighter the person at the screen plays (nobody when watching two bots)
+  isViewer(f) { return f.isPlayer && !this.cpu; }
 
   resize() {
     this.renderer.setSize(innerWidth, innerHeight);
@@ -87,20 +94,21 @@ export class Game {
     this.hud.showPause(true);
   }
 
-  // mode: 'duel' (vs bot) | 'training' (showcase) | 'multi' (vs a friend over the network, opts.role = host | guest)
+  // mode: 'duel' (vs bot) | 'training' (showcase) | 'cpu' (two bots fight, you fly a camera over them) | 'multi' (vs a friend over the network, opts.role = host | guest)
   start(playerDef, enemyDef, mode = 'duel', mapId = MAP_LIST[0].id, opts = {}) {
     this.cleanup();
     this.setup = { mode, mapId, opts };   // to play the same match again
     this.training = mode === 'training';
     this.multi = mode === 'multi';
-    this.gungame = mode === 'duel' && !!opts.gungame;
+    this.cpu = mode === 'cpu';
+    this.gungame = (mode === 'duel' || this.cpu) && !!opts.gungame;
     const map = this.map = MAPS[mapId] ?? MAP_LIST[0];
     this.playerDef = playerDef;
     this.enemyDef = enemyDef;
 
     const scene = this.scene = new THREE.Scene();
     scene.background = new THREE.Color(map.sky);
-    scene.fog = new THREE.Fog(map.sky, ...map.fog);
+    scene.fog = new THREE.Fog(map.sky, ...map.fog.map(d => d * (this.cpu ? SPECTATOR.fogScale : 1)));
     scene.add(new THREE.HemisphereLight(...map.hemi));
     const sun = new THREE.DirectionalLight(map.sun.color, map.sun.intensity);
     sun.position.set(...map.sun.pos);
@@ -139,7 +147,9 @@ export class Game {
     const look = this.multi ? { x: 0, z: 0 } : this.enemy.pos;   // online: face the middle of the map
     this.player.yaw = Math.atan2(look.x - this.player.pos.x, look.z - this.player.pos.z);
 
-    this.controls = new PlayerControls(this, this.player);
+    // The first fighter plays on its own too: its brain hunts the first bot, which hunts it back
+    this.playerBrain = this.cpu ? new EnemyAI(this, this.player, this.enemy) : null;
+    this.controls = this.cpu ? new SpectatorControls(this) : new PlayerControls(this, this.player);
     this.scores = { player: 0, enemy: 0 };
     this.duration = this.training ? 0 : opts.duration ?? 0;   // seconds, 0 = unlimited
     this.timeLeft = this.duration;
@@ -155,6 +165,7 @@ export class Game {
     this.botEmotes = new Map();
     sfx.preload(Object.values(EMOTES).flat().map(e => e.sound));
     this.hud.setTraining(this.training);
+    this.hud.setSpectating(this.cpu);
     this.hud.setupChange(playerDef, this.training ? null : enemyDef, (side, id) => this.changeCharacter(side, id));
 
     if (this.multi) {
@@ -197,7 +208,7 @@ export class Game {
     for (const f of fighters) if (!f.remote) f.updateVertical(dt, this.arena.colliders, WORLD.gravity);
     this.controls.update(dt, canAct);
     this.doom?.shake(this.camera);
-    this.bots.forEach(b => b.update(dt, canAct));
+    this.brains.forEach(b => b.update(dt, canAct));
     for (const f of fighters) {
       f.update(dt);
       if (!f.remote) {   // the friend's position comes from the network
@@ -276,7 +287,7 @@ export class Game {
 
   // Volume of another character's emote sound by distance to the player
   emoteVolume(f) {
-    const k = Math.max(0, 1 - this.player.pos.distanceTo(f.pos) / EMOTE.hearRange);
+    const k = Math.max(0, 1 - this.listener.distanceTo(f.pos) / EMOTE.hearRange);
     return EMOTE.volume * k * k;
   }
 
@@ -320,7 +331,7 @@ export class Game {
     if (killer.level === GUNGAME.order.length - 1) return this.finish(killer);
     killer.level++;
     const id = this.levelWeapon(killer);
-    if (killer.isPlayer) this.controls.switchWeapon(id);
+    if (this.isViewer(killer)) this.controls.switchWeapon(id);
     else killer.setWeapon(id);
   }
 
@@ -333,9 +344,16 @@ export class Game {
     this.doom?.fadeOut();
     const { player, enemy } = this.scores;
     const result = winner ? (winner.isPlayer ? 'win' : 'lose') : player > enemy ? 'win' : player < enemy ? 'lose' : 'draw';
-    this.hud.showResult(result, player, enemy, [this.player, ...this.bots.map(b => b.f)]);
-    if (result === 'win') sfx.win(); else if (result === 'lose') sfx.lose(); else sfx.beep(true);
+    this.hud.showResult(this.resultTitle(result), player, enemy, [this.player, ...this.bots.map(b => b.f)]);
+    if (this.cpu || result === 'draw') sfx.beep(true);   // nobody here to cheer for
+    else if (result === 'win') sfx.win(); else sfx.lose();
     document.exitPointerLock?.();
+  }
+
+  // Watching two bots there is no victory or defeat: the title names the winner
+  resultTitle(result) {
+    if (!this.cpu || result === 'draw') return t('result.' + result);
+    return t('result.cpuWin', { name: (result === 'win' ? this.playerDef : this.enemyDef).name });
   }
 
   // Random free spot far from `other`, preferring places out of its line of sight.
@@ -370,7 +388,7 @@ export class Game {
     this.place(f, other);
     f.invuln = MATCH.spawnProtection;
     if (this.gungame) f.setWeapon(this.levelWeapon(f));   // a kill made while dead only changes the weapon now
-    if (!f.isPlayer) this.bots.find(b => b.f === f)?.onRespawn();
+    this.brains.find(b => b.f === f)?.onRespawn();
   }
 
   // True when no cover is between two points
@@ -494,15 +512,17 @@ export class Game {
       return;
     }
     const died = target.takeDamage(damage);
-    if (shooter.isPlayer) { this.hud.hitMarker(headshot, died); sfx.hit(headshot); if (died && headshot) sfx.headshotKill(); }
-    else { this.hud.damageFlash(); sfx.hurt(); }
+    if (!this.cpu) {   // when watching, nobody is the viewer: no hit markers or hurt flashes
+      if (shooter.isPlayer) { this.hud.hitMarker(headshot, died); sfx.hit(headshot); if (died && headshot) sfx.headshotKill(); }
+      else { this.hud.damageFlash(); sfx.hurt(); }
+    }
     if (died) this.onKill(shooter, target);
   }
 
   // Tracers, muzzle flash and gun sound of a shot (ours or the friend's)
   shotEffects(shooter, w, muzzle, ends) {
-    const away = this.player.pos.distanceTo(shooter.pos);
-    sfx.shot(w.id, shooter.isPlayer ? 1 : Math.max(0.3, 1 - away / 60));
+    const away = this.listener.distanceTo(shooter.pos);
+    sfx.shot(w.id, this.isViewer(shooter) ? 1 : Math.max(0.3, 1 - away / 60));
     if (w.melee) return shooter.startSwing();
     const awp = w.id === 'awp', pellets = w.pellets ?? 1;
     const color = shooter.isPlayer ? 0xfff1a8 : 0xff9aa8;
@@ -544,7 +564,9 @@ export class Game {
     if (this.gungame) this.levelUp(killer);
     if (this.state === 'over') return;   // that kill won the match: the result screen plays its own sound
 
-    if (victim.isPlayer) {
+    if (this.cpu) {
+      this.brains.find(b => b.f === killer)?.taunt();
+    } else if (victim.isPlayer) {
       this.controls.setScope(false);
       this.controls.mouseDown = false;
       if (!this.multi) this.bots.find(b => b.f === killer)?.taunt();
@@ -582,12 +604,12 @@ export class Game {
     sfx.stopAll(0);
     cancelAnimationFrame(this.raf);
     this.controls?.dispose();
-    this.bots?.forEach(b => b.dispose());
+    this.brains?.forEach(b => b.dispose());
     this.scene?.traverse(o => {
       o.geometry?.dispose?.();
       if (o.material?.map) o.material.map.dispose();
     });
-    this.controls = this.bots = this.scene = this.doom = null;
+    this.controls = this.bots = this.playerBrain = this.scene = this.doom = null;
     this.state = 'idle';
   }
 }

@@ -62,3 +62,6 @@
 #hud-bar button { border: 2px solid #fff; border-radius: 10px; background: transparent; color: #fff; font-weight: 800; font-size: 12px; padding: 4px 12px; }
 #hud-bar #hud-done { background: var(--accent); border-color: var(--accent); }
 #hud-hint { position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%); margin: 0; width: max-content; max-width: 90vw; text-align: center; font-size: 12px; font-weight: 800; opacity: .85; text-shadow: 0 2px 0 #000; }
+
+/* CPU vs CPU: only pinch zoom is left */
+.spectating #joy-zone, .spectating #joystick, .spectating #t-fire, .spectating #t-jump, .spectating #t-slide, .spectating #t-scope, .spectating #t-reload, .spectating #t-emote, .spectating #t-weapon, .spectating #weapon-menu { display: none; }

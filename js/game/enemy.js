@@ -273,7 +273,8 @@ export class EnemyAI {
     return WEAPON_ORDER[randInt(0, WEAPON_ORDER.length - 1)];
   }
 
-  countersTarget() { return ENEMY.counterWeapons.includes(this.target.weaponId); }
+  // Bots would answer each other's sword or AWP forever, so they only counter a human
+  countersTarget() { return !this.game.cpu && ENEMY.counterWeapons.includes(this.target.weaponId); }
 
   handleWeapons(dt) {
     if (!this.game.gungame) this.chooseWeapon(dt);

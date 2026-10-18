@@ -42,7 +42,7 @@ export class HealthFlasks {
       this.take(i);
       taker.heal();
       if (taker.isPlayer) {
-        sfx.heal();
+        if (this.game.isViewer(taker)) sfx.heal();
         if (this.game.multi) net.send({ t: 'flask', i });   // the friend's copy of the flask disappears too
       }
     });
