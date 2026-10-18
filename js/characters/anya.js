@@ -14,13 +14,14 @@ const C = {
 // Dress and trim colors of each look
 const LOOKS = {
   default: { dress: 0x2e2622, gold: 0xe0b040 },
+  brasil: { dress: 0xffdc2e, gold: 0x009c3b },
   navy: { dress: 0x26325e, gold: 0xc9d2e0 },
   wine: { dress: 0x6e1f33, gold: 0xe8c9a0 },
 };
 
 // Little girl from Spy x Family: short pink hair with an ahoge and two black horn hairpieces, green eyes,
 // a black dress with a gold hem, a red ribbon, white knee socks.
-// Skins: { look: 'navy' | 'wine' } recolors the dress
+// Skins: { look: 'navy' | 'wine' | 'brasil' } recolors the dress
 export function buildAnya({ look = 'default' } = {}) {
   const L = LOOKS[look];
   const rig = createRig();

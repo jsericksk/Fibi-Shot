@@ -7,6 +7,7 @@ const C = { skin: 0xffe3d2, hair: 0xf6e7ae };
 // Outfit colors of each look: coat (also the hat and the first sock stripe), trim, gloves and shoes, tie and clip, hat band and bow
 const LOOKS = {
   default: { coat: 0xfbfbff, trim: 0x25222e, gloves: 0x25222e, shoes: 0x25222e, stripe: 0x25222e, pom: 0xfbfbff, tie: 0x2f9be0, clip: 0x1f6fb0, band: 0x7b5fd0, bowTie: 0x9a84f0 },
+  brasil: { coat: 0xffdc2e, trim: 0x009c3b, gloves: 0x009c3b, shoes: 0x009c3b, stripe: 0x009c3b, pom: 0x002776, tie: 0x002776, clip: 0x009c3b, band: 0x009c3b, bowTie: 0xffdc2e },
   noir: { coat: 0x24202a, trim: 0xe0182d, gloves: 0x15121a, shoes: 0x15121a, stripe: 0xe0182d, pom: 0xe0182d, tie: 0xe0182d, clip: 0xa01020, band: 0xe0182d, bowTie: 0xff6a78 },
 };
 
@@ -20,7 +21,7 @@ const HAIR_SWEEP = 0.6;   // how far back the hair below the ears leans per unit
 const BRIM = 1.02;   // radius of the hat brim (the dome and band keep their size)
 
 // Blonde girl with a wide white hat, blue tie and striped socks.
-// Skins: { hat: false } leaves the hat off, { look: 'noir' } is the black and red outfit
+// Skins: { hat: false } leaves the hat off, { look: 'noir' } is the black and red outfit, { look: 'brasil' } the Brazil jersey colors
 export function buildFibi({ hat: withHat = true, look = 'default' } = {}) {
   const L = LOOKS[look];
   const rig = createRig();

@@ -13,8 +13,9 @@ const C = {
 
 // Outfit colors: the raglan sleeves, collar and shoes, and the shorts. The fibi look uses Fibi's blue and black
 const LOOKS = {
-  default: { salmon: 0xe58a86, shorts: 0xd4a22e, shortsDark: 0xb98a22 },
-  fibi: { salmon: 0x2f9be0, shorts: 0x25222e, shortsDark: 0x15121a },
+  default: { tee: 0xffffff, salmon: 0xe58a86, shorts: 0xd4a22e, shortsDark: 0xb98a22 },
+  fibi: { tee: 0xffffff, salmon: 0x2f9be0, shorts: 0x25222e, shortsDark: 0x15121a },
+  brasil: { tee: 0xffdc2e, salmon: 0x009c3b, shorts: 0x002776, shortsDark: 0x001a52 },
 };
 
 // Fringe lock: a flat, softly pointed cone
@@ -32,7 +33,7 @@ function tuft(parent, pos, rot) {
   }
 }
 
-// Skins: { fibiHat: true } adds Fibi's hat, { look: 'fibi' } wears Fibi's colors.
+// Skins: { fibiHat: true } adds Fibi's hat, { look: 'fibi' } wears Fibi's colors, { look: 'brasil' } the Brazil jersey colors.
 // Cheerful girl with green hair in four spiky tufts, a white tee with salmon sleeves, mustard shorts and salmon shoes
 export function buildYotsuba({ look = 'default', fibiHat = false } = {}) {
   const L = LOOKS[look];
@@ -49,7 +50,7 @@ export function buildYotsuba({ look = 'default', fibiHat = false } = {}) {
   }
 
   // White tee, salmon collar, mustard shorts at the waist
-  add(body, new THREE.CylinderGeometry(0.28, 0.34, 0.5, 32), M(C.white), [0, 0.78, 0]);
+  add(body, new THREE.CylinderGeometry(0.28, 0.34, 0.5, 32), M(L.tee), [0, 0.78, 0]);
   add(body, new THREE.TorusGeometry(0.2, 0.04, 10, 32), M(L.salmon), [0, 1.02, 0], [1, 1, 1], [Math.PI / 2, 0, 0]);
   add(body, new THREE.CylinderGeometry(0.34, 0.35, 0.17, 32), M(L.shorts), [0, 0.5, 0]);
   add(body, box, M(L.shortsDark), [0, 0.52, 0.345], [0.015, 0.14, 0.02]);   // fly seam

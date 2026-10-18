@@ -3,7 +3,7 @@ import { M, add, sphere, cyl, box } from '../utils.js';
 import { createRig, addEyes } from './rig.js';
 import { addFibiHat } from './fibi.js';
 
-const C = {
+const BASE = {
   skin: 0xffe3d2,
   hair: 0x8a5a4a,           // chestnut brown
   hairDark: 0x6b4034,
@@ -21,9 +21,16 @@ const C = {
   sock: 0xc9b6e4,
 };
 
+// Outfit colors that change with the look: blouse, corset and ribbons, skirt, tie
+const LOOKS = {
+  default: {},
+  brasil: { white: 0xffdc2e, wine: 0x009c3b, navy: 0x002776, tie: 0x009c3b },
+};
+
 // Horse girl in a sailor-style outfit: chestnut wavy hair, periwinkle beret, amber eyes and a tail.
-// Skin: { fibiHat: true } trades the beret for Fibi's hat
-export function buildMambo({ fibiHat = false } = {}) {
+// Skins: { fibiHat: true } trades the beret for Fibi's hat, { look: 'brasil' } wears the Brazil jersey colors
+export function buildMambo({ fibiHat = false, look = 'default' } = {}) {
+  const C = { ...BASE, ...LOOKS[look] };
   const rig = createRig();
   const { legs, body, arms, head } = rig;
 

@@ -17,12 +17,13 @@ const C = {
 const LOOKS = {
   default: { jacket: 0xf4a6bd, jacketLight: 0xfbd0dc, skirt: 0x4a4a54 },
   black: { jacket: 0x2a2a30, jacketLight: 0x55555f, skirt: 0x1c1c22 },
+  brasil: { jacket: 0xffdc2e, jacketLight: 0x009c3b, skirt: 0x002776 },
   sky: { jacket: 0x7fb4e8, jacketLight: 0xcfe3f8, skirt: 0x4a4a54 },
 };
 
 // Shy guitarist from Bocchi the Rock!: very long pink hair with an ahoge and two cube hairpins (cyan and yellow),
 // blue eyes, a pink track jacket and a pleated gray skirt.
-// Skins: { look: 'black' | 'sky' } recolors the outfit
+// Skins: { look: 'black' | 'sky' | 'brasil' } recolors the outfit
 export function buildBocchi({ look = 'default' } = {}) {
   const L = LOOKS[look];
   const rig = createRig();

@@ -12,14 +12,15 @@ const C = {
 
 // Outfit colors of each look: top, and the trim and tie
 const LOOKS = {
-  default: { white: 0xf7fbfb, teal: 0x2bb5a8 },
-  sakura: { white: 0xfff4f8, teal: 0xf06fa0 },
-  night: { white: 0x4a4f6a, teal: 0x9a6bff },
+  default: { white: 0xf7fbfb, teal: 0x2bb5a8, skirt: 0x2a2c33 },
+  sakura: { white: 0xfff4f8, teal: 0xf06fa0, skirt: 0x2a2c33 },
+  brasil: { white: 0xffdc2e, teal: 0x009c3b, skirt: 0x002776 },
+  night: { white: 0x4a4f6a, teal: 0x9a6bff, skirt: 0x2a2c33 },
 };
 
 // Virtual singer Hatsune Miku: long turquoise twin tails, blue eyes, headphones with a mic, a white top with a teal tie,
 // black detached sleeves, a black skirt and thigh-high boots.
-// Skins: { look: 'sakura' | 'night' } recolors the outfit
+// Skins: { look: 'sakura' | 'night' | 'brasil' } recolors the outfit
 export function buildMiku({ look = 'default' } = {}) {
   const L = LOOKS[look];
   const rig = createRig();
@@ -38,7 +39,7 @@ export function buildMiku({ look = 'default' } = {}) {
   add(body, new THREE.TorusGeometry(0.2, 0.04, 10, 32), M(L.teal), [0, 1.02, 0], [1, 1, 1], [Math.PI / 2, 0, 0]);
   add(body, box, M(L.teal), [0, 0.92, 0.3], [0.07, 0.08, 0.04]);
   add(body, new THREE.ConeGeometry(0.07, 0.3, 4), M(L.teal), [0, 0.74, 0.31], [1, 1, 0.3], [Math.PI, 0, 0]);
-  add(body, new THREE.CylinderGeometry(0.34, 0.48, 0.28, 32), M(C.black), [0, 0.46, 0]);
+  add(body, new THREE.CylinderGeometry(0.34, 0.48, 0.28, 32), M(L.skirt), [0, 0.46, 0]);
   add(body, new THREE.CylinderGeometry(0.48, 0.49, 0.04, 32), M(L.teal), [0, 0.33, 0]);
 
   // Black detached sleeves with teal trim, bare hands

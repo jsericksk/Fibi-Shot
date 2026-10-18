@@ -3,11 +3,18 @@ import { M, add, sphere, cyl, box } from '../utils.js';
 import { createRig, addEyes } from './rig.js';
 import { addFibiOutfit, addFibiHat, addHairMass } from './fibi.js';
 
-const C = { skin: 0xffe3d2, hair: 0x9fb8ae, red: 0xd8483e, cream: 0xfbf3ec, dark: 0x3a3a46, bow: 0xe8584a };
+const BASE = { skin: 0xffe3d2, hair: 0x9fb8ae, red: 0xd8483e, cream: 0xfbf3ec, dark: 0x3a3a46, bow: 0xe8584a };
+
+// Outfit colors that change with the look: robe, sleeves and collar, skirt and socks, bow
+const LOOKS = {
+  default: {},
+  brasil: { red: 0xffdc2e, cream: 0x009c3b, dark: 0x002776, bow: 0x009c3b },
+};
 
 // Sleepy girl with long wavy gray-green hair and a red/white kimono-style outfit.
-// Skins: { fibiOutfit: true } and { fibiHat: true } borrow Fibi's clothes and hat
-export function buildNono({ fibiOutfit = false, fibiHat = false } = {}) {
+// Skins: { fibiOutfit: true } and { fibiHat: true } borrow Fibi's clothes and hat, { look: 'brasil' } wears the Brazil jersey colors
+export function buildNono({ fibiOutfit = false, fibiHat = false, look = 'default' } = {}) {
+  const C = { ...BASE, ...LOOKS[look] };
   const rig = createRig();
   const { legs, body, arms, head } = rig;
 
