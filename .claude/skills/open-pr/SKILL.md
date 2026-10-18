@@ -22,7 +22,9 @@ Use the claude-in-chrome tools (load them with ToolSearch if deferred) against a
 - **Skins:** one grid with every new look, rows of the same character, the normal look first.
 - **Result screen / HUD:** when those changed.
 
-Use `computer` with `action: "screenshot"` and `save_to_disk: true` to get a file path for each one. Keep them to the width of the window; no GIFs.
+Use `computer` with `action: "screenshot"` and `save_to_disk: true` (scale 1) to get a file path for DOM screens like the home. Keep them to the width of the window; no GIFs.
+
+For anything drawn on the game canvas, do not use that screenshot: it is a downscaled JPEG and looks blurry. Render the canvas at 2560x1280 instead (`renderer.setPixelRatio(1)`, `setSize(2560, 1280, false)`, fix the camera aspect), call `canvas.toDataURL('image/png')` right after the render, and save it with a temporary local server that accepts a POST and writes the PNG. Keep that server and the PNGs in the scratchpad, never in the repo, and stop the server afterwards.
 
 How to get an in-game shot: the game has no public instance and background tabs do not animate, so build one by hand in `javascript_tool`. Read `js/main.js` and `js/game/game.js` for how a match is started, stepped and rendered, instead of relying on a remembered snippet. Hide the pause menu before capturing (the lost pointer lock opens it).
 
