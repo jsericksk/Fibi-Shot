@@ -178,8 +178,8 @@ function addDesert(scene, half) {
 // A huge volcano with a glowing crater, jagged black ridges and pools of lava on the dark ground
 function addVolcano(scene, half) {
   addGround(scene, 0x1a1412);
-  add(scene, new THREE.ConeGeometry(1, 1, 24), M(0x2a2220), [-40, 45, -200], [150, 90, 130]);
-  add(scene, new THREE.CylinderGeometry(1, 1, 1, 24), new THREE.MeshBasicMaterial({ color: 0xff7a22 }), [-40, 89, -200], [14, 3, 14]);   // unlit: the crater glows
+  add(scene, new THREE.ConeGeometry(1, 1, 24), M(0x2a2220), [-30, 40, -150], [130, 80, 110]);
+  add(scene, new THREE.CylinderGeometry(1, 1, 1, 24), new THREE.MeshBasicMaterial({ color: 0xff7a22 }), [-30, 79, -150], [12, 3, 12]);   // unlit: the crater glows
   const count = 34, ridges = new THREE.InstancedMesh(new THREE.ConeGeometry(1, 1, 5), M(0xffffff), count);
   const m = new THREE.Matrix4(), color = new THREE.Color();
   for (let i = 0; i < count; i++) {
@@ -199,7 +199,7 @@ function addVolcano(scene, half) {
 
 // Night harbor: dark water all around, cargo ships anchored out in it and a lit lighthouse on the far side (-Z)
 function addDocks(scene) {
-  addGround(scene, 0x10243a);
+  addGround(scene, 0x1d4468);
   for (const [x, z, len, rot] of [[-90, -110, 70, 0.2], [100, -140, 80, -0.15], [-150, 60, 60, Math.PI / 2], [140, 90, 66, Math.PI / 2 + 0.1]]) {
     const ship = new THREE.Group();
     ship.position.set(x, 0, z);
@@ -209,10 +209,10 @@ function addDocks(scene) {
     add(ship, box, M(0xe8e4dc), [-len * 0.35, 9, 0], [12, 8, 11]);
     for (let i = 0; i < 4; i++) add(ship, box, M([0xa83a2a, 0x2a5a96, 0x3a6a46, 0xc99a3a][i]), [-len * 0.1 + i * 9, 8, 0], [7, 4, 9]);
   }
-  add(scene, cyl, M(0xf0ece4), [30, 18, -190], [4, 36, 4]);
-  add(scene, sphere, new THREE.MeshBasicMaterial({ color: 0xffe9a0 }), [30, 38, -190], [3.5, 3.5, 3.5]);   // unlit: the lamp
+  add(scene, cyl, M(0xf0ece4), [30, 18, -150], [4, 36, 4]);
+  add(scene, sphere, new THREE.MeshBasicMaterial({ color: 0xffe9a0 }), [30, 38, -150], [3.5, 3.5, 3.5]);   // unlit: the lamp
   const lamp = new THREE.PointLight(0xffe9a0, 400, 120, 1.6);
-  lamp.position.set(30, 38, -190);
+  lamp.position.set(30, 38, -150);
   scene.add(lamp);
   for (let i = 0; i < 8; i++) {   // low hills of the far coast
     addHill(scene, [rand(-240, 240), -230, rand(40, 80), rand(10, 24), 30], 0x1b2a22);
@@ -224,7 +224,7 @@ function addCastle(scene, half) {
   addGround(scene, 0x5a9a48);
   const stone = M(0xb4aea0), roof = M(0x9a3a2a);
   const keep = new THREE.Group();
-  keep.position.set(-30, 0, -190);
+  keep.position.set(-30, 0, -150);
   keep.scale.setScalar(2);
   scene.add(keep);
   add(keep, box, stone, [0, 10, 0], [30, 20, 12]);
@@ -313,7 +313,7 @@ function addCity(scene, half) {
 function addPark(scene, half) {
   addGround(scene, 0x7ac060);
   const wheel = new THREE.Group();
-  wheel.position.set(-35, 0, -190);
+  wheel.position.set(-35, 0, -150);
   scene.add(wheel);
   const frame = M(0xf6ecd8), colors = [0xff4a6a, 0x2a9ad8, 0xf2c230, 0x5acb6a];
   add(wheel, new THREE.TorusGeometry(40, 1.2, 8, 40), frame, [0, 46, 0], [1, 1, 1]);
@@ -329,7 +329,7 @@ function addPark(scene, half) {
     leg.rotation.z = -side * 0.3;
   }
   for (let i = 0; i < 9; i++) {
-    add(scene, new THREE.TorusGeometry(14, 1.2, 8, 20, Math.PI), M(colors[i % colors.length]), [-100 + i * 24, 0, -150], [1, 1.3, 1]);
+    add(scene, new THREE.TorusGeometry(14, 1.2, 8, 20, Math.PI), M(colors[i % colors.length]), [-100 + i * 24, 0, -120], [1, 1.3, 1]);
   }
   for (let i = 0; i < 9; i++) {
     const [x, z] = ringPoint(half + 20, half + 110), k = rand(0.9, 1.4), color = i % 2 ? 0xff4a6a : 0x2a9ad8;
