@@ -4,6 +4,9 @@ import { buildNono } from './nono.js';
 import { buildDoro } from './doro.js';
 import { buildMambo } from './mambo.js';
 import { buildYotsuba } from './yotsuba.js';
+import { buildAnya } from './anya.js';
+import { buildBocchi } from './bocchi.js';
+import { buildMiku } from './miku.js';
 
 const HAT_RADIUS = 0.95;   // collision size with Fibi's wide hat brim
 
@@ -40,6 +43,9 @@ export const CHARACTERS = [
       { id: 'fibicolors', options: { look: 'fibi' } },
     ],
   },
+  { id: 'anya', name: 'Anya', build: buildAnya, skins: [{ id: 'navy', options: { look: 'navy' } }, { id: 'wine', options: { look: 'wine' } }] },
+  { id: 'bocchi', name: 'Bocchi', build: buildBocchi, skins: [{ id: 'black', options: { look: 'black' } }, { id: 'sky', options: { look: 'sky' } }] },
+  { id: 'miku', name: 'Miku', build: buildMiku, skins: [{ id: 'sakura', options: { look: 'sakura' } }, { id: 'night', options: { look: 'night' } }] },
 ].map(c => ({ ...c, key: c.id }));   // key tells looks apart (thumbnails and stages are cached by it); id stays the character's
 
 const skinned = {};

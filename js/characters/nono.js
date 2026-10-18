@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { M, add, sphere, cyl, box } from '../utils.js';
 import { createRig, addEyes } from './rig.js';
-import { addFibiOutfit, addFibiHat } from './fibi.js';
+import { addFibiOutfit, addFibiHat, addHairMass } from './fibi.js';
 
 const C = { skin: 0xffe3d2, hair: 0x9fb8ae, red: 0xd8483e, cream: 0xfbf3ec, dark: 0x3a3a46, bow: 0xe8584a };
 
@@ -43,15 +43,13 @@ export function buildNono({ fibiOutfit = false, fibiHat = false } = {}) {
   add(head, sphere, M(C.skin), [0, 0, 0], [0.62, 0.56, 0.58]);
   addEyes(head, { outer: 0x7a70a8, inner: 0xc4bbe4, lidY: 0.14, lidSY: 0.05, brow: 0x6b7a74, mouth: 'smile', blush: 0.7 });
 
-  // Hair: heavy bangs, shoulder-length back hair and long side locks
+  // Hair: heavy bangs, Fibi's smooth back hair and long side locks
   add(head, new THREE.SphereGeometry(1, 32, 24, 0, Math.PI * 2, 0, 1.2), M(C.hair), [0, 0.02, 0], [0.665, 0.61, 0.63]);
   for (let i = -4; i <= 4; i++) {
     const a = i * 0.17;
     add(head, sphere, M(C.hair), [Math.sin(a) * 0.62, 0.17, Math.cos(a) * 0.55], [0.095, 0.2, 0.07], [0, a, 0]);
   }
-  add(head, new THREE.CylinderGeometry(0.5, 0.56, 0.5, 32), M(C.hair), [0, -0.2, -0.46]);
-  add(head, sphere, M(C.hair), [0, -0.45, -0.46], [0.56, 0.14, 0.46]);
-  add(head, sphere, M(C.hair), [0, 0.1, -0.1], [0.67, 0.62, 0.64]);
+  addHairMass(head, C.hair);
   for (const s of [-1, 1]) {
     add(head, new THREE.CapsuleGeometry(0.12, 0.55, 8, 16), M(C.hair), [s * 0.6, -0.5, 0.05], [1, 1, 1], [0, 0, s * -0.1]);
     add(head, sphere, M(C.hair), [s * 0.66, -0.93, 0.08], [0.15, 0.15, 0.15]); // wavy curl at the tip

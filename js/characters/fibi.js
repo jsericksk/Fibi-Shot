@@ -33,7 +33,7 @@ export function buildFibi({ hat: withHat = true, look = 'default' } = {}) {
   addEyes(head, { outer: 0x5a3fb5, inner: 0x9a84f0, mouth: 'smile' });
 
   // Hair: one smooth mass, wide at the back and ending above the chin so none shows under the face (the same in every skin), plus bangs and temples
-  add(head, createHairGeometry(withHat), M(C.hair), [0, 0, HAIR_Z], [1, 1, HAIR_DEPTH]);
+  addHairMass(head, C.hair, withHat);
   for (let i = -3; i <= 3; i++) {
     const a = i * 0.2;
     add(head, sphere, M(C.hair), [Math.sin(a) * 0.6, 0.2, Math.cos(a) * 0.54], [0.1, 0.16, 0.07], [0, a, 0]);
@@ -42,7 +42,7 @@ export function buildFibi({ hat: withHat = true, look = 'default' } = {}) {
   if (!withHat) addAhoge(head);
   else {
     // The hair under the hat is cut off, so once the hat is thrown she shows the full top instead of a bald spot
-    rig.hatOff = [add(head, createHairGeometry(false), M(C.hair), [0, 0, HAIR_Z], [1, 1, HAIR_DEPTH]), addAhoge(head)];
+    rig.hatOff = [addHairMass(head, C.hair), addAhoge(head)];
     rig.hatOff.forEach(o => { o.visible = false; });
   }
 
@@ -58,6 +58,11 @@ export function buildFibi({ hat: withHat = true, look = 'default' } = {}) {
   if (withHat) addFibiHat(rig, { look, y: 0.5, crown: 1, back: 0 });
 
   return rig;
+}
+
+// Fibi's smooth hair mass in any color: wide at the back and ending above the chin. Others use it for their back hair
+export function addHairMass(head, color, withHat = false) {
+  return add(head, createHairGeometry(withHat), M(color), [0, 0, HAIR_Z], [1, 1, HAIR_DEPTH]);
 }
 
 // The hair lathe with its lower half swept backwards (and its top cut off under a hat), so it flows down behind the head and never shows under the chin

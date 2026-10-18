@@ -63,6 +63,9 @@ weapon menu. Their size and position can be changed in **Pause > Edit controls**
 - **Doro:** chubby, grumpy mochi girl with pink hair. Skin: black.
 - **Mambo:** horse girl in a sailor-style outfit, with a periwinkle beret and a tail. Skin: Fibi's hat.
 - **Yotsuba:** cheerful girl with spiky green hair, a white tee and mustard shorts. Skins: Fibi's hat, and Fibi's colors without a hat.
+- **Anya:** little girl with short pink hair, black horn hairpieces and a black dress with a gold hem. Skins: navy and wine dresses.
+- **Bocchi:** shy girl with very long pink hair, cube hairpins and a pink jacket. Skins: all black, and sky blue.
+- **Miku:** singer with long turquoise twin tails, headphones and a teal tie. Skins: pink and night purple outfits.
 
 Each character has its own emotes with sound (press `H`).
 Characters can have skins: pick one of the round portraits under the character list (also in the multiplayer lobby).
