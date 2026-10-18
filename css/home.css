@@ -38,8 +38,7 @@
 
 #screen-select .maps { display: grid; grid-template-columns: repeat(auto-fit, minmax(62px, 1fr)); gap: 8px; margin: 0; }
 #screen-select .map { width: 100%; }
-#screen-select .map.random { grid-column: 1 / -1; display: flex; align-items: center; justify-content: center; gap: 8px; }   /* a slim bar so the grid keeps its two rows */
-.map.random i { display: grid; place-items: center; width: 24px; aspect-ratio: 1; margin: 0; font-style: normal; font-size: 16px; font-weight: 900; }
+.map.random i { display: grid; place-items: center; font-style: normal; font-size: 30px; font-weight: 900; }
 
 .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
 button { -webkit-tap-highlight-color: transparent; }
@@ -71,11 +70,14 @@ button { -webkit-tap-highlight-color: transparent; }
   #screen-select .logo { font-size: 28px; }
   .home-body { grid-template-columns: minmax(0, 1fr); }
   .art { height: clamp(120px, 24vh, 220px); }
+  .duel.three .art { height: clamp(50px, 15vw, 150px); }   /* player, enemy and the plus slot must fit the width */
+  .fighter h2 { font-size: 10px; letter-spacing: 1px; }
+  .duel.three .fighter { padding: 4px 2px 6px; }
 }
 
 /* phone in landscape: everything must fit in a short screen */
 @media (max-height: 520px) {
-  .duel.three .art { height: clamp(64px, 24vh, 110px); }
+  .duel.three .art { height: clamp(50px, min(24vh, 15vw), 110px); }
   #screen-select { gap: 0; padding: 6px 12px; }
   #screen-select .logo { font-size: 24px; }
   .art { height: clamp(90px, 34vh, 160px); }
@@ -97,6 +99,15 @@ button { -webkit-tap-highlight-color: transparent; }
   .act.play i { font-size: 28px; }
   .act.play b { font-size: 22px; }
   #screen-select .help { display: none; }
+}
+
+/* phones: the maps stay in two rows and scroll sideways, like the character strip */
+@media (max-width: 719px), (max-height: 520px) {
+  #screen-select .maps { grid-template-columns: none; grid-template-rows: repeat(2, auto); grid-auto-flow: column; grid-auto-columns: 72px; justify-content: safe center; overflow-x: auto; padding: 4px 14px 8px; scroll-snap-type: x proximity; scrollbar-width: none; -webkit-overflow-scrolling: touch; mask-image: linear-gradient(90deg, transparent, #000 14px, #000 calc(100% - 14px), transparent); }
+  #screen-select .map { scroll-snap-align: start; }
+}
+@media (max-height: 520px) {
+  #screen-select .maps { grid-auto-columns: 56px; }
 }
 
 /* training ignores the enemy choice: dim it while the Training button is hovered */
