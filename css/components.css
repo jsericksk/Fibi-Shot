@@ -1,0 +1,80 @@
+/* ---------- select screen ---------- */
+#screen-select, #screen-lobby { display: flex; flex-direction: column; align-items: center; justify-content: safe center; gap: 6px; background: radial-gradient(ellipse at 50% 30%, #2a0a10, #0a0507 70%); overflow: auto; }   /* never push the top out of reach: scroll instead */
+.logo { margin: 0; font-size: clamp(40px, 7vw, 72px); font-weight: 900; letter-spacing: 3px; text-shadow: 0 3px 0 #6b0a15, 0 0 28px rgba(224, 24, 45, .55); }
+.versus { display: flex; align-items: center; gap: clamp(12px, 4vw, 56px); padding: 6px clamp(16px, 3vw, 40px) 10px; border-radius: 22px; background: rgba(255, 255, 255, .04); border: 1px solid rgba(224, 24, 45, .25); }
+.section { margin: 10px 0 0; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; opacity: .55; }
+.side { display: flex; flex-direction: column; align-items: center; }
+.side h2 { margin: 0; font-size: 18px; letter-spacing: 2px; text-transform: uppercase; opacity: .7; }
+.stage { position: relative; aspect-ratio: 300 / 380; }
+
+/* wider than the box so dances that swing out are not cut off */
+.stage canvas { position: absolute; top: 0; left: -30%; width: 160%; height: 100%; touch-action: none; cursor: grab; }
+.fighter-row { display: flex; align-items: center; gap: 8px; }
+.stage-emote { position: relative; z-index: 1; flex: none; width: 38px; height: 38px; border-radius: 50%; color: #fff; }   /* just left of the player card, centered on it */
+.fname { font-size: 24px; font-weight: 900; margin-bottom: 8px; }
+.vs { font-size: clamp(36px, 6vw, 64px); font-weight: 900; color: var(--accent); text-shadow: 0 3px 0 #000, 0 0 20px rgba(224, 24, 45, .6); }
+.picker { display: flex; gap: 10px; }
+.card { width: 84px; border: 3px solid transparent; border-radius: 14px; background: rgba(255, 255, 255, .07); padding: 4px; color: var(--ink); font-weight: 800; transition: transform .1s, background .1s; }
+.card img { width: 100%; height: 84px; object-fit: contain; object-position: top; display: block; }
+.card:hover { transform: translateY(-3px); background: rgba(255, 255, 255, .15); }
+.skins { display: flex; justify-content: center; gap: 10px; margin: 2px 0 6px; }   /* right under the fighters, so it is clear whose looks they are */
+.skin { width: 58px; height: 68px; padding: 3px; overflow: hidden; border: 3px solid rgba(255, 255, 255, .25); border-radius: 14px; background: rgba(255, 255, 255, .07); transition: transform .1s, background .1s; }
+.skin img { width: 100%; height: 100%; object-fit: contain; object-position: top; display: block; transform: scale(1.45); transform-origin: 50% 22%; }   /* zoomed on the head and body, where the looks differ */
+.skin:hover { transform: translateY(-3px); background: rgba(255, 255, 255, .15); }
+.skin.selected { border-color: var(--accent); background: rgba(224, 24, 45, .22); box-shadow: 0 4px 18px rgba(224, 24, 45, .5); }
+.card.selected { border-color: var(--accent); background: rgba(224, 24, 45, .22); box-shadow: 0 4px 18px rgba(224, 24, 45, .5); }
+.primary { border: 0; border-radius: 14px; background: var(--accent); color: #fff; font-weight: 900; font-size: 22px; padding: 12px 44px; box-shadow: 0 5px 0 #7a0c18; }
+.primary:active { transform: translateY(3px); box-shadow: 0 2px 0 #7a0c18; }
+.primary.alt { background: #4a4348; box-shadow: 0 5px 0 #000; }   /* neutral twin, for cancel buttons */
+.primary.alt:active { box-shadow: 0 2px 0 #000; }
+.help { margin: 8px 12px 0; font-size: 13px; font-weight: 700; opacity: .7; text-align: center; }
+
+/* map picker (menu) */
+.maps { display: flex; gap: 14px; margin-top: 12px; justify-content: center; }
+.map { width: 76px; border: 3px solid transparent; border-radius: 12px; background: rgba(255, 255, 255, .07); padding: 4px; color: var(--ink); font-weight: 800; font-size: 13px; }
+.map i { display: block; width: 100%; aspect-ratio: 1; border-radius: 8px; margin-bottom: 3px; }
+.map:hover { background: rgba(255, 255, 255, .15); }
+.map.selected { border-color: var(--accent); background: rgba(224, 24, 45, .22); box-shadow: 0 4px 18px rgba(224, 24, 45, .5); }
+
+/* language switch and small header buttons */
+.langs { display: flex; gap: 6px; }
+.tool, .lang { border: 2px solid #5a1119; border-radius: 8px; background: rgba(0, 0, 0, .4); color: var(--ink); font-weight: 800; font-size: 13px; padding: 3px 10px; }
+.tool { white-space: nowrap; }
+.tool.icon { display: grid; place-items: center; padding: 3px 7px; }
+.tool svg { width: 16px; height: 16px; display: block; }
+.tool:hover { border-color: var(--accent); }
+.lang.selected { border-color: var(--accent); background: rgba(224, 24, 45, .3); }
+
+/* small screens: phones in landscape (short) and in portrait (narrow) */
+@media (max-height: 520px) {
+  .logo { font-size: 24px; letter-spacing: 2px; }
+  .versus { gap: 24px; }
+  .side h2 { font-size: 11px; }
+  .stage-emote { width: 30px; height: 30px; }
+  .fname { font-size: 14px; margin-bottom: 2px; }
+  .vs { font-size: 24px; }
+  .picker { gap: 6px; }
+  .card { width: 46px; padding: 3px; border-width: 2px; border-radius: 10px; }
+  .card img { height: 38px; }
+  .card span { font-size: 10px; }
+  .skins { gap: 6px; margin: 2px 0 2px; }
+  .skin { width: 40px; height: 46px; padding: 2px; border-width: 2px; border-radius: 10px; }
+  .maps { gap: 8px; margin-top: 4px; }
+  .map { width: 46px; padding: 3px; font-size: 9px; border-width: 2px; }
+  .map i { margin-bottom: 1px; }
+  .primary, .primary.alt { font-size: 14px; padding: 5px 22px; box-shadow: 0 3px 0 #7a0c18; }
+  .primary.alt { box-shadow: 0 3px 0 #000; }
+  .versus { padding: 2px 16px 4px; border-radius: 14px; }
+  .section { display: none; }
+  .help { font-size: 9px; margin: 3px 12px 0; }
+}
+@media (max-width: 600px) {
+  .logo { font-size: 34px; }
+  .versus { gap: 8px; }
+  .fname { font-size: 18px; }
+  .picker { flex-wrap: wrap; justify-content: center; gap: 6px; max-width: 42vw; }
+  .card { width: 52px; border-width: 2px; }
+  .card img { height: 46px; }
+  .card span { font-size: 10px; }
+  .help { font-size: 11px; }
+}

@@ -114,7 +114,7 @@ English, Portuguese and Spanish. The language follows your browser and can be sw
 
 ```
 index.html        All screens (menu, lobby, match)
-css/style.css     Styles
+css/              Styles, one file per area (base, home, lobby, game, touch...)
 audio/            Mp3 files
 js/config.js      Every tunable number
 js/maps.js        Map definitions
