@@ -178,8 +178,8 @@ function addDesert(scene, half) {
 // A huge volcano with a glowing crater, jagged black ridges and pools of lava on the dark ground
 function addVolcano(scene, half) {
   addGround(scene, 0x1a1412);
-  add(scene, new THREE.ConeGeometry(1, 1, 24), M(0x2a2220), [-30, 40, -150], [130, 80, 110]);
-  add(scene, new THREE.CylinderGeometry(1, 1, 1, 24), new THREE.MeshBasicMaterial({ color: 0xff7a22 }), [-30, 79, -150], [12, 3, 12]);   // unlit: the crater glows
+  add(scene, new THREE.ConeGeometry(1, 1, 24), M(0x2a2220), [-30, 40, -160], [110, 80, 70]);
+  add(scene, new THREE.CylinderGeometry(1, 1, 1, 24), new THREE.MeshBasicMaterial({ color: 0xff7a22 }), [-30, 79, -160], [12, 3, 12]);   // unlit: the crater glows
   const count = 34, ridges = new THREE.InstancedMesh(new THREE.ConeGeometry(1, 1, 5), M(0xffffff), count);
   const m = new THREE.Matrix4(), color = new THREE.Color();
   for (let i = 0; i < count; i++) {
