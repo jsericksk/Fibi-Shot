@@ -204,7 +204,134 @@ function snowFloor(half) {
   return { tex, roughness: 0.85, metalness: 0 };
 }
 
-const FLOORS = { tiles: tilesFloor, moon: moonFloor, grass: grassFloor, concrete: concreteFloor, pavers: paversFloor, rio: rioFloor, mars: marsFloor, snow: snowFloor };
+// Wind-rippled sand with dark grains and pale streaks
+function sandFloor(half) {
+  const S = 512;
+  const c = document.createElement('canvas');
+  c.width = c.height = S;
+  const g = c.getContext('2d');
+  g.fillStyle = '#e0bd7d'; g.fillRect(0, 0, S, S);
+  for (let i = 0; i < 60; i++) {
+    const y = Math.random() * S;
+    g.strokeStyle = Math.random() < 0.5 ? 'rgba(160,115,60,0.25)' : 'rgba(255,235,185,0.3)';
+    g.lineWidth = 2 + Math.random() * 3;
+    g.beginPath();
+    for (let x = 0; x <= S; x += 16) g.lineTo(x, y + Math.sin(x / 40 + i) * 5);
+    g.stroke();
+  }
+  for (let i = 0; i < 5000; i++) {
+    g.fillStyle = Math.random() < 0.5 ? 'rgba(120,80,40,0.3)' : 'rgba(255,240,200,0.35)';
+    g.fillRect(Math.random() * S, Math.random() * S, 2, 2);
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(half / 14, half / 14);
+  tex.anisotropy = 4;
+  return { tex, roughness: 1, metalness: 0 };
+}
+
+// Black basalt crossed by glowing orange cracks
+function lavaFloor(half) {
+  const S = 512;
+  const c = document.createElement('canvas');
+  c.width = c.height = S;
+  const g = c.getContext('2d');
+  g.fillStyle = '#241d1c'; g.fillRect(0, 0, S, S);
+  for (let i = 0; i < 4000; i++) {
+    g.fillStyle = Math.random() < 0.5 ? 'rgba(70,55,50,0.4)' : 'rgba(10,8,8,0.4)';
+    g.fillRect(Math.random() * S, Math.random() * S, 3, 3);
+  }
+  g.lineCap = 'round';
+  for (let i = 0; i < 26; i++) {
+    let x = Math.random() * S, y = Math.random() * S, a = Math.random() * Math.PI * 2;
+    const path = new Path2D();
+    path.moveTo(x, y);
+    for (let j = 0; j < 8; j++) {
+      a += (Math.random() - 0.5) * 1.2;
+      x += Math.cos(a) * 22; y += Math.sin(a) * 22;
+      path.lineTo(x, y);
+    }
+    g.strokeStyle = 'rgba(255,90,20,0.35)'; g.lineWidth = 7; g.stroke(path);
+    g.strokeStyle = '#ff9a2a'; g.lineWidth = 2; g.stroke(path);
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(half / 18, half / 18);
+  tex.anisotropy = 4;
+  return { tex, roughness: 0.9, metalness: 0 };
+}
+
+// Grey flagstones with uneven joints and moss in the cracks
+function cobbleFloor(half) {
+  const S = 512, N = 8, T = S / N;
+  const c = document.createElement('canvas');
+  c.width = c.height = S;
+  const g = c.getContext('2d');
+  g.fillStyle = '#4a4a46'; g.fillRect(0, 0, S, S);
+  for (let row = 0; row < N; row++) {
+    for (let col = 0; col < N; col++) {
+      g.fillStyle = `hsl(${40 + Math.random() * 12},${5 + Math.random() * 6}%,${52 + Math.random() * 12}%)`;
+      g.fillRect(col * T + 2, row * T + 2, T - 4, T - 4);
+    }
+  }
+  for (let i = 0; i < 800; i++) {
+    g.fillStyle = 'rgba(70,110,50,0.3)';
+    g.fillRect(Math.random() * S, Math.random() * S, 3, 3);
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(half / 8, half / 8);
+  tex.anisotropy = 4;
+  return { tex, roughness: 0.95, metalness: 0 };
+}
+
+// City asphalt with worn patches, lane markings along the tile edges and a zebra crossing in each corner
+function asphaltFloor(half) {
+  const S = 512;
+  const c = document.createElement('canvas');
+  c.width = c.height = S;
+  const g = c.getContext('2d');
+  g.fillStyle = '#3d4044'; g.fillRect(0, 0, S, S);
+  for (let i = 0; i < 5000; i++) {
+    g.fillStyle = Math.random() < 0.5 ? 'rgba(20,20,22,0.35)' : 'rgba(120,120,125,0.25)';
+    g.fillRect(Math.random() * S, Math.random() * S, 2, 2);
+  }
+  g.fillStyle = '#e6b422';
+  for (let i = 0; i < S; i += 48) { g.fillRect(i, 0, 28, 6); g.fillRect(0, i, 6, 28); }
+  g.fillStyle = 'rgba(235,235,235,0.9)';
+  for (let i = 0; i < 6; i++) g.fillRect(40 + i * 14, 70, 8, 60);
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(half / 12, half / 12);
+  tex.anisotropy = 4;
+  return { tex, roughness: 0.9, metalness: 0 };
+}
+
+// Pink and cream checkerboard with scattered confetti
+function checkerFloor(half) {
+  const S = 256, T = S / 4;
+  const c = document.createElement('canvas');
+  c.width = c.height = S;
+  const g = c.getContext('2d');
+  for (let row = 0; row < 4; row++) {
+    for (let col = 0; col < 4; col++) {
+      g.fillStyle = (row + col) % 2 ? '#fbe6cf' : '#f29ab8';
+      g.fillRect(col * T, row * T, T, T);
+    }
+  }
+  const confetti = ['#3aa8e8', '#f2c230', '#5acb6a', '#ffffff'];
+  for (let i = 0; i < 40; i++) {
+    g.fillStyle = confetti[i % confetti.length];
+    g.fillRect(Math.random() * S, Math.random() * S, 4, 4);
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(half / 4, half / 4);
+  tex.anisotropy = 4;
+  return { tex, roughness: 0.8, metalness: 0 };
+}
+
+const FLOORS = { tiles: tilesFloor, moon: moonFloor, grass: grassFloor, concrete: concreteFloor, pavers: paversFloor, rio: rioFloor, mars: marsFloor, snow: snowFloor, sand: sandFloor, lava: lavaFloor, cobble: cobbleFloor, asphalt: asphaltFloor, checker: checkerFloor };
 
 // Trees all around the playable area, beyond the walls (instanced: two draw calls for the whole forest)
 function addForest(scene, { count, spread }, half) {
