@@ -4,6 +4,9 @@ import { buildNono } from './nono.js';
 import { buildDoro } from './doro.js';
 import { buildMambo } from './mambo.js';
 import { buildYotsuba } from './yotsuba.js';
+import { buildAnya } from './anya.js';
+import { buildBocchi } from './bocchi.js';
+import { buildMiku } from './miku.js';
 
 const HAT_RADIUS = 0.95;   // collision size with Fibi's wide hat brim
 
@@ -15,6 +18,7 @@ export const CHARACTERS = [
     skins: [
       { id: 'nohat', options: { hat: false }, radius: 0.7 },
       { id: 'noir', options: { look: 'noir' } },
+      { id: 'brasil', options: { look: 'brasil' } },
     ],
   },
   {
@@ -22,6 +26,7 @@ export const CHARACTERS = [
     skins: [
       { id: 'inverse', options: { look: 'inverse' } },
       { id: 'fibihat', options: { fibiHat: true }, radius: HAT_RADIUS },
+      { id: 'brasil', options: { look: 'brasil' } },
     ],
   },
   {
@@ -29,17 +34,22 @@ export const CHARACTERS = [
     skins: [
       { id: 'fibioutfit', options: { fibiOutfit: true } },
       { id: 'fibihat', options: { fibiHat: true }, radius: HAT_RADIUS },
+      { id: 'brasil', options: { look: 'brasil' } },
     ],
   },
-  { id: 'doro', name: 'Doro', build: buildDoro, skins: [{ id: 'black', options: { look: 'black' } }] },
-  { id: 'mambo', name: 'Mambo', build: buildMambo, skins: [{ id: 'fibihat', options: { fibiHat: true }, radius: HAT_RADIUS }] },
+  { id: 'doro', name: 'Doro', build: buildDoro, skins: [{ id: 'black', options: { look: 'black' } }, { id: 'brasil', options: { look: 'brasil' } }] },
+  { id: 'mambo', name: 'Mambo', build: buildMambo, skins: [{ id: 'fibihat', options: { fibiHat: true }, radius: HAT_RADIUS }, { id: 'brasil', options: { look: 'brasil' } }] },
   {
     id: 'yotsuba', name: 'Yotsuba', build: buildYotsuba,
     skins: [
       { id: 'fibihat', options: { fibiHat: true }, radius: HAT_RADIUS },
       { id: 'fibicolors', options: { look: 'fibi' } },
+      { id: 'brasil', options: { look: 'brasil' } },
     ],
   },
+  { id: 'anya', name: 'Anya', build: buildAnya, skins: [{ id: 'navy', options: { look: 'navy' } }, { id: 'wine', options: { look: 'wine' } }, { id: 'brasil', options: { look: 'brasil' } }] },
+  { id: 'bocchi', name: 'Bocchi', build: buildBocchi, skins: [{ id: 'black', options: { look: 'black' } }, { id: 'sky', options: { look: 'sky' } }, { id: 'brasil', options: { look: 'brasil' } }] },
+  { id: 'miku', name: 'Miku', build: buildMiku, skins: [{ id: 'sakura', options: { look: 'sakura' } }, { id: 'night', options: { look: 'night' } }, { id: 'brasil', options: { look: 'brasil' } }] },
 ].map(c => ({ ...c, key: c.id }));   // key tells looks apart (thumbnails and stages are cached by it); id stays the character's
 
 const skinned = {};

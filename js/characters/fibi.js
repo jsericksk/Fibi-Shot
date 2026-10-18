@@ -7,6 +7,7 @@ const C = { skin: 0xffe3d2, hair: 0xf6e7ae };
 // Outfit colors of each look: coat (also the hat and the first sock stripe), trim, gloves and shoes, tie and clip, hat band and bow
 const LOOKS = {
   default: { coat: 0xfbfbff, trim: 0x25222e, gloves: 0x25222e, shoes: 0x25222e, stripe: 0x25222e, pom: 0xfbfbff, tie: 0x2f9be0, clip: 0x1f6fb0, band: 0x7b5fd0, bowTie: 0x9a84f0 },
+  brasil: { coat: 0xffdc2e, trim: 0x009c3b, gloves: 0x009c3b, shoes: 0x009c3b, stripe: 0x009c3b, pom: 0x002776, tie: 0x002776, clip: 0x009c3b, band: 0x009c3b, bowTie: 0xffdc2e },
   noir: { coat: 0x24202a, trim: 0xe0182d, gloves: 0x15121a, shoes: 0x15121a, stripe: 0xe0182d, pom: 0xe0182d, tie: 0xe0182d, clip: 0xa01020, band: 0xe0182d, bowTie: 0xff6a78 },
 };
 
@@ -20,7 +21,7 @@ const HAIR_SWEEP = 0.6;   // how far back the hair below the ears leans per unit
 const BRIM = 1.02;   // radius of the hat brim (the dome and band keep their size)
 
 // Blonde girl with a wide white hat, blue tie and striped socks.
-// Skins: { hat: false } leaves the hat off, { look: 'noir' } is the black and red outfit
+// Skins: { hat: false } leaves the hat off, { look: 'noir' } is the black and red outfit, { look: 'brasil' } the Brazil jersey colors
 export function buildFibi({ hat: withHat = true, look = 'default' } = {}) {
   const L = LOOKS[look];
   const rig = createRig();
@@ -33,7 +34,7 @@ export function buildFibi({ hat: withHat = true, look = 'default' } = {}) {
   addEyes(head, { outer: 0x5a3fb5, inner: 0x9a84f0, mouth: 'smile' });
 
   // Hair: one smooth mass, wide at the back and ending above the chin so none shows under the face (the same in every skin), plus bangs and temples
-  add(head, createHairGeometry(withHat), M(C.hair), [0, 0, HAIR_Z], [1, 1, HAIR_DEPTH]);
+  addHairMass(head, C.hair, withHat);
   for (let i = -3; i <= 3; i++) {
     const a = i * 0.2;
     add(head, sphere, M(C.hair), [Math.sin(a) * 0.6, 0.2, Math.cos(a) * 0.54], [0.1, 0.16, 0.07], [0, a, 0]);
@@ -42,7 +43,7 @@ export function buildFibi({ hat: withHat = true, look = 'default' } = {}) {
   if (!withHat) addAhoge(head);
   else {
     // The hair under the hat is cut off, so once the hat is thrown she shows the full top instead of a bald spot
-    rig.hatOff = [add(head, createHairGeometry(false), M(C.hair), [0, 0, HAIR_Z], [1, 1, HAIR_DEPTH]), addAhoge(head)];
+    rig.hatOff = [addHairMass(head, C.hair), addAhoge(head)];
     rig.hatOff.forEach(o => { o.visible = false; });
   }
 
@@ -58,6 +59,11 @@ export function buildFibi({ hat: withHat = true, look = 'default' } = {}) {
   if (withHat) addFibiHat(rig, { look, y: 0.5, crown: 1, back: 0 });
 
   return rig;
+}
+
+// Fibi's smooth hair mass in any color: wide at the back and ending above the chin. Others use it for their back hair
+export function addHairMass(head, color, withHat = false) {
+  return add(head, createHairGeometry(withHat), M(color), [0, 0, HAIR_Z], [1, 1, HAIR_DEPTH]);
 }
 
 // The hair lathe with its lower half swept backwards (and its top cut off under a hat), so it flows down behind the head and never shows under the chin

@@ -5,6 +5,7 @@ import { createRig } from './rig.js';
 // Body colors that change with the look: the dough, its lighter belly and the puffed cheeks
 const LOOKS = {
   default: { dough: 0xfff3ea, belly: 0xfffaf5, cheek: 0xffd6d0, line: 0x5a3a52 },   // soft white
+  brasil: { dough: 0xffdc2e, belly: 0x1fa84f, cheek: 0xffe98a, line: 0x002776 },   // yellow dough with a green belly
   black: { dough: 0x2a262d, belly: 0x38333c, cheek: 0x4a3a44, line: 0xe8c8dc },    // the lids and the mouth stay readable on black
 };
 
@@ -19,7 +20,7 @@ const C = {
   eyeLight: 0xc3b4ee,
 };
 
-// Chubby, sweet mochi girl: puffy cheeks, big purple eyes, pink hair with a rose bun and a lavender bow. Skin: { look: 'black' }
+// Chubby, sweet mochi girl: puffy cheeks, big purple eyes, pink hair with a rose bun and a lavender bow. Skins: { look: 'black' | 'brasil' }
 export function buildDoro({ look = 'default' } = {}) {
   const L = LOOKS[look];
   const rig = createRig();

@@ -57,12 +57,15 @@ weapon menu. Their size and position can be changed in **Pause > Edit controls**
 
 ## Characters
 
-- **Fibi:** blonde girl with a wide white hat. Skins: no hat, and a black and red outfit.
-- **Guga:** girl in a penguin hoodie. Skins: inverted colors (white), and Fibi's hat.
-- **Nono:** sleepy girl with long gray-green hair. Skins: Fibi's outfit, and Fibi's hat.
-- **Doro:** chubby, grumpy mochi girl with pink hair. Skin: black.
-- **Mambo:** horse girl in a sailor-style outfit, with a periwinkle beret and a tail. Skin: Fibi's hat.
-- **Yotsuba:** cheerful girl with spiky green hair, a white tee and mustard shorts. Skins: Fibi's hat, and Fibi's colors without a hat.
+- **Fibi:** blonde girl with a wide white hat. Skins: no hat, and a black and red outfit, and the Brazil jersey.
+- **Guga:** girl in a penguin hoodie. Skins: inverted colors (white), Fibi's hat, and the Brazil jersey.
+- **Nono:** sleepy girl with long gray-green hair. Skins: Fibi's outfit, Fibi's hat, and the Brazil jersey.
+- **Doro:** chubby, grumpy mochi girl with pink hair. Skins: black, and the Brazil jersey.
+- **Mambo:** horse girl in a sailor-style outfit, with a periwinkle beret and a tail. Skins: Fibi's hat, and the Brazil jersey.
+- **Yotsuba:** cheerful girl with spiky green hair, a white tee and mustard shorts. Skins: Fibi's hat, and Fibi's colors without a hat, and the Brazil jersey.
+- **Anya:** little girl with short pink hair, black horn hairpieces and a black dress with a gold hem. Skins: navy and wine dresses, and the Brazil jersey.
+- **Bocchi:** shy girl with very long pink hair, cube hairpins and a pink jacket. Skins: all black, sky blue, and the Brazil jersey.
+- **Miku:** singer with long turquoise twin tails, headphones and a teal tie. Skins: pink and night purple outfits, and the Brazil jersey.
 
 Each character has its own emotes with sound (press `H`).
 Characters can have skins: pick one of the round portraits under the character list (also in the multiplayer lobby).

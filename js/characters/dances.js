@@ -401,4 +401,272 @@ export const DANCES = {
       head.rotation.set(-0.3 * w, 0, 0);
     }
   },
+
+  // Anya 1: waku waku (6 s, 120 BPM) - flapping excitement, cheek wiggle, smug lean, sneaky sidesteps, surprise jump (no spinning)
+  waku(rig, t) {
+    reset(rig);
+    const { model, legs, head } = rig;
+    const beat = t * PI * 2;
+    if (t < 1.5) {
+      model.position.y = abs(s(beat)) * 0.15;
+      const flap = s(t * 24) * 0.5;                                    // both arms flap like wings
+      armsPose(rig, [-0.3, 0.9 + flap], [-0.3, 0.9 - flap]);
+      legs[0].rotation.x = legs[1].rotation.x = -0.3 * abs(s(beat));
+      head.rotation.set(0, 0, s(beat / 2) * 0.25);
+    } else if (t < 3) {
+      const p = s(t * 10);                                             // hands on the cheeks, hips and head wiggling
+      model.rotation.z = p * 0.15;
+      model.position.y = abs(s(beat)) * 0.05;
+      armsPose(rig, [-2.3, 0.8], [-2.3, 0.8]);
+      legs[0].rotation.z = -0.12 * abs(p); legs[1].rotation.z = 0.12 * abs(p);
+      head.rotation.set(0.1, p * 0.3, -p * 0.2);
+    } else if (t < 4.5) {
+      model.rotation.x = -0.15;                                        // smug: leaning back, one hand on the hip, one pointing up
+      model.position.y = abs(s(beat)) * 0.08;
+      armsPose(rig, [0, 0.7], [-2.5 + s(t * 8) * 0.3, 0.3]);
+      head.rotation.set(-0.3, 0, 0.3);
+    } else if (t < 5.5) {
+      const p = s(((t - 4.5) / 1) * PI * 2);                           // sneaky sidesteps, peeking
+      model.position.x = p * 0.35;
+      model.rotation.x = 0.25;
+      legs[0].rotation.x = s(t * 12) * 0.5; legs[1].rotation.x = -s(t * 12) * 0.5;
+      armsPose(rig, [-1.6, 0.1], [-1.6, 0.1]);
+      head.rotation.set(0, -p * 0.5, 0);
+    } else {
+      const u = (t - 5.5) / 0.5, jump = s(min(1, u) * PI);             // surprise jump, legs spread, arms up
+      model.position.y = jump * 0.5;
+      legs[0].rotation.z = -0.5 * jump; legs[1].rotation.z = 0.5 * jump;
+      armsPose(rig, [-2.9, 0.7], [-2.9, 0.7]);
+      head.rotation.set(-0.3 * jump, 0, 0);
+    }
+  },
+
+  // Anya 2: secret agent (6 s) - crouched sneaking, arm windmills, finger guns, shocked jump (no spinning)
+  agent(rig, t) {
+    reset(rig);
+    const { model, legs, arms, head } = rig;
+    if (t < 2) {
+      model.rotation.x = 0.3;                                          // low sneak, looking around
+      model.position.set(s(t * 2.5) * 0.4, -0.1, 0);
+      legs[0].rotation.x = s(t * 9) * 0.5; legs[1].rotation.x = -s(t * 9) * 0.5;
+      armsPose(rig, [-1.0, 0.3], [-1.0, 0.3]);
+      head.rotation.set(0.1, s(t * 4) * 0.6, 0);
+    } else if (t < 4) {
+      model.position.y = abs(s(t * 10)) * 0.12;                        // arms windmilling like propellers
+      arms[0].rotation.set(t * 14, 0, -0.3); arms[1].rotation.set(-t * 14, 0, 0.3);
+      legs[0].rotation.x = s(t * 10) * 0.6; legs[1].rotation.x = -s(t * 10) * 0.6;
+      head.rotation.set(0, 0, s(t * 5) * 0.3);
+    } else if (t < 5.2) {
+      const kick = max(0, s(t * 12)) * 0.3;                            // finger gun with recoil, other hand on the hip
+      model.rotation.z = s(t * 16) * 0.08;
+      armsPose(rig, [0, 0.7], [-1.57 - kick, 0.05]);
+      legs[0].rotation.z = -0.15; legs[1].rotation.z = 0.15;
+      head.rotation.set(-0.1 - kick, 0, 0.2);
+    } else {
+      const u = (t - 5.2) / 0.8, jump = s(min(1, u) * PI);             // shocked: big jump, legs and arms wide
+      model.position.y = jump * 0.6;
+      legs[0].rotation.z = -0.6 * jump; legs[1].rotation.z = 0.6 * jump;
+      armsPose(rig, [-2.9, 0.9], [-2.9, 0.9]);
+      head.rotation.set(-0.35 * jump, 0, 0);
+    }
+  },
+
+  // Bocchi 1: air guitar (6 s) - headbanging strums, knee kicks with a windmill strum, power chord, collapse (no spinning)
+  guitar(rig, t) {
+    reset(rig);
+    const { model, legs, arms, head } = rig;
+    if (t < 2) {
+      model.rotation.x = 0.15;                                         // headbang, left hand on the neck, right hand strumming
+      model.position.y = abs(s(t * 7)) * 0.05;
+      armsPose(rig, [-1.3, 0.2], [0, 0.2]);
+      arms[1].rotation.set(-0.7 + s(t * 30) * 0.35, 0, 0.1);
+      head.rotation.set(s(t * 14) * 0.5, 0, 0);
+    } else if (t < 4) {
+      const leg = Math.floor(t * 2) % 2, kick = abs(s(t * PI * 2));    // alternate knee kicks
+      legs[leg].rotation.x = -1.2 * kick;
+      model.position.y = kick * 0.1;
+      armsPose(rig, [-1.3, 0.2], [0, 0.2]);
+      arms[1].rotation.x = -t * 18;                                    // windmill strum
+      head.rotation.set(s(t * 10) * 0.3, 0, 0);
+    } else if (t < 5.3) {
+      model.rotation.x = -0.35;                                        // power chord: leaning back, legs wide, trembling
+      model.position.set(s(t * 40) * 0.02, 0, 0);
+      legs[0].rotation.z = -0.3; legs[1].rotation.z = 0.3;
+      armsPose(rig, [-2.9, 0.3], [0, 0.2]);
+      arms[1].rotation.x = -0.6 + s(t * 26) * 0.6;
+      head.rotation.set(-0.4, 0, 0);
+    } else {
+      const w = ease((t - 5.3) / 0.3);                                 // collapses, exhausted
+      model.rotation.x = 0.5 * w;
+      model.position.y = -0.15 * w;
+      armsPose(rig, [0.2 * w, 0.2], [0.2 * w, 0.2]);
+      head.rotation.set(0.4 * w, 0, 0);
+    }
+  },
+
+  // Bocchi 2: anxious melt (6 s) - trembling hug, melting into noodle arms, sudden pop-up, confident sway (no spinning)
+  melt(rig, t) {
+    reset(rig);
+    const { model, legs, arms, head } = rig;
+    if (t < 1.5) {
+      model.position.x = s(t * 60) * 0.02;                             // shivering, hugging herself, knees knocking
+      armsPose(rig, [-1.0, -0.6], [-1.0, -0.6]);
+      legs[0].rotation.z = 0.08 * abs(s(t * 30)); legs[1].rotation.z = -0.08 * abs(s(t * 30));
+      head.rotation.set(0.3, 0, 0);
+    } else if (t < 3.5) {
+      const w = ease((t - 1.5) / 1);                                   // melting down with noodle arms
+      model.rotation.x = 0.6 * w;
+      model.position.y = -0.25 * w;
+      arms.forEach((a, i) => a.rotation.set(s(t * 9 + i * 2) * 1.2, 0, SIDE[i] * (0.4 + s(t * 7 + i) * 0.4)));
+      head.rotation.set(0.4 * w, 0, s(t * 5) * 0.3);
+    } else if (t < 4.2) {
+      const u = (t - 3.5) / 0.7, pop = s(u * PI);                      // suddenly pops up, jazz hands
+      model.position.y = pop * 0.6;
+      legs[0].rotation.x = legs[1].rotation.x = -0.4 * pop;
+      armsPose(rig, [-2.9, 0.6 + s(t * 30) * 0.2], [-2.9, 0.6 - s(t * 30) * 0.2]);
+      head.rotation.set(-0.25, 0, 0);
+    } else {
+      const p = s((t - 4.2) * 6);                                      // sudden confidence: swaying and pointing at the sky
+      model.rotation.z = p * 0.15;
+      model.position.set(p * 0.2, abs(p) * 0.06, 0);
+      armsPose(rig, p > 0 ? [-2.9, 0.3] : [0, 0.7], p > 0 ? [0, 0.7] : [-2.9, 0.3]);
+      legs[p > 0 ? 0 : 1].rotation.x = -0.5 * abs(p);
+      head.rotation.set(-0.15, p * 0.3, -p * 0.2);
+    }
+  },
+
+  // Miku 1: leek swing (6 s, 120 BPM) - alternating arm swings, side hops with zigzag arms, body wave, split jump (no spinning)
+  leek(rig, t) {
+    reset(rig);
+    const { model, legs, arms, head } = rig;
+    const beat = t * PI * 2;
+    if (t < 2) {
+      const p = s(beat / 2);                                           // arms swing up and down like waving a leek
+      model.rotation.z = p * 0.1;
+      model.position.y = abs(s(beat)) * 0.1;
+      armsPose(rig, [-1.6 - 1.3 * p, 0.2], [-1.6 + 1.3 * p, 0.2]);
+      head.rotation.set(0, 0, p * 0.2);
+    } else if (t < 4) {
+      const p = s(beat / 2);                                           // hops sideways, arms overhead zigzagging
+      model.position.set(p * 0.4, abs(s(beat)) * 0.2, 0);
+      legs[0].rotation.x = s(beat) * 0.6; legs[1].rotation.x = -s(beat) * 0.6;
+      armsPose(rig, [-2.9, 0.3 + s(beat * 2) * 0.3], [-2.9, 0.3 - s(beat * 2) * 0.3]);
+      head.rotation.set(0, p * 0.3, -p * 0.2);
+    } else if (t < 5.2) {
+      const p = s(t * 12);                                             // body wave rolling through the arms
+      model.rotation.z = p * 0.18;
+      arms[0].rotation.set(-1.0, 0, -(0.8 + p * 0.5)); arms[1].rotation.set(-1.0, 0, 0.8 - p * 0.5);
+      legs[0].rotation.z = -0.15; legs[1].rotation.z = 0.15;
+      head.rotation.set(0, 0, -p * 0.25);
+    } else {
+      const u = (t - 5.2) / 0.8, jump = s(min(1, u) * PI);             // split jump, then holds a V pose
+      model.position.y = jump * 0.55;
+      legs[0].rotation.set(-0.3 * jump, 0, -0.9 * jump); legs[1].rotation.set(-0.3 * jump, 0, 0.9 * jump);
+      armsPose(rig, [-2.8, 0.8], [-2.8, 0.8]);
+      head.rotation.set(-0.15, 0, 0);
+    }
+  },
+
+  // Miku 2: robo funk (6 s, 120 BPM) - snapping poses with hip pops, shuffling slide, chicken-dance pecks, peace sign freeze (no spinning)
+  funk(rig, t) {
+    reset(rig);
+    const { model, legs, head } = rig;
+    const POSES = [[[-1.57, 0.9], [0, 0.75]], [[-2.9, 0.2], [-1.0, 1.0]], [[0, 0.75], [-2.9, 0.2]], [[-1.0, 1.0], [-1.57, 0.9]], [[-2.2, 0.8], [-2.2, 0.8]]];
+    const snap = Math.floor(t * 4);
+    if (t < 2) {
+      armsPose(rig, ...POSES[snap % POSES.length]);                    // a new pose every beat
+      const side = snap % 2 ? 1 : -1;
+      model.rotation.z = side * 0.15;
+      model.position.y = snap % 2 ? 0.04 : 0;
+      head.rotation.set(0, 0, -side * 0.3);
+    } else if (t < 4) {
+      const u = (t - 2) / 2;                                           // shuffling slide across the floor
+      model.position.x = s(u * PI * 2) * 0.4;
+      legs[0].rotation.x = s(t * 14) * 0.7; legs[1].rotation.x = -s(t * 14) * 0.7;
+      armsPose(rig, [-0.5 + s(t * 14) * 0.9, 0.2], [-0.5 - s(t * 14) * 0.9, 0.2]);
+      head.rotation.set(0, 0, s(t * 7) * 0.2);
+    } else if (t < 5.3) {
+      model.position.y = -0.1;                                         // chicken dance: low, elbows flapping, head pecking
+      legs[0].rotation.z = -0.25; legs[1].rotation.z = 0.25;
+      armsPose(rig, [-0.8, 1.4 + s(t * 20) * 0.4], [-0.8, 1.4 - s(t * 20) * 0.4]);
+      head.rotation.set(s(t * 10) * 0.3, 0, 0);
+    } else {
+      const w = ease((t - 5.3) / 0.2);                                 // freeze: peace sign by the face, other hand on the hip, tiptoe
+      model.position.y = 0.06 * w;
+      model.rotation.z = 0.12 * w;
+      armsPose(rig, [-2.2 * w, 0.8 * w + 0.2], [0, 0.7 * w + 0.2]);
+      legs[1].rotation.x = -0.4 * w;
+      head.rotation.set(-0.1 * w, 0, -0.25 * w);
+    }
+  },
+
+  // Guga 2: waddle (6 s, 120 BPM) - penguin waddle, belly-slide forward and back, flipper-flapping hops, bow (no spinning)
+  waddle(rig, t) {
+    reset(rig);
+    const { model, legs, head } = rig;
+    const beat = t * PI * 2;
+    if (t < 2) {
+      const p = s(beat / 2);                                           // rocks from side to side, flippers out
+      model.rotation.z = p * 0.25;
+      model.position.set(p * 0.15, abs(p) * 0.05, 0);
+      armsPose(rig, [0, 0.9 + s(beat) * 0.15], [0, 0.9 + s(beat) * 0.15]);
+      legs[0].rotation.x = p * 0.5; legs[1].rotation.x = -p * 0.5;
+      head.rotation.set(0, 0, -p * 0.2);
+    } else if (t < 3.8) {
+      const u = (t - 2) / 1.8, lean = s(u * PI);                       // belly-slides forward, flippers back, then pops up
+      model.rotation.x = 1.3 * lean;
+      model.position.set(0, -0.3 * lean, 0.7 * lean);
+      legs[0].rotation.x = legs[1].rotation.x = 0.5 * lean;
+      armsPose(rig, [0.8 * lean, 0.2], [0.8 * lean, 0.2]);
+      head.rotation.set(-0.5 * lean, s(t * 8) * 0.2 * lean, 0);
+    } else if (t < 5.2) {
+      model.position.y = abs(s(t * 10)) * 0.25;                        // hops, flippers flapping fast
+      armsPose(rig, [0, 1.0 + s(t * 30) * 0.6], [0, 1.0 + s(t * 30) * 0.6]);
+      legs[0].rotation.x = legs[1].rotation.x = -0.4 * abs(s(t * 10));
+      head.rotation.set(-0.2, 0, 0);
+    } else {
+      const w = ease((t - 5.2) / 0.3);                                 // polite bow
+      model.rotation.x = 0.7 * w;
+      model.position.y = -0.08 * w;
+      armsPose(rig, [-0.3 * w, 0.3], [-0.3 * w, 0.3]);
+      head.rotation.set(0.3 * w, 0, 0);
+    }
+  },
+
+  // Guga 3: metal penguin (6 s, 130 BPM) - headbang, devil horns and stomps, mosh flail, dab, stage dive pose (no spinning)
+  rock(rig, t) {
+    reset(rig);
+    const { model, legs, arms, head } = rig;
+    if (t < 1.5) {
+      model.rotation.x = 0.2 + s(t * 14) * 0.15;                       // headbang, one fist pumping, the other hand on the hip
+      model.position.y = abs(s(t * 7)) * 0.05;
+      armsPose(rig, [0, 0.7], [-2.9 + s(t * 14) * 0.3, 0.2]);
+      head.rotation.set(s(t * 14) * 0.6, 0, 0);
+    } else if (t < 3) {
+      const ph = t * 8;                                                // devil horns up high, big stomps
+      model.position.y = abs(s(ph)) * 0.1;
+      armsPose(rig, [-2.6 + s(t * 20) * 0.1, 0.3], [-2.6 + s(t * 20) * 0.1, 0.3]);
+      legs[0].rotation.x = -max(0, s(ph)) * 1.0; legs[1].rotation.x = -max(0, -s(ph)) * 1.0;
+      head.rotation.set(-0.3, 0, s(t * 4) * 0.25);
+    } else if (t < 4.5) {
+      model.rotation.z = s(t * 8) * 0.25;                              // mosh: shoulders rocking, arms flailing
+      model.position.x = s(t * 4) * 0.3;
+      arms.forEach((a, i) => a.rotation.set(s(t * 13 + i * 2) * 1.3, 0, SIDE[i] * 0.5));
+      legs[0].rotation.x = s(t * 8) * 0.6; legs[1].rotation.x = -s(t * 8) * 0.6;
+      head.rotation.set(s(t * 12) * 0.4, 0, 0);
+    } else if (t < 5.5) {
+      const left = t > 5;                                              // dab on one side, then on the other
+      const sd = left ? -1 : 1;
+      armsPose(rig, left ? [-1.3, -0.6] : [-2.9, 0.6], left ? [-2.9, 0.6] : [-1.3, -0.6]);
+      model.rotation.z = sd * 0.1;
+      model.position.y = abs(s(t * 14)) * 0.04;
+      head.rotation.set(0.45, 0, sd * -0.2);
+    } else {
+      const w = ease((t - 5.5) / 0.15);                                // final pose: leaning back, arms in a V, legs wide
+      model.rotation.x = -0.5 * w;
+      legs[0].rotation.z = -0.3 * w; legs[1].rotation.z = 0.3 * w;
+      armsPose(rig, [-2.9 * w, 0.8 * w + 0.2], [-2.9 * w, 0.8 * w + 0.2]);
+      head.rotation.set(-0.4 * w, 0, 0);
+    }
+  },
 };

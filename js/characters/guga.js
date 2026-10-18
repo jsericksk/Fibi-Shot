@@ -8,11 +8,12 @@ const C = { skin: 0xffe3d2, beak: 0xf2b72c, feet: 0xf0a030, metal: 0xaab0c0 };
 // Colors that change with the look: the suit and hair, the belly and cuffs, the collar, and the eyes on the hood
 const LOOKS = {
   default: { suit: 0x2b2a33, belly: 0xfafaff, hair: 0x2a2630, collar: 0x4a4a55, hoodEye: 0xffffff, hoodPupil: 0x111111 },
+  brasil: { suit: 0xffdc2e, belly: 0x009c3b, hair: 0x2a2630, collar: 0x002776, hoodEye: 0xffffff, hoodPupil: 0x111111 },
   inverse: { suit: 0xf2f2f8, belly: 0x2b2a33, hair: 0xe6e6ee, collar: 0xb8bac4, hoodEye: 0x2b2a33, hoodPupil: 0xffffff },
 };
 
 // Girl in a penguin hoodie with a chain collar.
-// Skins: { look: 'inverse' } swaps black and white, { fibiHat: true } trades the hood for Fibi's hat
+// Skins: { look: 'inverse' } swaps black and white, { look: 'brasil' } wears the Brazil jersey colors, { fibiHat: true } trades the hood for Fibi's hat
 export function buildGuga({ look = 'default', fibiHat = false } = {}) {
   const L = LOOKS[look];
   const rig = createRig();
