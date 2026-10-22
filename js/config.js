@@ -7,7 +7,8 @@ export const MATCH = {
   countdown: 5,               // seconds of "5, 4, 3, 2, 1" before a duel starts (training skips it)
   respawnDelay: 2.5,          // seconds a dead fighter waits before coming back
   spawnProtection: 1.5,       // invulnerability after spawning
-  minSpawnDistance: 20,       // respawn spots are at least this far from the other fighter
+  spawnTries: 200,            // random spots tried per respawn
+  spawnFarthestRatio: 0.85,   // respawns use spots at least this fraction of the farthest one found
   maxHp: 100,
   bulletRange: 140,           // hitscan max distance
   timedSeconds: [180, 300],   // lengths of the timed matches (the other option is unlimited)

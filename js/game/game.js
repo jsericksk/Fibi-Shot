@@ -121,7 +121,7 @@ export class Game {
     scene.add(this.player.root);
     // Online: host starts on the west side and guest on the east side
     const side = !this.multi ? null : opts.role === 'host' ? (x => x < -5) : (x => x > 5);
-    this.place(this.player, null, undefined, side);
+    this.place(this.player, [], undefined, side);
 
     // Duel: one hunting enemy. Training: every other character wanders around as a showcase.
     const defs = this.training ? CHARACTERS.filter(c => c.id !== playerDef.id) : opts.secondEnemy ? [enemyDef, opts.secondEnemy] : [enemyDef];
@@ -131,7 +131,7 @@ export class Game {
       f.unarmed = this.training;
       scene.add(f.root);
       if (this.multi) return new RemotePlayer(this, f);
-      this.place(f, this.player, this.training ? SHOWCASE.spawnDistance : undefined);
+      this.place(f, [this.player], this.training ? SHOWCASE.spawnDistance : undefined);
       return new EnemyAI(this, f, this.player, this.training);
     });
     if (this.gungame) this.player.setWeapon(this.levelWeapon(this.player));   // the bots already took theirs when they spawned
@@ -338,36 +338,36 @@ export class Game {
     document.exitPointerLock?.();
   }
 
-  // Random free spot far from `other`, preferring places out of its line of sight.
-  // If every free spot tried is closer than `minDistance`, the farthest one wins.
-  pickSpawn(other, minDistance = MATCH.minSpawnDistance, filter = null) {
+  // Random free spot among the farthest from every fighter in `others`, preferring places out of their sight.
+  // With an explicit `minDistance` (training showcase) any spot at least that far is fine.
+  pickSpawn(others, minDistance = null, filter = null) {
     const lim = this.arena.half - 2;
-    const valid = [], hidden = [];
-    let farthest = null, farthestDist = -1;
-    for (let i = 0; i < 80; i++) {
+    const spots = [];
+    for (let i = 0; i < MATCH.spawnTries; i++) {
       const x = rand(-lim, lim), z = rand(-lim, lim);
       if (!this.arena.isFree(x, z, 1) || (filter && !filter(x, z))) continue;
-      const spot = { x, z };
-      const dist = other ? other.pos.distanceTo(new THREE.Vector3(x, 0, z)) : Infinity;
-      if (dist > farthestDist) { farthest = spot; farthestDist = dist; }
-      if (dist < minDistance) continue;
-      valid.push(spot);
-      if (other && !this.hasLineOfSight(new THREE.Vector3(x, 1.2, z), other.chestPos())) hidden.push(spot);
+      spots.push({ x, z, dist: Math.min(Infinity, ...others.map(o => o.pos.distanceTo(new THREE.Vector3(x, 0, z)))) });
     }
-    const pool = hidden.length ? hidden : valid;
-    return pool.length ? pool[Math.floor(Math.random() * pool.length)] : farthest ?? { x: 0, z: -lim };
+    if (!spots.length) return { x: 0, z: -lim };
+    const farthest = Math.max(...spots.map(s => s.dist));
+    const minDist = minDistance ?? farthest * MATCH.spawnFarthestRatio;
+    const far = spots.filter(s => s.dist >= Math.min(minDist, farthest));
+    const hidden = far.filter(s => others.every(o => !this.hasLineOfSight(new THREE.Vector3(s.x, 1.2, s.z), o.chestPos())));
+    const pool = hidden.length ? hidden : far;
+    return pool[Math.floor(Math.random() * pool.length)];
   }
 
-  // Puts a fighter at a random spawn, facing the other one
-  place(f, other, minDistance, filter) {
-    const p = this.pickSpawn(other, minDistance, filter);
+  // Puts a fighter at a random spawn, facing the first of the others
+  place(f, others, minDistance, filter) {
+    const p = this.pickSpawn(others, minDistance, filter);
+    const [other] = others;
     f.respawn(p.x, p.z, other ? Math.atan2(other.pos.x - p.x, other.pos.z - p.z) : rand(0, Math.PI * 2));
     f.invuln = 0;
   }
 
   respawn(f) {
-    const other = f.isPlayer ? this.enemy : this.player;
-    this.place(f, other);
+    const others = [this.player, ...this.bots.map(b => b.f)].filter(o => o !== f);
+    this.place(f, others);
     f.invuln = MATCH.spawnProtection;
     if (this.gungame) f.setWeapon(this.levelWeapon(f));   // a kill made while dead only changes the weapon now
     if (!f.isPlayer) this.bots.find(b => b.f === f)?.onRespawn();
