@@ -2,11 +2,13 @@ import * as THREE from 'three';
 import { buildArena, floorHeight } from './arena.js';
 import { MAPS, MAP_LIST } from '../maps.js';
 import { getCharacter, CHARACTERS } from '../characters/index.js';
-import { MATCH, GUNGAME, SURVIVAL, WORLD, CAMERA, EMOTE, EMOTES, SHOWCASE, TRAINING, NET, DOOMSDAY } from '../config.js';
+import { MATCH, GUNGAME, SURVIVAL, WORLD, CAMERA, EMOTE, EMOTES, SHOWCASE, TRAINING, NET } from '../config.js';
 import { Effects } from './effects.js';
 import { Rockets } from './rockets.js';
 import { HealthFlasks } from './pickups.js';
 import { Doomsday } from './doomsday.js';
+import { Anaconda } from './anaconda.js';
+import { Alien } from './alien.js';
 import { Fighter, randomDeathPose } from './fighter.js';
 import { PlayerControls } from './player.js';
 import { EnemyAI } from './enemy.js';
@@ -22,6 +24,14 @@ import { t } from '../i18n.js';
 
 const COUNTDOWN = MATCH.countdown;
 const FAR = MATCH.bulletRange;
+
+// What a map's `easter` setting starts when the match is nearly over (see maps.js). Each egg has update(dt, timeLeft) and
+// `done`, true when the match may end, and optionally shake(camera) and fadeOut()
+const EASTER_EGGS = {
+  doomsday: game => new Doomsday(game.scene, game.arena.earth, game.hud),
+  anaconda: game => new Anaconda(game.scene, game.arena.half),
+  alien: game => new Alien(game.scene, floorHeight(game.arena.colliders, 0, 0, Infinity)),
+};
 
 // One deathmatch, endless or timed: scene, fighters, hit detection, scoring and respawns
 export class Game {
@@ -147,7 +157,7 @@ export class Game {
     this.hud.setBotsLeft(this.survival ? CHARACTERS.length : null);
     this.hud.setTimer(this.training ? null : this.duration, this.timeLeft);
     this.hud.setDoomFlash(0);
-    this.doom = null;
+    this.egg = null;
     this.hud.setScope(false);
     this.hud.showPause(false);
     this.lastEmote = null;
@@ -206,7 +216,7 @@ export class Game {
     // Gravity first: the camera is placed in controls.update, so it must already see this frame's height
     for (const f of fighters) if (!f.remote) f.updateVertical(dt, this.arena.colliders, WORLD.gravity);
     this.controls.update(dt, canAct);
-    this.doom?.shake(this.camera);
+    this.egg?.shake?.(this.camera);
     this.bots.forEach(b => b.update(dt, canAct));
     for (const f of fighters) {
       f.update(dt);
@@ -310,16 +320,16 @@ export class Game {
     if (!this.duration || this.state !== 'playing') return;
     this.timeLeft = Math.max(0, this.timeLeft - dt);
     this.hud.setTimer(this.duration, this.timeLeft);
-    if (this.map.doomsday) this.updateDoomsday(dt);
+    if (this.map.easter) this.updateEasterEgg(dt);
     else if (this.timeLeft === 0) this.finish();
   }
 
-  // Moon easter egg: the nuke goes off in the last seconds and the match ends when the blast arrives
-  updateDoomsday(dt) {
-    if (this.timeLeft > DOOMSDAY.warnSeconds) return;
-    this.doom ??= new Doomsday(this.scene, this.arena.earth, this.hud);
-    this.doom.update(dt);
-    if (this.doom.done) this.finish();
+  // Map easter egg: it starts in the last seconds and the match ends when it says so (the Moon's blast takes a while to arrive)
+  updateEasterEgg(dt) {
+    if (this.timeLeft > MATCH.easterEggSeconds) return;
+    this.egg ??= EASTER_EGGS[this.map.easter](this);
+    this.egg.update(dt, this.timeLeft);
+    if (this.egg.done) this.finish();
   }
 
   // Gun Game: the weapon a fighter holds at its current level
@@ -361,7 +371,7 @@ export class Game {
     this.controls.setScope(false);
     this.controls.mouseDown = false;
     this.hud.toast('', 0);
-    this.doom?.fadeOut();
+    this.egg?.fadeOut?.();
     const { player, enemy } = this.scores;
     const result = winner ? (winner.isPlayer ? 'win' : 'lose') : player > enemy ? 'win' : player < enemy ? 'lose' : 'draw';
     this.hud.showResult(result, player, enemy, [this.player, ...this.bots.map(b => b.f)]);
@@ -622,7 +632,7 @@ export class Game {
       o.geometry?.dispose?.();
       if (o.material?.map) o.material.map.dispose();
     });
-    this.controls = this.bots = this.scene = this.doom = null;
+    this.controls = this.bots = this.scene = this.egg = null;
     this.state = 'idle';
   }
 }

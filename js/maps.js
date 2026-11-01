@@ -9,7 +9,8 @@
 // town { ground } (rows of houses beyond the walls, on that ground color)
 // road { z, width, color } (a flat strip of asphalt across the map, centered on z, with a dashed center line)
 // backdrop: 'rio' | 'mars' | 'snow' | 'desert' | 'volcano' | 'docks' | 'castle' | 'jungle' | 'city' | 'park' | 'graveyard' | 'festival' (far scenery beyond the walls, see game/backdrops.js)
-// doomsday: true (needs `space`) ends timed matches with the Earth being nuked
+// easter: what happens in the last seconds of timed matches and as they end: 'doomsday' (needs `space`) nukes the Earth,
+// 'anaconda' (a giant snake strikes the center) or 'alien' (an alien flies in and lands in the center), see game/doomsday.js, anaconda.js and alien.js
 // health: [x, z] (drawn for the same size as `quarter`) puts a health flask there and another one mirrored on the opposite side
 // Gravity is the same on every map (WORLD.gravity): fighters can jump onto cover up to ~3 m high.
 
@@ -24,7 +25,7 @@ export const MAPS = {
     sun: { color: 0xffffff, intensity: 2.8, pos: [35, 38, -12] },
     floor: 'moon',
     space: true,               // stars and a distant Earth
-    doomsday: true,            // easter egg: timed matches end with a nuke on the Earth
+    easter: 'doomsday',        // timed matches end with a nuke on the Earth
     wall: { color: 0x5c5c66, stripe: 0xdfe6f2 },
     kinds: {
       rock: { color: 0x75757d, trim: null },
@@ -367,6 +368,7 @@ export const MAPS = {
     floor: 'mars',
     wall: { color: 0x8a4328, stripe: null, height: 2.4 },   // a rock rim around the crater
     backdrop: 'mars',
+    easter: 'alien',
     sunDisc: true,
     kinds: {
       rock: { color: 0x9a4a2e, trim: null },
@@ -610,6 +612,7 @@ export const MAPS = {
     floor: 'grass',
     wall: { color: 0x2f6a30, stripe: null, height: 4 },   // a wall of vines around the clearing
     backdrop: 'jungle',
+    easter: 'anaconda',
     sunDisc: true,
     kinds: {
       ruin: { color: 0x7d8a6a, trim: null },
