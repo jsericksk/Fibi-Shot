@@ -1,14 +1,20 @@
 /* change character (training pause menu) */
 .overlay { overflow: auto; }
 #change-panel { display: none; flex-direction: column; align-items: center; gap: 8px; }
-#change-pickers { display: none; flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 12px 40px; margin-top: 6px; }
-#change-pickers.open { display: flex; }
+#change-dialog .dialog-box { max-height: 94vh; max-width: 96vw; }   /* the title and the back button stay put while the characters scroll */
+#change-pickers { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 40px; min-height: 0; overflow-y: auto; }
 .cp-side { display: flex; flex-direction: column; align-items: center; gap: 6px; }
 .cp-side h3 { margin: 0; font-size: 14px; letter-spacing: 2px; text-transform: uppercase; opacity: .8; }
-#change-pickers .picker { gap: 10px; }
+#change-pickers .picker { flex-wrap: wrap; justify-content: center; gap: 10px; max-width: 100%; }   /* wraps instead of running off the screen */
 #change-pickers .card { width: 118px; padding: 6px; background: rgba(255, 255, 255, .1); }
 #change-pickers .card img { height: 150px; }
 #change-pickers .card span { font-size: 14px; }
+@media (max-height: 520px), (max-width: 700px) {
+  #change-pickers .picker { gap: 6px; }
+  #change-pickers .card { width: 78px; padding: 4px; }
+  #change-pickers .card img { height: 84px; }
+  #change-pickers .card span { font-size: 12px; }
+}
 #change-pickers .card { border: 3px solid rgba(255, 255, 255, .25); border-radius: 14px; }
 #change-pickers .card:hover { background: rgba(255, 255, 255, .2); }
 #change-pickers .card.selected { border-color: var(--accent); background: rgba(224, 24, 45, .35); box-shadow: 0 4px 18px rgba(224, 24, 45, .5); }

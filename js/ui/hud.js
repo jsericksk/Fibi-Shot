@@ -16,7 +16,7 @@ const el = {
   scoreP: $('sc-p'), scoreE: $('sc-e'), toast: $('toast'),
   killFeed: $('killfeed'), slots: $('slots'), ammo: $('ammo'), reloadNote: $('reload-note'), reloadIcon: $('reload-icon'),
   crosshair: $('crosshair'), scope: $('scope'), hit: $('hitmarker'), hitText: $('hit-text'),
-  banner: $('banner'), changePanel: $('change-panel'), changePickers: $('change-pickers'), weaponFlash: $('weapon-flash'), score: $('score'), timer: $('timer'), result: $('result'), resultTitle: $('result-title'), resultScore: $('result-score'), resultStats: $('result-stats'), pause: $('pause'), vignette: $('vignette'), doomFlash: $('doom-flash'),
+  banner: $('banner'), changePanel: $('change-panel'), changeDialog: $('change-dialog'), changePickers: $('change-pickers'), weaponFlash: $('weapon-flash'), score: $('score'), timer: $('timer'), result: $('result'), resultTitle: $('result-title'), resultScore: $('result-score'), resultStats: $('result-stats'), pause: $('pause'), vignette: $('vignette'), doomFlash: $('doom-flash'),
 };
 
 // Sensitivity sliders in the pause menu
@@ -111,6 +111,18 @@ export const hud = {
     this.toast('', 0);
     clearTimeout(flashTimer);
     el.weaponFlash.style.display = 'none';
+  },
+
+  // Survival: the next bot takes the enemy plate
+  setEnemy(def) {
+    el.eName.textContent = names[1] = def.name;
+    el.ePortrait.src = thumbnail(def);
+  },
+
+  // Survival: shows how many bots are still to beat in place of the kill score. null is any other mode.
+  setBotsLeft(left) {
+    document.body.classList.toggle('survival', left !== null);
+    if (left !== null) $('sc-left').textContent = t('survival.left', { n: left });
   },
 
   update(player, enemies) {
@@ -227,7 +239,7 @@ export const hud = {
     el.score.classList.toggle('off', on);
     document.querySelector('.plate.right').style.display = on ? 'none' : '';
     el.changePanel.style.display = on ? 'flex' : 'none';
-    el.changePickers.classList.remove('open');
+    el.changeDialog.classList.add('hidden');
     showToggles();   // the language may have changed since the last match
   },
 
@@ -241,7 +253,10 @@ export const hud = {
     el.changePickers.querySelectorAll('.card').forEach(b => {
       b.onclick = () => { if (!b.classList.contains('selected')) fn(b.dataset.side, b.dataset.id); };
     });
-    $('btn-change').onclick = () => el.changePickers.classList.toggle('open');
+    const closeDialog = () => el.changeDialog.classList.add('hidden');
+    $('btn-change').onclick = () => el.changeDialog.classList.remove('hidden');
+    $('btn-change-close').onclick = closeDialog;
+    el.changeDialog.onclick = e => { if (e.target === el.changeDialog) closeDialog(); };   // a click outside the box closes it
   },
 
   // Weapon icon in the center of the screen after switching weapons

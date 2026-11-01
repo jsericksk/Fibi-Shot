@@ -137,9 +137,14 @@
   <div id="hitmarker"><b></b><span id="hit-text"></span></div>
   <div id="banner"></div>
   <div id="weapon-flash"></div>
+  <div id="emote-picker" class="hidden">
+    <h3 data-i18n="emote.title"></h3>
+    <div id="emote-grid"></div>
+    <p id="emote-hint"></p>
+  </div>
 
   <div id="timer"></div>
-  <div id="score"><b id="sc-p">0</b><span>×</span><b id="sc-e">0</b></div>
+  <div id="score"><b id="sc-p">0</b><span>×</span><b id="sc-e">0</b><b id="sc-left"></b></div>
   <div id="toast"></div>
   <div id="killfeed"></div>
   <div id="reload-icon"><svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></div>
@@ -186,7 +191,6 @@
       <button id="btn-bot-emotes" class="toggle"></button>
       <button id="btn-bot-move" class="toggle"></button>
       <button id="btn-change" data-i18n="pause.change"></button>
-      <div id="change-pickers"></div>
     </div>
     <button id="btn-quit" data-i18n="pause.quit"></button>
     <button id="btn-resume" class="primary" data-i18n="pause.resume"></button>
@@ -198,6 +202,15 @@
   <div class="dialog-box">
     <h2 id="match-title"></h2>
     <div id="match-options"></div>
+  </div>
+</div>
+
+<!-- Training: change the player or the enemy character -->
+<div id="change-dialog" class="hidden">
+  <div class="dialog-box">
+    <h2 data-i18n="pause.change"></h2>
+    <div id="change-pickers"></div>
+    <button id="btn-change-close" class="primary alt" data-i18n="lobby.back"></button>
   </div>
 </div>
 

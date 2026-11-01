@@ -24,6 +24,11 @@ export const GUNGAME = {
   order: ['pistol', 'ak47', 'shotgun', 'awp', 'bazooka', 'sword'],   // each kill moves to the next weapon; a kill with the last one wins
 };
 
+// ---- Survival (a duel mode picked in the match length dialog) ----------------------
+export const SURVIVAL = {
+  nextBotDelay: 0.8,          // seconds from a bot falling to the next one stepping in
+};
+
 // ---- Health flasks (two per map, see `health` in maps.js) --------------------------
 export const HEALTH_FLASK = {
   respawnSeconds: 25,         // a taken flask comes back after this long
@@ -95,7 +100,7 @@ export const SLIDE = {
 };
 
 // ---- Emotes (H key) ----------------------------------------------------------
-// Each character has its own emotes; one is picked at random when pressing H.
+// Each character has its own emotes; H opens a grid to pick one (bots and the home screen pick at random).
 // dance: animation name from js/characters/dances.js (ballet, idol, moonwalk, disco, penguin, groove, robot, cancan, hops, backflip, gallop, waku, agent, guitar, melt, leek, funk, waddle, rock) | duration: seconds | sound: mp3 in audio/emotes
 export const EMOTES = {
   fibi: [
@@ -134,6 +139,8 @@ export const EMOTES = {
   default: [{ dance: 'idol', duration: 5, sound: null }],   // characters without their own emotes
 };
 export const EMOTE = {
+  previewSize: [200, 240],    // px of each dance preview in the picker grid
+  previewPadding: 1.3,        // room left above and below the character in a preview (1 = the model fills the cell)
   volume: 0.8,
   fadeOut: 0.15,              // seconds to fade the sound when the dance is cancelled
   hearRange: 35,              // other characters' emote sounds fade out with distance up to this many meters
