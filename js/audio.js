@@ -140,6 +140,13 @@ export const sfx = {
     noise(5, { type: 'lowpass', freq: 380, vol: 1 * vol });
     noise(3, { type: 'lowpass', freq: 160, vol: 0.9 * vol, delay: 0.8 });
   }),
+  // Long angry hiss
+  hiss: safe((vol = 1) => {
+    noise(1.3, { type: 'highpass', freq: 4000, vol: 0.35 * vol });
+    noise(1.3, { type: 'bandpass', freq: 2500, vol: 0.25 * vol });
+  }),
+  // Rising and falling warble, like a flying saucer
+  alien: safe(() => [0, 0.3, 0.6].forEach((delay, i) => tone(i % 2 ? 900 : 500, i % 2 ? 500 : 900, 0.3, { type: 'sine', vol: 0.2, delay }))),
   heal: safe(() => [660, 880, 1320].forEach((f, i) => tone(f, f, 0.16, { type: 'sine', vol: 0.18, delay: i * 0.09 }))),
   hurt: safe(() => { tone(180, 70, 0.2, { type: 'sawtooth', vol: 0.3 }); noise(0.1, { type: 'lowpass', freq: 600, vol: 0.3 }); }),
   beep: safe(high => tone(high ? 880 : 520, high ? 880 : 520, 0.14, { type: 'square', vol: 0.12 })),

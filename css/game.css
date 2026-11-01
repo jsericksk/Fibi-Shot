@@ -101,8 +101,26 @@
 /* Gun Game hands the weapons out (no weapon button) and is won by levels, so the kill score is hidden */
 .gungame #t-weapon, .gungame #weapon-menu, .gungame #score { display: none; }
 
+/* Survival counts the bots left instead of the kills */
+#sc-left { display: none; font-size: .6em; }
+.touch #sc-left { font-size: .85em; }
+.survival #score > :not(#sc-left) { display: none; }
+.survival #sc-left { display: inline; }
+
 /* weapon icon shown after switching */
 #weapon-flash { display: none; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); flex-direction: column; align-items: center; gap: 2px; pointer-events: none; font-weight: 900; text-shadow: 0 2px 0 #000; animation: flash-in .15s ease-out; }
 #weapon-flash svg { width: 130px; fill: #fff; filter: drop-shadow(0 0 6px rgba(224, 24, 45, .8)); }
 @keyframes flash-in { from { opacity: 0; transform: translate(-50%, -50%) scale(.8); } }
 #crosshair.hide { display: none; }
+
+/* emote grid opened with H */
+#emote-picker { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 10px; width: max-content; max-width: 96vw; padding: 12px 16px; background: rgba(10, 0, 3, .78); border: 1px solid #5a1119; border-radius: 18px; text-shadow: 0 2px 0 #000; }
+#emote-picker h3 { margin: 0; font-size: 14px; letter-spacing: 2px; text-transform: uppercase; opacity: .8; }
+#emote-picker p { margin: 0; font-size: 13px; opacity: .75; }
+#emote-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+.emote-cell { display: flex; flex-direction: column; align-items: center; width: min(150px, 21vh); padding: 0 0 2px; border: 3px solid rgba(255, 255, 255, .25); border-radius: 14px; background: rgba(255, 255, 255, .08); color: var(--ink); }
+.emote-cell canvas { display: block; width: 100%; height: auto; }
+.emote-cell b { font-size: 22px; font-weight: 900; line-height: 1; }   /* under the dance so it never covers the character */
+.touch .emote-cell b { display: none; }   /* a tap picks it: no key to show */
+.touch .emote-cell { padding: 0; }
+.emote-cell:hover { border-color: var(--accent); background: rgba(224, 24, 45, .25); }

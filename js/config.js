@@ -12,6 +12,7 @@ export const MATCH = {
   maxHp: 100,
   bulletRange: 140,           // hitscan max distance
   timedSeconds: [180, 300],   // lengths of the timed matches (the other option is unlimited)
+  easterEggSeconds: 15,       // the map easter eggs (see `easter` in maps.js) start when this much time is left
 };
 
 // ---- Links ----------------------------------------------------------------------
@@ -22,6 +23,11 @@ export const LINKS = {
 // ---- Gun Game (a duel mode picked in the match length dialog) --------------------
 export const GUNGAME = {
   order: ['pistol', 'ak47', 'shotgun', 'awp', 'bazooka', 'sword'],   // each kill moves to the next weapon; a kill with the last one wins
+};
+
+// ---- Survival (a duel mode picked in the match length dialog) ----------------------
+export const SURVIVAL = {
+  nextBotDelay: 0.8,          // seconds from a bot falling to the next one stepping in
 };
 
 // ---- Health flasks (two per map, see `health` in maps.js) --------------------------
@@ -36,7 +42,7 @@ export const HEALTH_FLASK = {
 
 // ---- Moon easter egg: a nuke hits the Earth at the end of timed matches ----------
 export const DOOMSDAY = {
-  warnSeconds: 15,            // the bomb goes off when the timer reaches this
+  warnSeconds: MATCH.easterEggSeconds,   // the bomb goes off when the timer reaches this
   shockSeconds: 3,            // the blast keeps travelling after the timer hits zero, then the match ends
   fireballScale: 0.8,         // final fireball size, in Earth radii
   mushroomHeight: 1.5,        // final height of the mushroom cloud, in Earth radii
@@ -47,6 +53,38 @@ export const DOOMSDAY = {
   resultFadeSeconds: 2,       // white screen fading out to show the result
   shake: 0.35,                // camera shake (meters) when the blast reaches the Moon
   volume: 1,
+};
+
+// ---- Jungle easter egg: an anaconda shows up near the end and strikes the center when time is up ----
+export const ANACONDA = {
+  radius: 3,                  // body thickness (m)
+  segments: 64,               // spheres that make up the body
+  tailDistance: 30,           // meters behind the far wall where its tail lies
+  raised: [[0, 0.5, 0], [6, 0.8, 6], [-5, 1, 13], [4, 2.5, 19], [0, 7, 23], [0, 13, 25], [0, 15.5, 28]],   // its spine while it waits, relative to the tail: coiled on the ground, then the head rising over the wall
+  arcHeight: 12,              // how high the body arcs while it strikes
+  groundY: 1.2,               // height of the head when it bites the center
+  popSeconds: 0.7,            // how long it takes to appear
+  swayAmount: 2.5,            // meters its neck sways side to side while waiting
+  swaySpeed: 1.6,
+  strikeSeconds: 0.7,         // how long the lunge takes
+  settleSeconds: 1.5,         // it stays on the center this long before the result screen
+  dustRadius: 14,             // the dust ring thrown up by the impact
+  dustSeconds: 0.8,
+  shake: 0.6,                 // camera shake (m) at the impact
+  shakeSeconds: 0.6,
+};
+
+// ---- Mars easter egg: an alien flies in near the end and lands at the center of the map ----
+export const ALIEN = {
+  size: 1.8,                  // scale of the model (about 2.7 m tall at 1)
+  startRadius: 40,            // it begins its spiral this far from the center
+  startHeight: 18,
+  startAngle: 0.8,            // radians around the center where it appears
+  turns: 1.25,                // laps of the spiral before landing
+  landSeconds: 3,             // it touches down this many seconds before the match ends
+  popSeconds: 0.5,            // how long it takes to appear
+  bob: 1.2,                   // meters it bobs up and down while flying
+  bobSpeed: 3,
 };
 
 // ---- World -----------------------------------------------------------------
@@ -95,7 +133,7 @@ export const SLIDE = {
 };
 
 // ---- Emotes (H key) ----------------------------------------------------------
-// Each character has its own emotes; one is picked at random when pressing H.
+// Each character has its own emotes; H opens a grid to pick one (bots and the home screen pick at random).
 // dance: animation name from js/characters/dances.js (ballet, idol, moonwalk, disco, penguin, groove, robot, cancan, hops, backflip, gallop, waku, agent, guitar, melt, leek, funk, waddle, rock) | duration: seconds | sound: mp3 in audio/emotes
 export const EMOTES = {
   fibi: [
@@ -134,6 +172,8 @@ export const EMOTES = {
   default: [{ dance: 'idol', duration: 5, sound: null }],   // characters without their own emotes
 };
 export const EMOTE = {
+  previewSize: [200, 240],    // px of each dance preview in the picker grid
+  previewPadding: 1.3,        // room left above and below the character in a preview (1 = the model fills the cell)
   volume: 0.8,
   fadeOut: 0.15,              // seconds to fade the sound when the dance is cancelled
   hearRange: 35,              // other characters' emote sounds fade out with distance up to this many meters

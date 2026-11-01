@@ -4,6 +4,7 @@ import { sfx } from '../audio.js';
 import { settings } from '../settings.js';
 import { WEAPON_ORDER } from './weapons.js';
 import { CAMERA, PLAYER, SLIDE, EMOTES } from '../config.js';
+import { emotePicker } from '../ui/emote-picker.js';
 
 const BASE_FOV = CAMERA.fov;
 const JUMP_SPEED = PLAYER.jumpSpeed;
@@ -46,7 +47,7 @@ export class PlayerControls {
       if (this.f.emote && ['KeyW', 'KeyA', 'KeyS', 'KeyD'].includes(e.code)) this.f.emote = null;   // a fresh move key ends the dance
       if (e.code === 'KeyF') this.slide();
       if (e.code === 'KeyH') this.emote();
-      if (idx >= 0) this.pickWeapon(WEAPON_ORDER[idx]);
+      if (idx >= 0) emotePicker.isOpen ? emotePicker.pick(idx) : this.pickWeapon(WEAPON_ORDER[idx]);   // the number keys choose from the emote grid while it is open
       if (e.code === 'Space') this.jump();
       if (e.code === 'KeyR') this.reload();
     };
@@ -150,8 +151,9 @@ export class PlayerControls {
     if (this.game.canAct && !this.f.dead && this.f.startReload()) { sfx.reload(); this.setScope(false); }
   }
 
+  // Opens the emote grid (or closes it if it is already open)
   emote() {
-    if (this.game.canAct && !this.f.dead && !this.f.emote) this.startEmote();
+    if (this.game.canAct && !this.f.dead) emotePicker.toggle(this.f.def, i => this.startEmote(i));
   }
 
   // Weapons can be changed freely during the countdown too (not in Gun Game)
@@ -173,10 +175,10 @@ export class PlayerControls {
     this.game.hud.setScope(on, on && this.f.weapon.scoped.sniper);
   }
 
-  // Random dance from the character's list (the camera stays where it is)
-  startEmote() {
+  // Dance number `index` of the character's list (the camera stays where it is)
+  startEmote(index) {
     const list = EMOTES[this.f.def.id] ?? EMOTES.default;
-    this.f.emote = { ...list[Math.floor(Math.random() * list.length)], t: 0, id: performance.now() };   // id lets the friend tell dances apart
+    this.f.emote = { ...list[index], t: 0, id: performance.now() };   // id lets the friend tell dances apart
     this.setScope(false);
   }
 

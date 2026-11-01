@@ -2,17 +2,20 @@ import * as THREE from 'three';
 import { buildArena, floorHeight } from './arena.js';
 import { MAPS, MAP_LIST } from '../maps.js';
 import { getCharacter, CHARACTERS } from '../characters/index.js';
-import { MATCH, GUNGAME, WORLD, CAMERA, EMOTE, EMOTES, SHOWCASE, TRAINING, NET, DOOMSDAY } from '../config.js';
+import { MATCH, GUNGAME, SURVIVAL, WORLD, CAMERA, EMOTE, EMOTES, SHOWCASE, TRAINING, NET } from '../config.js';
 import { Effects } from './effects.js';
 import { Rockets } from './rockets.js';
 import { HealthFlasks } from './pickups.js';
 import { Doomsday } from './doomsday.js';
+import { Anaconda } from './anaconda.js';
+import { Alien } from './alien.js';
 import { Fighter, randomDeathPose } from './fighter.js';
 import { PlayerControls } from './player.js';
 import { EnemyAI } from './enemy.js';
 import { RemotePlayer } from './remote.js';
 import { WEAPONS } from './weapons.js';
 import { net } from '../net.js';
+import { emotePicker } from '../ui/emote-picker.js';
 import { animateRig } from '../characters/rig.js';
 import { sfx } from '../audio.js';
 import { isSwitchingFullscreen, enterFullscreen } from '../fullscreen.js';
@@ -21,6 +24,14 @@ import { t } from '../i18n.js';
 
 const COUNTDOWN = MATCH.countdown;
 const FAR = MATCH.bulletRange;
+
+// What a map's `easter` setting starts when the match is nearly over (see maps.js). Each egg has update(dt, timeLeft) and
+// `done`, true when the match may end, and optionally shake(camera) and fadeOut()
+const EASTER_EGGS = {
+  doomsday: game => new Doomsday(game.scene, game.arena.earth, game.hud),
+  anaconda: game => new Anaconda(game.scene, game.arena.half),
+  alien: game => new Alien(game.scene, floorHeight(game.arena.colliders, 0, 0, Infinity)),
+};
 
 // One deathmatch, endless or timed: scene, fighters, hit detection, scoring and respawns
 export class Game {
@@ -67,7 +78,10 @@ export class Game {
 
   setPaused(on) {
     this.paused = on;
-    if (on) sfx.stopAll(EMOTE.fadeOut);
+    if (on) {
+      sfx.stopAll(EMOTE.fadeOut);
+      emotePicker.close();
+    }
     this.hud.showPause(on);
   }
 
@@ -87,13 +101,14 @@ export class Game {
     this.hud.showPause(true);
   }
 
-  // mode: 'duel' (vs bot) | 'training' (showcase) | 'multi' (vs a friend over the network, opts.role = host | guest)
+  // mode: 'duel' (vs bot, opts.variant = gungame | survival) | 'training' (showcase) | 'multi' (vs a friend over the network, opts.role = host | guest)
   start(playerDef, enemyDef, mode = 'duel', mapId = MAP_LIST[0].id, opts = {}) {
     this.cleanup();
     this.setup = { mode, mapId, opts };   // to play the same match again
     this.training = mode === 'training';
     this.multi = mode === 'multi';
-    this.gungame = mode === 'duel' && !!opts.gungame;
+    this.gungame = mode === 'duel' && opts.variant === 'gungame';
+    this.survival = mode === 'duel' && opts.variant === 'survival';
     const map = this.map = MAPS[mapId] ?? MAP_LIST[0];
     this.playerDef = playerDef;
     this.enemyDef = enemyDef;
@@ -124,16 +139,9 @@ export class Game {
     this.place(this.player, [], undefined, side);
 
     // Duel: one hunting enemy. Training: every other character wanders around as a showcase.
-    const defs = this.training ? CHARACTERS.filter(c => c.id !== playerDef.id) : opts.secondEnemy ? [enemyDef, opts.secondEnemy] : [enemyDef];
-    this.bots = defs.map(def => {
-      const f = new Fighter(def, false, arena.half);
-      f.training = this.training;
-      f.unarmed = this.training;
-      scene.add(f.root);
-      if (this.multi) return new RemotePlayer(this, f);
-      this.place(f, [this.player], this.training ? SHOWCASE.spawnDistance : undefined);
-      return new EnemyAI(this, f, this.player, this.training);
-    });
+    // Survival: every character in turn, starting with the first one.
+    const defs = this.training ? CHARACTERS.filter(c => c.id !== playerDef.id) : this.survival ? [CHARACTERS[0]] : opts.secondEnemy ? [enemyDef, opts.secondEnemy] : [enemyDef];
+    this.bots = defs.map(def => this.makeBot(def));
     if (this.gungame) this.player.setWeapon(this.levelWeapon(this.player));   // the bots already took theirs when they spawned
     this.enemy = this.bots[0].f;
     const look = this.multi ? { x: 0, z: 0 } : this.enemy.pos;   // online: face the middle of the map
@@ -146,9 +154,10 @@ export class Game {
 
     this.hud.setup(playerDef, this.training ? [enemyDef] : defs, this.gungame);
     this.hud.setScore(0, 0);
+    this.hud.setBotsLeft(this.survival ? CHARACTERS.length : null);
     this.hud.setTimer(this.training ? null : this.duration, this.timeLeft);
     this.hud.setDoomFlash(0);
-    this.doom = null;
+    this.egg = null;
     this.hud.setScope(false);
     this.hud.showPause(false);
     this.lastEmote = null;
@@ -178,6 +187,17 @@ export class Game {
     this.loop();
   }
 
+  // An opponent of the player: the friend online, a bot otherwise
+  makeBot(def) {
+    const f = new Fighter(def, false, this.arena.half);
+    f.training = this.training;
+    f.unarmed = this.training;
+    this.scene.add(f.root);
+    if (this.multi) return new RemotePlayer(this, f);
+    this.place(f, [this.player], this.training ? SHOWCASE.spawnDistance : undefined);
+    return new EnemyAI(this, f, this.player, this.training);
+  }
+
   loop = () => {
     if (!this.active) return;
     this.raf = requestAnimationFrame(this.loop);
@@ -196,7 +216,7 @@ export class Game {
     // Gravity first: the camera is placed in controls.update, so it must already see this frame's height
     for (const f of fighters) if (!f.remote) f.updateVertical(dt, this.arena.colliders, WORLD.gravity);
     this.controls.update(dt, canAct);
-    this.doom?.shake(this.camera);
+    this.egg?.shake?.(this.camera);
     this.bots.forEach(b => b.update(dt, canAct));
     for (const f of fighters) {
       f.update(dt);
@@ -300,16 +320,16 @@ export class Game {
     if (!this.duration || this.state !== 'playing') return;
     this.timeLeft = Math.max(0, this.timeLeft - dt);
     this.hud.setTimer(this.duration, this.timeLeft);
-    if (this.map.doomsday) this.updateDoomsday(dt);
+    if (this.map.easter) this.updateEasterEgg(dt);
     else if (this.timeLeft === 0) this.finish();
   }
 
-  // Moon easter egg: the nuke goes off in the last seconds and the match ends when the blast arrives
-  updateDoomsday(dt) {
-    if (this.timeLeft > DOOMSDAY.warnSeconds) return;
-    this.doom ??= new Doomsday(this.scene, this.arena.earth, this.hud);
-    this.doom.update(dt);
-    if (this.doom.done) this.finish();
+  // Map easter egg: it starts in the last seconds and the match ends when it says so (the Moon's blast takes a while to arrive)
+  updateEasterEgg(dt) {
+    if (this.timeLeft > MATCH.easterEggSeconds) return;
+    this.egg ??= EASTER_EGGS[this.map.easter](this);
+    this.egg.update(dt, this.timeLeft);
+    if (this.egg.done) this.finish();
   }
 
   // Gun Game: the weapon a fighter holds at its current level
@@ -324,13 +344,34 @@ export class Game {
     else killer.setWeapon(id);
   }
 
+  // Survival: one life. Every bot beaten shows how many are left, and beating the last one wins
+  onSurvivalKill(killer, victim) {
+    if (victim.isPlayer) return this.finish(killer);
+    const left = CHARACTERS.length - this.scores.player;
+    this.hud.setBotsLeft(left);
+    if (!left) this.finish(killer);
+  }
+
+  // Survival: the next character steps in where the last one fell
+  nextBot() {
+    const [old] = this.bots;
+    old.dispose();
+    this.scene.remove(old.f.root);
+    const def = CHARACTERS[this.scores.player];
+    this.bots = [this.makeBot(def)];
+    this.enemy = this.bots[0].f;
+    this.enemy.invuln = MATCH.spawnProtection;
+    this.hud.setEnemy(def);
+  }
+
   // Time is up or Gun Game was won: freeze the match and show who won
   finish(winner = null) {
     this.state = 'over';
+    emotePicker.close();
     this.controls.setScope(false);
     this.controls.mouseDown = false;
     this.hud.toast('', 0);
-    this.doom?.fadeOut();
+    this.egg?.fadeOut?.();
     const { player, enemy } = this.scores;
     const result = winner ? (winner.isPlayer ? 'win' : 'lose') : player > enemy ? 'win' : player < enemy ? 'lose' : 'draw';
     this.hud.showResult(result, player, enemy, [this.player, ...this.bots.map(b => b.f)]);
@@ -366,6 +407,7 @@ export class Game {
   }
 
   respawn(f) {
+    if (this.survival && !f.isPlayer) return this.nextBot();
     const others = [this.player, ...this.bots.map(b => b.f)].filter(o => o !== f);
     this.place(f, others);
     f.invuln = MATCH.spawnProtection;
@@ -533,7 +575,7 @@ export class Game {
   onKill(killer, victim) {
     killer.stats.kills++;
     victim.stats.deaths++;
-    victim.respawnT = MATCH.respawnDelay;
+    victim.respawnT = this.survival && !victim.isPlayer ? SURVIVAL.nextBotDelay : MATCH.respawnDelay;
     victim.deathPose = this.freeDeathPose(victim);
     const floorAt = (x, z, y) => floorHeight(this.arena.colliders, x, z, y);
     this.effects.throwOff(victim.guns[victim.weaponId].group, victim.yaw, floorAt);
@@ -542,9 +584,11 @@ export class Game {
     if (killer.isPlayer) this.scores.player++; else this.scores.enemy++;
     this.hud.setScore(this.scores.player, this.scores.enemy);
     if (this.gungame) this.levelUp(killer);
+    if (this.survival) this.onSurvivalKill(killer, victim);
     if (this.state === 'over') return;   // that kill won the match: the result screen plays its own sound
 
     if (victim.isPlayer) {
+      emotePicker.close();
       this.controls.setScope(false);
       this.controls.mouseDown = false;
       if (!this.multi) this.bots.find(b => b.f === killer)?.taunt();
@@ -576,6 +620,7 @@ export class Game {
 
   cleanup() {
     this.active = false;
+    emotePicker.close();
     clearTimeout(this.leaveTimer);
     net.setHandler(null);
     net.setCloseHandler(null);
@@ -587,7 +632,7 @@ export class Game {
       o.geometry?.dispose?.();
       if (o.material?.map) o.material.map.dispose();
     });
-    this.controls = this.bots = this.scene = this.doom = null;
+    this.controls = this.bots = this.scene = this.egg = null;
     this.state = 'idle';
   }
 }

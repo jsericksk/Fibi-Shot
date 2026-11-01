@@ -261,6 +261,59 @@ function lavaFloor(half) {
   return { tex, roughness: 0.9, metalness: 0 };
 }
 
+// Dark damp earth with patches of moss, pebbles and a few flat stones
+function graveyardFloor(half) {
+  const S = 512;
+  const c = document.createElement('canvas');
+  c.width = c.height = S;
+  const g = c.getContext('2d');
+  g.fillStyle = '#2a2d27'; g.fillRect(0, 0, S, S);
+  for (let i = 0; i < 60; i++) {
+    const x = Math.random() * S, y = Math.random() * S, r = 18 + Math.random() * 50;
+    const grad = g.createRadialGradient(x, y, 0, x, y, r);
+    grad.addColorStop(0, Math.random() < 0.5 ? 'rgba(50,80,50,0.5)' : 'rgba(20,18,18,0.5)');
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = grad;
+    g.fillRect(x - r, y - r, r * 2, r * 2);
+  }
+  for (let i = 0; i < 3500; i++) {
+    g.fillStyle = Math.random() < 0.5 ? 'rgba(90,100,85,0.35)' : 'rgba(10,10,10,0.35)';
+    g.fillRect(Math.random() * S, Math.random() * S, 2, 2);
+  }
+  for (let i = 0; i < 14; i++) {
+    g.fillStyle = 'rgba(130,134,128,0.55)';
+    g.fillRect(Math.random() * S, Math.random() * S, 10 + Math.random() * 14, 8 + Math.random() * 8);
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(half / 14, half / 14);
+  tex.anisotropy = 4;
+  return { tex, roughness: 1, metalness: 0 };
+}
+
+// Pale temple gravel raked in parallel lines, with stepping stones
+function gravelFloor(half) {
+  const S = 512;
+  const c = document.createElement('canvas');
+  c.width = c.height = S;
+  const g = c.getContext('2d');
+  g.fillStyle = '#9a948a'; g.fillRect(0, 0, S, S);
+  for (let i = 0; i < 6000; i++) {
+    g.fillStyle = Math.random() < 0.5 ? 'rgba(60,56,50,0.35)' : 'rgba(225,220,208,0.35)';
+    g.fillRect(Math.random() * S, Math.random() * S, 2, 2);
+  }
+  g.strokeStyle = 'rgba(70,64,58,0.35)';
+  g.lineWidth = 2;
+  for (let y = 8; y < S; y += 16) { g.beginPath(); g.moveTo(0, y); g.lineTo(S, y); g.stroke(); }
+  g.fillStyle = '#6a665e';
+  for (const [x, y] of [[60, 70], [200, 150], [340, 90], [450, 230], [120, 300], [290, 360], [420, 440], [70, 450]]) g.fillRect(x, y, 56, 40);
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(half / 12, half / 12);
+  tex.anisotropy = 4;
+  return { tex, roughness: 1, metalness: 0 };
+}
+
 // Grey flagstones with uneven joints and moss in the cracks
 function cobbleFloor(half) {
   const S = 512, N = 8, T = S / N;
@@ -331,7 +384,7 @@ function checkerFloor(half) {
   return { tex, roughness: 0.8, metalness: 0 };
 }
 
-const FLOORS = { tiles: tilesFloor, moon: moonFloor, grass: grassFloor, concrete: concreteFloor, pavers: paversFloor, rio: rioFloor, mars: marsFloor, snow: snowFloor, sand: sandFloor, lava: lavaFloor, cobble: cobbleFloor, asphalt: asphaltFloor, checker: checkerFloor };
+const FLOORS = { tiles: tilesFloor, moon: moonFloor, grass: grassFloor, concrete: concreteFloor, pavers: paversFloor, rio: rioFloor, mars: marsFloor, snow: snowFloor, sand: sandFloor, lava: lavaFloor, graveyard: graveyardFloor, gravel: gravelFloor, cobble: cobbleFloor, asphalt: asphaltFloor, checker: checkerFloor };
 
 // Trees all around the playable area, beyond the walls (instanced: two draw calls for the whole forest)
 function addForest(scene, { count, spread }, half) {
@@ -425,11 +478,11 @@ function addCeiling(scene, map, blockers, half) {
   }
 }
 
-// A sun disc with a soft glow, high in the sky where the light comes from (fog does not affect it)
-function addSunDisc(scene, { pos }) {
+// A sun disc (or a moon, with another color) with a soft glow, high in the sky where the light comes from (fog does not affect it)
+function addSunDisc(scene, { pos }, color = 0xfff4c8) {
   const dir = new THREE.Vector3(...pos).normalize().multiplyScalar(200);
   const disc = (radius, opacity) => {
-    const mesh = new THREE.Mesh(new THREE.SphereGeometry(radius, 24, 16), new THREE.MeshBasicMaterial({ color: 0xfff4c8, transparent: opacity < 1, opacity, depthWrite: false, fog: false }));
+    const mesh = new THREE.Mesh(new THREE.SphereGeometry(radius, 24, 16), new THREE.MeshBasicMaterial({ color, transparent: opacity < 1, opacity, depthWrite: false, fog: false }));
     mesh.position.copy(dir);
     scene.add(mesh);
   };
@@ -437,8 +490,8 @@ function addSunDisc(scene, { pos }) {
   disc(15, 0.25);
 }
 
-// Stars and a distant Earth for space maps (fog does not affect them). Returns the Earth mesh
-function addSpace(scene) {
+// Night sky: stars spread over the upper half (fog does not affect them)
+function addStars(scene) {
   const pts = [];
   for (let i = 0; i < 900; i++) {
     const v = new THREE.Vector3(Math.random() - 0.5, Math.random() * 0.9 + 0.02, Math.random() - 0.5).normalize().multiplyScalar(180);
@@ -447,7 +500,11 @@ function addSpace(scene) {
   const geo = new THREE.BufferGeometry();
   geo.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
   scene.add(new THREE.Points(geo, new THREE.PointsMaterial({ color: 0xffffff, size: 1.4, sizeAttenuation: false, fog: false })));
+}
 
+// Stars and a distant Earth for space maps. Returns the Earth mesh
+function addSpace(scene) {
+  addStars(scene);
   const c = document.createElement('canvas');
   c.width = c.height = 256;
   const g = c.getContext('2d');
@@ -555,7 +612,8 @@ export function buildArena(scene, map) {
   if (map.ceiling) addCeiling(scene, map, blockers, half);
   if (map.road) addRoad(scene, map.road, half);
   if (map.town) addTown(scene, map.town, half);
-  if (map.sunDisc) addSunDisc(scene, map.sun);
+  if (map.stars) addStars(scene);
+  if (map.sunDisc) addSunDisc(scene, map.sun, map.sunDisc.color);
   BACKDROPS[map.backdrop]?.(scene, half);
 
   // True when a circle of `margin` radius at (x, z) does not touch any cover

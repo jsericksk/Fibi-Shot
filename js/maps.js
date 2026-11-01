@@ -3,12 +3,14 @@
 // Optional: wall.height (default 3.5), wall.stripe (null = none), kinds[].split (color of the top half of a stacked pair),
 // kinds[].crown (leaves on top of a tree), forest { count, spread } (trees beyond the walls),
 // ceiling { height, color } (indoor map: needs lights; light panels are drawn over `lights.at`), lights.y (default 3)
-// sunDisc: true (draws a sun in the sky where `sun.pos` points)
+// sunDisc: true (draws a sun in the sky where `sun.pos` points) or { color } for another color, like a moon
+// stars: true (a starry sky, for night maps)
 // half (half the map size in meters, default WORLD.arenaHalf)
 // town { ground } (rows of houses beyond the walls, on that ground color)
 // road { z, width, color } (a flat strip of asphalt across the map, centered on z, with a dashed center line)
-// backdrop: 'rio' | 'mars' | 'snow' | 'desert' | 'volcano' | 'docks' | 'castle' | 'jungle' | 'city' | 'park' (far scenery beyond the walls, see game/backdrops.js)
-// doomsday: true (needs `space`) ends timed matches with the Earth being nuked
+// backdrop: 'rio' | 'mars' | 'snow' | 'desert' | 'volcano' | 'docks' | 'castle' | 'jungle' | 'city' | 'park' | 'graveyard' | 'festival' (far scenery beyond the walls, see game/backdrops.js)
+// easter: what happens in the last seconds of timed matches and as they end: 'doomsday' (needs `space`) nukes the Earth,
+// 'anaconda' (a giant snake strikes the center) or 'alien' (an alien flies in and lands in the center), see game/doomsday.js, anaconda.js and alien.js
 // health: [x, z] (drawn for the same size as `quarter`) puts a health flask there and another one mirrored on the opposite side
 // Gravity is the same on every map (WORLD.gravity): fighters can jump onto cover up to ~3 m high.
 
@@ -23,7 +25,7 @@ export const MAPS = {
     sun: { color: 0xffffff, intensity: 2.8, pos: [35, 38, -12] },
     floor: 'moon',
     space: true,               // stars and a distant Earth
-    doomsday: true,            // easter egg: timed matches end with a nuke on the Earth
+    easter: 'doomsday',        // timed matches end with a nuke on the Earth
     wall: { color: 0x5c5c66, stripe: 0xdfe6f2 },
     kinds: {
       rock: { color: 0x75757d, trim: null },
@@ -123,6 +125,104 @@ export const MAPS = {
     ],
     center: [
       [0, 0, 4.4, 4.4, 2.4, 'rock'],
+    ],
+  },
+
+  graveyard: {
+    id: 'graveyard',
+    name: 'Cemitério',
+    preview: 'linear-gradient(#151429 0 38%, #3a4a56 38% 54%, #2a2d27 54%)',
+    half: 58,
+    sky: 0x151429,
+    fog: [40, 230],
+    hemi: [0x9a9ccc, 0x1c2220, 1.5],
+    sun: { color: 0xaebcff, intensity: 1.5, pos: [-40, 28, -60] },
+    floor: 'graveyard',
+    wall: { color: 0x22232b, stripe: null, height: 3.4 },   // an iron fence around the grounds
+    backdrop: 'graveyard',
+    stars: true,
+    sunDisc: { color: 0xe6ecff },   // a pale moon
+    kinds: {
+      crypt: { color: 0x5d6170, trim: null, split: 0x383a46 },   // mausoleum with a dark roof
+      tomb: { color: 0x8a8d96, trim: null },
+      angel: { color: 0x9aa0ac, trim: 0x7dffb0 },
+      deadtree: { color: 0x3a2f2c, trim: null },
+      fence: { color: 0x2c2c36, trim: null },
+      mound: { color: 0x4a3c33, trim: null },
+      lamp: { color: 0x2a2a32, trim: 0xffd27a },
+    },
+    lights: { color: 0x7dffb0, intensity: 28, distance: 26, y: 2, at: [[-24, -24], [24, -24], [-24, 24], [24, 24], [0, 0]] },
+    health: [16, -8],
+    quarter: [
+      [8, 8, 4, 4, 2.8, 'crypt'],
+      [20, 6, 6, 1, 1.3, 'fence'],
+      [6, 20, 1, 6, 1.3, 'fence'],
+      [18, 18, 5, 5, 3.2, 'crypt'],
+      [27, 11, 1.8, 1, 1.5, 'tomb'],
+      [11, 27, 1, 1.8, 1.5, 'tomb'],
+      [13, 13, 1.6, 0.8, 1.4, 'tomb'],
+      [25, 25, 1.4, 1.4, 5.2, 'deadtree'],
+      [14, 3, 1.2, 1.2, 3.4, 'lamp'],
+      [3, 14, 1.2, 1.2, 3.4, 'lamp'],
+      [24, 3, 3, 2, 0.9, 'mound'],
+      [13, 22, 1.6, 0.8, 1.4, 'tomb'],
+      [22, 13, 0.8, 1.6, 1.4, 'tomb'],
+      [28, 20, 1.4, 1.4, 5.2, 'deadtree'],
+      [20, 28, 1.4, 1.4, 5.2, 'deadtree'],
+      [2, 26, 3, 2, 0.9, 'mound'],
+    ],
+    center: [
+      [0, 0, 5, 5, 1.0, 'mound'],
+      [0, 0, 1.4, 1.4, 4, 'angel'],
+    ],
+  },
+
+  festival: {
+    id: 'festival',
+    name: 'Festival',
+    preview: 'linear-gradient(#0c1226 0 38%, #ff9a4a 38% 50%, #9a948a 50%)',
+    half: 58,
+    sky: 0x0c1226,
+    fog: [50, 260],
+    hemi: [0x9aa8e0, 0x2a2024, 1.1],
+    sun: { color: 0xb4c4ff, intensity: 1.1, pos: [30, 50, -15] },
+    floor: 'gravel',
+    wall: { color: 0x3a2a24, stripe: 0xff7a3a, height: 3.2 },   // a wooden fence with a string of lanterns
+    backdrop: 'festival',
+    stars: true,
+    sunDisc: { color: 0xfff0d0 },   // the full moon
+    kinds: {
+      stall: { color: 0x8a5a35, trim: null, split: 0xc8342a },   // wooden food stall under a red awning
+      lantern: { color: 0x6a6a72, trim: 0xffa24a },
+      sakura: { color: 0x4a3330, trim: null, crown: 0xf4b4d0 },
+      drum: { color: 0x7a2a22, trim: 0xff9a4a },
+      rock: { color: 0x4a4a52, trim: null },
+      gate: { color: 0xb83a2a, trim: null },
+      deck: { color: 0x6a4a30, trim: null },
+    },
+    lights: { color: 0xffa860, intensity: 60, distance: 34, y: 3, at: [[-24, -24], [24, -24], [-24, 24], [24, 24], [0, 0]] },
+    health: [-8, 18],
+    quarter: [
+      [9, 8, 4, 3, 2.6, 'stall'],
+      [21, 6, 6, 2, 2.4, 'stall'],
+      [6, 21, 2, 6, 2.4, 'stall'],
+      [18, 18, 1.4, 1.4, 5.5, 'sakura'],
+      [26, 12, 5, 1, 1.2, 'gate'],
+      [12, 26, 1, 5, 1.2, 'gate'],
+      [14, 3, 1.2, 1.2, 3, 'lantern'],
+      [3, 14, 1.2, 1.2, 3, 'lantern'],
+      [25, 25, 3, 3, 2.2, 'rock'],
+      [14, 13, 2, 2, 1.4, 'drum'],
+      [27, 3, 2, 2, 1.6, 'drum'],
+      [21, 15, 2, 2, 1.6, 'drum'],
+      [15, 23, 2.4, 2.4, 1.8, 'rock'],
+      [28, 20, 1.4, 1.4, 5.5, 'sakura'],
+      [20, 28, 1.4, 1.4, 5.5, 'sakura'],
+      [4, 27, 4, 3, 2.6, 'stall'],
+    ],
+    center: [
+      [0, 0, 6, 6, 0.8, 'deck'],
+      [0, 0, 1.4, 1.4, 5.5, 'sakura'],
     ],
   },
 
@@ -268,6 +368,7 @@ export const MAPS = {
     floor: 'mars',
     wall: { color: 0x8a4328, stripe: null, height: 2.4 },   // a rock rim around the crater
     backdrop: 'mars',
+    easter: 'alien',
     sunDisc: true,
     kinds: {
       rock: { color: 0x9a4a2e, trim: null },
@@ -511,6 +612,7 @@ export const MAPS = {
     floor: 'grass',
     wall: { color: 0x2f6a30, stripe: null, height: 4 },   // a wall of vines around the clearing
     backdrop: 'jungle',
+    easter: 'anaconda',
     sunDisc: true,
     kinds: {
       ruin: { color: 0x7d8a6a, trim: null },

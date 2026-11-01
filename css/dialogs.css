@@ -1,6 +1,6 @@
 /* match type dialog */
-#match-dialog, #confirm-dialog { position: fixed; inset: 0; z-index: 10; display: flex; align-items: center; justify-content: center; background: rgba(10, 0, 3, .75); }
-#match-dialog.hidden, #confirm-dialog.hidden { display: none; }
+#match-dialog, #change-dialog, #confirm-dialog { position: fixed; inset: 0; z-index: 10; display: flex; align-items: center; justify-content: center; background: rgba(10, 0, 3, .75); }
+#match-dialog.hidden, #change-dialog.hidden, #confirm-dialog.hidden { display: none; }
 #confirm-dialog { z-index: 20; }
 #confirm-title.hidden { display: none; }
 #confirm-title + #confirm-text { font-size: 16px; font-weight: 600; opacity: .85; }

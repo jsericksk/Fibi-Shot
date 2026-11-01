@@ -6,20 +6,26 @@ import { clamp } from '../utils.js';
 
 const VOICE = 'home';
 
+// Soft-lit scene and camera framing a whole character, shared by every stage-like view
+export function buildStageScene(aspect) {
+  const scene = new THREE.Scene();
+  scene.add(new THREE.HemisphereLight(0xffffff, 0xb8c4ea, 1.9));
+  const sun = new THREE.DirectionalLight(0xffffff, 1.2);
+  sun.position.set(2, 4, 5);
+  scene.add(sun);
+  const camera = new THREE.PerspectiveCamera(34, aspect, 0.1, 50);
+  camera.position.set(0, 2.3, 5.2);
+  camera.lookAt(0, 0.95, 0);
+  return { scene, camera };
+}
+
 // Live 3D character of the home screen: it is turned by dragging and, with an emote button, it can dance.
 // Returns show(def) to switch the character.
 export function initHomeStage(canvas, emoteButton) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
   renderer.setClearColor(0x000000, 0);
 
-  const scene = new THREE.Scene();
-  scene.add(new THREE.HemisphereLight(0xffffff, 0xb8c4ea, 1.9));
-  const sun = new THREE.DirectionalLight(0xffffff, 1.2);
-  sun.position.set(2, 4, 5);
-  scene.add(sun);
-  const camera = new THREE.PerspectiveCamera(34, canvas.width / canvas.height, 0.1, 50);
-  camera.position.set(0, 2.3, 5.2);
-  camera.lookAt(0, 0.95, 0);
+  const { scene, camera } = buildStageScene(canvas.width / canvas.height);
 
   const rigs = {};   // built once per look
   let def = null, rig = null, emote = null, yaw = HOME_STAGE.startYaw;

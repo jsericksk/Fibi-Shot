@@ -338,4 +338,71 @@ function addPark(scene, half) {
   }
 }
 
-export const BACKDROPS = { rio: addRio, mars: addMars, snow: addSnow, desert: addDesert, volcano: addVolcano, docks: addDocks, castle: addCastle, jungle: addJungle, city: addCity, park: addPark };
+// Unlit glowing material for lamps and windows (lit surfaces would look dull in the dark)
+const lamp = color => new THREE.MeshBasicMaterial({ color });
+
+// Night graveyard: dark hills, bare trees beyond the fence and a gothic chapel with lit windows far ahead (-Z)
+function addGraveyard(scene, half) {
+  addGround(scene, 0x181b1f);
+  for (let i = 0; i < 12; i++) {
+    const [x, z] = ringPoint(half + 70, 210);
+    addHill(scene, [x, z, rand(50, 90), rand(14, 34), rand(40, 70)], 0x1c2228);
+  }
+  const count = 70, trunks = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.25, 0.5, 1, 6), M(0x26201f), count);
+  const boughs = new THREE.InstancedMesh(new THREE.ConeGeometry(1, 1, 5), M(0x2d2524), count);
+  const m = new THREE.Matrix4();
+  for (let i = 0; i < count; i++) {
+    const [x, z] = ringPoint(half + 6, half + 90), h = rand(7, 13);
+    trunks.setMatrixAt(i, m.makeScale(1, h, 1).setPosition(x, h / 2, z));
+    boughs.setMatrixAt(i, m.makeScale(h * 0.28, h * 0.6, h * 0.28).setPosition(x, h * 0.85, z));   // a thin spiky crown: the tree has no leaves
+  }
+  scene.add(trunks, boughs);
+
+  const chapel = new THREE.Group();
+  chapel.position.set(-35, 0, -150);
+  chapel.scale.setScalar(2);
+  scene.add(chapel);
+  const stone = M(0x3a3d46), roof = M(0x1d1f26);
+  add(chapel, box, stone, [0, 9, 0], [26, 18, 14]);
+  add(chapel, new THREE.ConeGeometry(1, 1, 4), roof, [0, 22, 0], [20, 10, 12]).rotation.y = Math.PI / 4;
+  add(chapel, box, stone, [-17, 15, 0], [8, 30, 8]);
+  add(chapel, new THREE.ConeGeometry(1, 1, 4), roof, [-17, 36, 0], [8, 12, 8]).rotation.y = Math.PI / 4;
+  for (const x of [-8, 0, 8]) add(chapel, box, lamp(0xffd27a), [x, 10, 7.1], [2.2, 6, 0.3]);
+  add(chapel, sphere, lamp(0xfff2d0), [-17, 24, 4.1], [1.6, 1.6, 0.3]);   // the round window of the tower
+}
+
+// Night festival: dark mountains, a pagoda far ahead (-Z), cherry trees beyond the fence and glowing paper lanterns floating around
+function addFestival(scene, half) {
+  addGround(scene, 0x15161e);
+  for (let i = 0; i < 10; i++) {
+    const [x, z] = ringPoint(half + 100, 220);
+    addHill(scene, [x, z, rand(60, 100), rand(40, 80), rand(50, 80)], 0x1a2236);
+  }
+  const pagoda = new THREE.Group();
+  pagoda.position.set(35, 0, -150);
+  pagoda.scale.setScalar(1.6);
+  scene.add(pagoda);
+  for (let i = 0; i < 5; i++) {
+    const w = 22 - i * 3.6, y = 4 + i * 9;
+    add(pagoda, box, M(0xe8dcc0), [0, y, 0], [w * 0.7, 6, w * 0.7]);
+    add(pagoda, box, lamp(0xffc060), [0, y, w * 0.35 + 0.1], [w * 0.25, 3, 0.3]);   // a lit window on each floor
+    add(pagoda, new THREE.ConeGeometry(1, 1, 4), M(0x7a2a2a), [0, y + 5, 0], [w * 0.95, 4, w * 0.95]).rotation.y = Math.PI / 4;
+  }
+  const count = 26, trunks = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.3, 0.5, 1, 6), M(0x3a2a2a), count);
+  const blossoms = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 10, 8), M(0xe8a0c0), count);
+  const m = new THREE.Matrix4();
+  for (let i = 0; i < count; i++) {
+    const [x, z] = ringPoint(half + 6, half + 70), h = rand(5, 8), r = rand(3.4, 5);
+    trunks.setMatrixAt(i, m.makeScale(1, h, 1).setPosition(x, h / 2, z));
+    blossoms.setMatrixAt(i, m.makeScale(r, r * 0.75, r).setPosition(x, h + r * 0.3, z));
+  }
+  scene.add(trunks, blossoms);
+  const lanterns = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 10, 8), lamp(0xff9a4a), 60);
+  for (let i = 0; i < 60; i++) {
+    const [x, z] = ringPoint(half + 4, half + 90), r = rand(0.5, 0.8);
+    lanterns.setMatrixAt(i, m.makeScale(r, r * 1.3, r).setPosition(x, rand(3, 16), z));
+  }
+  scene.add(lanterns);
+}
+
+export const BACKDROPS = { rio: addRio, mars: addMars, snow: addSnow, desert: addDesert, volcano: addVolcano, docks: addDocks, castle: addCastle, jungle: addJungle, city: addCity, park: addPark, graveyard: addGraveyard, festival: addFestival };
