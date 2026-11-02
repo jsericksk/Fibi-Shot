@@ -57,7 +57,9 @@ export class PlayerControls {
     };
     this.onBlur = () => { this.orbit = false; this.keys.clear(); };
     this.onMouseMove = e => {
-      if (document.pointerLockElement === this.game.canvas) this.look(e.movementX, e.movementY);
+      if (document.pointerLockElement !== this.game.canvas) return;
+      const k = this.scoped ? settings.aimSensitivity : 1;
+      this.look(e.movementX * k, e.movementY * k);
     };
     this.onMouseDown = e => {
       if (document.pointerLockElement !== this.game.canvas) return;
